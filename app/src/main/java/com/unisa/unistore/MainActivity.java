@@ -196,21 +196,22 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
 		switch (position) {
 		case 0:
 			fragment = new HomeFragment();
+            ((HomeFragment)fragment).setActivity(this);
 			break;
 		case 1:
 			fragment = new VisualizzaFragment();
 			break;
 		case 2:
-			fragment = new PhotosFragment();
+			fragment = new FindPeopleFragment();
 			break;
 		case 3:
-			fragment = new CommunityFragment();
+			fragment = new AgendaFragment();
 			break;
 		case 4:
-			fragment = new PagesFragment();
+			fragment = new ModificaAnnuncioFragment();
 			break;
 		case 5:
-			fragment = new WhatsHotFragment();
+			fragment = new PubblicaFragment();
 			break;
 
 		default:
@@ -219,17 +220,12 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
 
 		if (fragment != null) {
 			FragmentManager fragmentManager = getFragmentManager();
-			fragmentManager.beginTransaction()
-                    // Replace the default fragment animations with animator resources representing
-                    // rotations when switching to the back of the card, as well as animator
-                    // resources representing rotations when flipping back to the front (e.g. when
-                    // the system Back button is pressed).
-                    .setCustomAnimations(
-                            R.animator.card_flip_left_in, R.animator.card_flip_left_in)
-					.replace(R.id.layout_root_view, fragment)
+			fragmentManager.beginTransaction().replace(R.id.layout_root_view, fragment)
                     // Add this t.the front of the card.
                     .addToBackStack(null)
                     .commit();
+
+            clickFlag = false;
 
 			// update selected item and title, then close the drawer
 			mDrawerList.setItemChecked(position, true);
@@ -242,7 +238,7 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
 		}
 	}
 
-	@Override
+    @Override
 	public void setTitle(CharSequence title) {
 		mTitle = title;
 		if(getActionBar() != null)
@@ -284,6 +280,7 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
 
     @Override
     public void onBackPressed() {
+        super.onBackPressed();
         // code here to show dialog
         if(clickFlag) {
             toggleVisibility(bookInfoCardView);
