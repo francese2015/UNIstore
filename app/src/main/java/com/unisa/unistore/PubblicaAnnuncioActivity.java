@@ -35,7 +35,7 @@ import uk.co.chrisjenx.calligraphy.CalligraphyConfig;
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
 public class PubblicaAnnuncioActivity extends Activity implements View.OnClickListener {
-    private final String apiKey = "AIzaSyAfEoQrjMoSaurzBJpkht783jvAB6trYkM";
+    private final String apiKey = "";
     private String url1 = "https://www.googleapis.com/books/v1/volumes?q=isbn:";
 
     private Button scanBtn;
