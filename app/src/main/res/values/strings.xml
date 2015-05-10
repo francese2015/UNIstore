@@ -2,7 +2,7 @@
 <resources>
     <string name="app_name">UNIstore</string>
 
-    <string name="parse_app_id">880611515333627</string>
+    <string name="parse_app_id">YOUR_APP_KEY</string>
     <string name="parse_client_key">YOUR_CLIENT_KEY</string>
 
     <string name="action_settings">Impostazioni</string>
@@ -15,23 +15,19 @@
 
     <!-- Nav Drawer Menu Items -->
     <string-array name="nav_drawer_items">
-        <item >Home</item>
-        <item >Find People</item>
-        <item >Photos</item>
-        <item >Communities</item>
-        <item >Pages</item>
-        <item >What\'s Hot</item>
+        <item >Bacheca annunci</item>
+        <item >Cercapersone</item>
+        <item >I miei annunci</item>
+        <item >I miei appuntamenti</item>
     </string-array>
 
     <!-- Nav Drawer List Item Icons -->
     <!-- Keep them in order as the titles are in -->
     <array name="nav_drawer_icons">
         <item>@drawable/ic_home</item>
-        <item>@drawable/ic_people</item>
-        <item>@drawable/ic_photos</item>
-        <item>@drawable/ic_communities</item>
+        <item>@drawable/ic_find_people</item>
         <item>@drawable/ic_pages</item>
-        <item>@drawable/ic_whats_hot</item>
+        <item>@drawable/ic_agenda</item>
     </array>
 
     <!-- Content Description -->
@@ -63,4 +59,9 @@
     <string name="ok">Ok</string>
     <string name="find_1">Cosa stai cercando?</string>
     <string name="find_2">Riceverai una notifica appena verrà messo in vendita!</string>
+    <string name="descrizione_libro">Descrizione del libro</string>
+    <string name="search">Cerca</string>
+    <string name="scan">Scan ISBN</string>
+    <string name="thumb">La foto del libro</string>
+    <string name="barcode_instruction"> Premi il pulsante \"<b>Scan ISBN</b>\" e aspetta qualche secondo. Quindi posiziona la fotocamera sul codice a barre del libro.</string>
 </resources>
