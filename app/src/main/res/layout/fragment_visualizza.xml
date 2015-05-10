@@ -34,8 +34,8 @@
             android:layout_gravity="center"
             android:layout_alignTop="@+id/textView2"
             android:layout_alignEnd="@+id/textView5"
-            android:layout_toRightOf="@+id/button"
-            android:layout_toEndOf="@+id/button"
+            android:layout_toRightOf="@+id/pubblica_button"
+            android:layout_toEndOf="@+id/pubblica_button"
             android:layout_alignBottom="@+id/textView4" />
 
         <TextView
@@ -91,7 +91,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Acquista"
-            android:id="@+id/button"
+            android:id="@+id/pubblica_button"
             android:layout_alignParentBottom="true"
             android:layout_centerHorizontal="true"
             android:layout_marginBottom="30dp"
@@ -107,7 +107,7 @@
             android:layout_alignParentStart="true"
             android:layout_alignParentRight="true"
             android:layout_alignParentEnd="true"
-            android:layout_above="@+id/button"
+            android:layout_above="@+id/pubblica_button"
             android:layout_alignTop="@+id/textView5"
             android:editable="false"
             android:background="#178a619e" />

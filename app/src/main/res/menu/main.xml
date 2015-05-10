@@ -8,9 +8,10 @@
         android:title="@string/action_settings"/>
 
     <item
-        android:id="@+id/drawer_menu"
-        android:title="@string/drawer_menu_title"
+        android:id="@+id/action_search"
         android:orderInCategory="200"
-        android:icon="@drawable/ic_launcher"
-        android:showAsAction="always" />
+        android:title="@string/search"
+        android:icon="@drawable/ic_search_light"
+        app:showAsAction="ifRoom"/>
+
 </menu>

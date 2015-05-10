@@ -9,8 +9,7 @@
         <item name="windowActionBar">false</item>
     </style>
 
-    <style name="MyToolbarTheme" parent="ThemeOverlay.AppCompat.Light">
-        <item name="android:textColorPrimary">@color/icons</item>
-        <item name="android:textColorSecondary">@color/icons</item>
+    <style name="MyToolbarTheme" parent="@android:style/Widget.Holo.Light.ActionBar.Solid.Inverse">
+        <item name="android:background">@android:color/holo_purple</item>
     </style>
 </resources>

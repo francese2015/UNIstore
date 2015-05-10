@@ -4,12 +4,9 @@ import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
+import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
-import android.graphics.Bitmap;
-import android.graphics.Matrix;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
@@ -26,16 +23,15 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.RelativeLayout;
 
 import com.unisa.unistore.adapter.NavDrawerListAdapter;
 import com.unisa.unistore.model.NavDrawerItem;
 
 import java.util.ArrayList;
 
-;
+import uk.co.chrisjenx.calligraphy.CalligraphyConfig;
+import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
 public class MainActivity extends ActionBarActivity implements View.OnClickListener {
     private static final String EXTRA_IMAGE = "DetailActivity:image";
@@ -62,6 +58,7 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
 
     private CardView bookInfoCardView;
     private boolean clickFlag = false;
+    private ActionBar supportActionBar;
 
 
     protected void setActionBarIcon(int iconRes) {
@@ -75,16 +72,23 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
         //getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_main);
+
+        CalligraphyConfig.initDefault(new CalligraphyConfig.Builder()
+                        .setDefaultFontPath("fonts/Bangers/Bangers.ttf")
+                        .setFontAttrId(R.attr.fontPath)
+                        .build()
+        );
 
         mRootView = (ViewGroup) findViewById(R.id.layout_root_view);
 
         toolbar = (Toolbar) findViewById(R.id.fragment_toolbar);
         if (toolbar != null) {
             setSupportActionBar(toolbar);
-            ActionBar supportActionBar = getSupportActionBar();
+            supportActionBar = getSupportActionBar();
             supportActionBar.setDisplayShowTitleEnabled(false);
             supportActionBar.setDisplayHomeAsUpEnabled(true);
+            supportActionBar.setHomeAsUpIndicator(R.drawable.ic_home);
         }
 
         mTitle = mDrawerTitle = getTitle();
@@ -106,14 +110,10 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
 		navDrawerItems.add(new NavDrawerItem(navMenuTitles[0], navMenuIcons.getResourceId(0, -1)));
 		// Find People
 		navDrawerItems.add(new NavDrawerItem(navMenuTitles[1], navMenuIcons.getResourceId(1, -1)));
-		// Photos
-		navDrawerItems.add(new NavDrawerItem(navMenuTitles[2], navMenuIcons.getResourceId(2, -1)));
-		// Communities, Will add a counter here
-		navDrawerItems.add(new NavDrawerItem(navMenuTitles[3], navMenuIcons.getResourceId(3, -1), true, "22"));
-		// Pages
-		navDrawerItems.add(new NavDrawerItem(navMenuTitles[4], navMenuIcons.getResourceId(4, -1)));
-		// What's hot, We  will add a counter here
-		navDrawerItems.add(new NavDrawerItem(navMenuTitles[5], navMenuIcons.getResourceId(5, -1), true, "50+"));
+        // I miei annunci
+        navDrawerItems.add(new NavDrawerItem(navMenuTitles[2], navMenuIcons.getResourceId(2, -1)));
+        // Agenda
+        navDrawerItems.add(new NavDrawerItem(navMenuTitles[3], navMenuIcons.getResourceId(3, -1), true, "22"));
 
 
 		// Recycle the typed array
@@ -131,11 +131,7 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
 
         mRootView = (ViewGroup) findViewById(R.id.layout_root_view);
         mRootView.setOnClickListener(this);
-/*
-        scaleImage((ImageView) findViewById(R.id.bookPhoto));
-        scaleImage((ImageView) findViewById(R.id.bookPhoto2));
-        scaleImage((ImageView) findViewById(R.id.bookPhoto3));
-*/
+
         if (savedInstanceState == null) {
 			// on first time display view for first nav item
 			displayView(0);
@@ -154,6 +150,11 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
 			displayView(position);
 		}
 	}
+
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));
+    }
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -197,21 +198,17 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
 		case 0:
 			fragment = new HomeFragment();
             ((HomeFragment)fragment).setActivity(this);
+            ((HomeFragment)fragment).setToolbar(toolbar);
+            ((HomeFragment)fragment).setToolbar(supportActionBar);
 			break;
 		case 1:
-			fragment = new VisualizzaFragment();
-			break;
-		case 2:
 			fragment = new FindPeopleFragment();
 			break;
-		case 3:
-			fragment = new AgendaFragment();
-			break;
-		case 4:
-			fragment = new ModificaAnnuncioFragment();
-			break;
-		case 5:
-			fragment = new PubblicaFragment();
+        case 2:
+            fragment = new VisualizzaFragment();
+            break;
+        case 3:
+            fragment = new AgendaFragment();
 			break;
 
 		default:
@@ -248,6 +245,7 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     @Override
     public void onClick(View v) {
+        /*
         if(!clickFlag) {
             bookInfoCardView = (CardView) findViewById(R.id.card_view_book_info);
 
@@ -261,6 +259,8 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
                 ActivityCompat.startActivity(activity, new Intent(activity, DetailActivity.class),
                         options.toBundle());
                 */
+        /*
+                mDrawerToggle.setDrawerIndicatorEnabled(false);
                 FragmentManager fragmentManager = getFragmentManager();
                 fragmentManager.beginTransaction()
                         .replace(R.id.layout_root_view, fragment)
@@ -276,12 +276,15 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
                 Log.e("MainActivity", "Error in creating fragment");
             }
         }
+        */
     }
 
     @Override
     public void onBackPressed() {
-        super.onBackPressed();
+        //super.onBackPressed();
+        getFragmentManager().popBackStack();
         // code here to show dialog
+        mDrawerToggle.setDrawerIndicatorEnabled(false);
         if(clickFlag) {
             toggleVisibility(bookInfoCardView);
             clickFlag = false;
@@ -293,48 +296,6 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
             boolean isVisible = view.getVisibility() == View.VISIBLE;
             view.setVisibility(isVisible ? View.INVISIBLE : View.VISIBLE);
         }
-    }
-
-    public void scaleImage(ImageView imageView) {
-        // Get the ImageView and its bitmap
-        Drawable drawing = imageView.getDrawable();
-        Bitmap bitmap = ((BitmapDrawable)drawing).getBitmap();
-
-        // Get current dimensions
-        int width = bitmap.getWidth();
-        int height = bitmap.getHeight();
-
-        // Determine how much to scale: the dimension requiring less scaling is
-        // closer to the its side. This way the image always stays inside your
-        // bounding box AND either x/y axis touches it.
-
-        float xScale = ((float) (width / 2)) / width;
-        float yScale = ((float) (height / 2)) / height;
-        float scale = (xScale <= yScale) ? xScale : yScale;
-
-        // Create a matrix for the scaling and add the scaling data
-        Matrix matrix = new Matrix();
-        matrix.postScale(scale, scale);
-
-        // Create a new bitmap and convert it to a format understood by the ImageView
-        Bitmap scaledBitmap = Bitmap.createBitmap(bitmap, 0, 0, width, height, matrix, true);
-        BitmapDrawable result = new BitmapDrawable(scaledBitmap);
-        width = scaledBitmap.getWidth();
-        height = scaledBitmap.getHeight();
-
-        // Apply the scaled bitmap
-        imageView.setImageDrawable(result);
-
-        // Now change ImageView's dimensions to match the scaled image
-        RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) imageView.getLayoutParams();
-        params.width = width;
-        params.height = height;
-        imageView.setLayoutParams(params);
-    }
-
-    private int dpToPx(int dp) {
-        float density = getApplicationContext().getResources().getDisplayMetrics().density;
-        return Math.round((float)dp * density);
     }
 
 	/**

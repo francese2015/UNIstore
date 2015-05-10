@@ -1,0 +1,87 @@
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="@color/material_background" >
+
+    <include
+        android:id="@+id/fragment_toolbar"
+        layout="@layout/toolbar" />
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:orientation="vertical"
+        android:id="@+id/linear"
+        android:layout_below="@+id/fragment_toolbar"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_margin="@dimen/activity_horizontal_margin">
+
+        <TextView
+            android:id="@+id/book_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="34px"
+            android:textColor="#ff000000"
+            android:textIsSelectable="true"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/book_author"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#ffa13143"
+            android:textIsSelectable="true" />
+
+        <ImageView
+            android:id="@+id/thumb"
+            android:layout_width="120dp"
+            android:layout_height="150dp"
+            android:contentDescription="@string/thumb" />
+
+        <TextView
+            android:id="@+id/book_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#ff592d94"
+            android:textIsSelectable="true" />
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical|center"
+            android:src="@drawable/barcode"
+            android:id="@+id/barcode_image"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/activity_horizontal_margin"
+            android:layout_above="@+id/fragment_toolbar"
+            android:textColor="@color/secondary_text"
+            android:text="@string/barcode_instruction"
+            android:id="@+id/barcode_instruction" />
+
+        <TextView
+            android:id="@+id/book_description"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#ff000000"
+            android:textIsSelectable="true" />
+
+    </LinearLayout>
+
+    <Button android:id="@+id/scan_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentBottom="true"
+        android:padding="10dp"
+        android:elevation="@dimen/elevation_high"
+        android:layout_marginBottom="@dimen/activity_vertical_margin"
+        android:background="@drawable/my_button"
+        android:textColor="@color/icons"
+        android:text="@string/scan" />
+
+</RelativeLayout>

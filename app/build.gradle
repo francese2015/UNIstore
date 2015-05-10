@@ -31,13 +31,15 @@ android {
 }
 
 dependencies {
-    compile 'com.parse.bolts:bolts-android:1.1.4'
-    compile 'com.facebook.android:facebook-android-sdk:3.21.1'
     compile fileTree(include: 'Parse-*.jar', dir: 'libs')
     compile fileTree(include: 'ParseFacebookUtils-*.jar', dir: 'libs')
     compile fileTree(include: 'ParseCrashReporting-*.jar', dir: 'libs')
+    
+    compile 'com.parse.bolts:bolts-android:1.1.4'
+    compile 'com.facebook.android:facebook-android-sdk:3.21.1'
     compile 'com.android.support:appcompat-v7:22.0.0'
     compile 'com.android.support:cardview-v7:21.+'
     compile 'com.android.support:recyclerview-v7:21.0.+'
     compile 'com.squareup.picasso:picasso:2.3.4'
+    compile project(':calligraphy-2.1.0')
 }

@@ -1,23 +1,29 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:card_view="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:nestedScrollingEnabled="true">
+
+    <ScrollView
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
     android:id="@+id/layout_root_view">
 
-    <RelativeLayout
+      <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:nestedScrollingEnabled="true">
+
         <!-- A CardView that contains a TextView -->
         <android.support.v7.widget.CardView
             xmlns:card_view="http://schemas.android.com/apk/res-auto"
             android:id="@+id/card_view_book_info"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="5dp"
             android:elevation="5dp"
-            card_view:cardCornerRadius="4dp"
-            android:layout_margin="5dp" >
+            card_view:cardCornerRadius="4dp" >
 
             <RelativeLayout
                 android:layout_width="match_parent"
@@ -25,7 +31,8 @@
                 android:orientation="vertical"
                 android:layout_marginLeft="5dp"
                 android:layout_marginRight="5dp"
-                android:id="@+id/book_info">
+                android:id="@+id/book_info"
+                style="@style/AppTheme">
                 <ImageView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -33,20 +40,11 @@
                     android:layout_gravity="center|left"
                     android:src="@drawable/foto_libro" />
 
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignRight="@+id/bookPhoto"
-                    android:orientation="vertical"
-                    android:layout_alignParentEnd="false"
-                    android:layout_alignParentStart="false">
-
-                </LinearLayout>
-
                 <TextView
                     android:id="@+id/book_title"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:textColor="@color/primary_text"
                     android:textSize="20dp"
                     android:text="@string/book_title"
                     android:layout_alignParentTop="true"
@@ -57,6 +55,7 @@
                     android:id="@+id/book_author"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:textColor="@color/secondary_text"
                     android:textSize="18dp"
                     android:text="@string/book_author"
                     android:layout_below="@+id/book_title"
@@ -68,6 +67,7 @@
                     android:id="@+id/book_price"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:textColor="@color/secondary_text"
                     android:textSize="15dp"
                     android:text="@string/book_price"
                     android:layout_below="@+id/book_author"
@@ -84,7 +84,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:elevation="5dp"
-            android:layout_margin="5dp"
+            android:layout_marginBottom="5dp"
             card_view:cardCornerRadius="4dp"
             android:layout_below="@+id/card_view_book_info"
             android:layout_alignParentLeft="true"
@@ -104,20 +104,11 @@
                     android:layout_gravity="center|left"
                     android:src="@drawable/foto_libro2" />
 
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignRight="@+id/bookPhoto2"
-                    android:orientation="vertical"
-                    android:layout_alignParentEnd="false"
-                    android:layout_alignParentStart="false">
-
-                </LinearLayout>
-
                 <TextView
                     android:id="@+id/book_title2"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:textColor="@color/primary_text"
                     android:textSize="20dp"
                     android:text="@string/book_title2"
                     android:layout_alignParentTop="true"
@@ -128,6 +119,7 @@
                     android:id="@+id/book_author2"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:textColor="@color/secondary_text"
                     android:textSize="18dp"
                     android:text="@string/book_author2"
                     android:layout_below="@+id/book_title2"
@@ -139,6 +131,7 @@
                     android:id="@+id/book_price2"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:textColor="@color/secondary_text"
                     android:textSize="15dp"
                     android:text="@string/book_price2"
                     android:layout_below="@+id/book_author2"
@@ -158,7 +151,7 @@
             android:elevation="5dp"
             android:layout_below="@+id/card_view_book_info2"
             card_view:cardCornerRadius="4dp"
-            android:layout_margin="5dp" >
+            android:layout_marginBottom="5dp" >
 
             <RelativeLayout
                 android:layout_width="match_parent"
@@ -173,25 +166,14 @@
                     android:id="@+id/bookPhoto3"
                     android:layout_gravity="center|left"
                     android:src="@drawable/foto_libro3"
-                    android:layout_below="@+id/linearLayout"
                     android:layout_alignParentLeft="true"
                     android:layout_alignParentStart="true" />
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignRight="@+id/bookPhoto3"
-                    android:orientation="vertical"
-                    android:layout_alignParentEnd="false"
-                    android:layout_alignParentStart="false"
-                    android:id="@+id/linearLayout">
-
-                </LinearLayout>
 
                 <TextView
                     android:id="@+id/book_title3"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:textColor="@color/primary_text"
                     android:textSize="20dp"
                     android:text="@string/book_title3"
                     android:layout_alignParentTop="true"
@@ -202,6 +184,7 @@
                     android:id="@+id/book_author3"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:textColor="@color/secondary_text"
                     android:textSize="18dp"
                     android:text="@string/book_author3"
                     android:layout_below="@+id/book_title3"
@@ -213,27 +196,99 @@
                     android:id="@+id/book_price3"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:textColor="@color/secondary_text"
                     android:textSize="15dp"
                     android:text="@string/book_price3"
                     android:layout_below="@+id/book_author3"
                     android:layout_toRightOf="@+id/bookPhoto3"
                     android:layout_toEndOf="@+id/bookPhoto3"
-                    android:layout_marginTop="5dp" />
+                    android:layout_marginBottom="5dp" />
             </RelativeLayout>
 
         </android.support.v7.widget.CardView>
+
+        <android.support.v7.widget.CardView
+            xmlns:card_view="http://schemas.android.com/apk/res-auto"
+            android:id="@+id/card_view_book_info4"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:elevation="5dp"
+            card_view:cardCornerRadius="4dp"
+            android:layout_marginBottom="5dp"
+            android:layout_below="@+id/card_view_book_info3"
+            android:layout_alignLeft="@+id/card_view_book_info3"
+            android:layout_alignStart="@+id/card_view_book_info3">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginLeft="5dp"
+                android:layout_marginRight="5dp"
+                android:id="@+id/book_info4">
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/bookPhoto4"
+                    android:layout_gravity="center|left"
+                    android:src="@drawable/foto_libro3"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentStart="true" />
+
+                <TextView
+                    android:id="@+id/book_title4"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/primary_text"
+                    android:textSize="20dp"
+                    android:text="@string/book_title3"
+                    android:layout_alignParentTop="true"
+                    android:layout_toEndOf="@+id/bookPhoto4"
+                    android:layout_toRightOf="@+id/bookPhoto4" />
+
+                <TextView
+                    android:id="@+id/book_author4"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/secondary_text"
+                    android:textSize="18dp"
+                    android:text="@string/book_author3"
+                    android:layout_below="@+id/book_title4"
+                    android:layout_alignLeft="@+id/book_title4"
+                    android:layout_alignStart="@+id/book_title4"
+                    android:layout_marginTop="5dp" />
+
+                <TextView
+                    android:id="@+id/book_price4"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/secondary_text"
+                    android:textSize="15dp"
+                    android:text="@string/book_price3"
+                    android:layout_below="@+id/book_author4"
+                    android:layout_toRightOf="@+id/bookPhoto4"
+                    android:layout_toEndOf="@+id/bookPhoto4"
+                    android:layout_marginBottom="5dp" />
+
+            </RelativeLayout>
+
+        </android.support.v7.widget.CardView>
+
     </RelativeLayout>
 
-    <ImageButton
-        android:layout_width="@dimen/abc_action_button_min_width_material"
-        android:layout_height="@dimen/abc_action_button_min_height_material"
-        android:layout_toEndOf="@+id/layout_root_view"
-        android:elevation="5dp"
-        android:id="@+id/fab_aggiungiAnnuncio"
-        android:longClickable="false"
-        android:textSize="25dp"
-        android:layout_margin="15dp"
-        android:background="#4CAF50"
-        android:layout_gravity="right|bottom" />
+    </ScrollView>
 
-</FrameLayout>
+    <ImageButton
+    android:id="@+id/fab_image_button"
+    android:layout_width="@dimen/fab_button_diameter"
+    android:layout_height="@dimen/fab_button_diameter"
+    android:layout_alignParentRight="true"
+    android:layout_alignParentEnd="true"
+    android:layout_alignParentBottom="true"
+    android:layout_marginBottom="@dimen/fab_button_margin_bottom"
+    android:layout_marginRight="@dimen/fab_button_margin_right"
+    android:background="@drawable/fab_shape"
+    android:src="@drawable/fab_ic_add"
+    android:tint="@android:color/white"/>
+
+</RelativeLayout>
