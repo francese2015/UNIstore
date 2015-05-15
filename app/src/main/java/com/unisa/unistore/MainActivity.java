@@ -15,8 +15,6 @@ import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.Toolbar;
-import android.transition.Fade;
-import android.transition.TransitionManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -30,7 +28,6 @@ import com.unisa.unistore.model.NavDrawerItem;
 
 import java.util.ArrayList;
 
-import uk.co.chrisjenx.calligraphy.CalligraphyConfig;
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
 public class MainActivity extends ActionBarActivity implements View.OnClickListener {
@@ -73,13 +70,13 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
 
 		super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+/*
         CalligraphyConfig.initDefault(new CalligraphyConfig.Builder()
                         .setDefaultFontPath("fonts/Bangers/Bangers.ttf")
                         .setFontAttrId(R.attr.fontPath)
                         .build()
         );
-
+*/
         mRootView = (ViewGroup) findViewById(R.id.layout_root_view);
 
         toolbar = (Toolbar) findViewById(R.id.fragment_toolbar);
@@ -281,14 +278,9 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
 
     @Override
     public void onBackPressed() {
-        //super.onBackPressed();
+        super.onBackPressed();
         getFragmentManager().popBackStack();
         // code here to show dialog
-        mDrawerToggle.setDrawerIndicatorEnabled(false);
-        if(clickFlag) {
-            toggleVisibility(bookInfoCardView);
-            clickFlag = false;
-        }
     }
 
     private static void toggleVisibility(View... views) {
