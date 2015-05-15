@@ -17,4 +17,23 @@
     <color name="secondary_text">#727272</color>
     <color name="icons">#FFFFFF</color>
     <color name="divider">#B6B6B6</color>
+
+    <color name="com_parse_ui_parse_login_button">#4CAF50</color>
+    <color name="com_parse_ui_parse_login_button_push">#388E3C</color>
+    <color name="com_parse_ui_parse_login_button_focus">#8BC34A</color>
+    <color name="no_login_button">#9E9E9E</color>
+    <color name="no_login_button_push">#616161</color>
+    <color name="no_login_button_focus">#607D8B</color>
+    <color name="com_parse_ui_parse_login_help_button_label">#E0E0E0</color>
+    <color name="com_parse_ui_parse_login_help_button_label_push">#AAAAAA</color>
+    <color name="com_parse_ui_parse_login_help_button_label_focus">#CCCCCC</color>
+    <color name="com_parse_ui_parse_login_text_hint">#AAAAAA</color>
+    <color name="com_parse_ui_parse_login_display_text">@android:color/white</color>
+    <color name="com_parse_ui_facebook_login_button">#3B5998</color>
+    <color name="com_parse_ui_facebook_login_button_push">#2E4677</color>
+    <color name="com_parse_ui_facebook_login_button_focus">#304F8B</color>
+    <color name="com_parse_ui_twitter_login_button">#2DAAE2</color>
+    <color name="com_parse_ui_twitter_login_button_push">#2588B5</color>
+    <color name="com_parse_ui_twitter_login_button_focus">#2788BE</color>
+
 </resources>
