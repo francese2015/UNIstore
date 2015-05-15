@@ -3,9 +3,10 @@ package com.unisa.unistore;
 import android.app.Application;
 
 import com.parse.Parse;
-import com.parse.ParseACL;
 import com.parse.ParseCrashReporting;
-import com.parse.ParseUser;
+import com.parse.ParseFacebookUtils;
+
+import uk.co.chrisjenx.calligraphy.CalligraphyConfig;
 
 public class MainApplication extends Application {
 
@@ -13,42 +14,24 @@ public class MainApplication extends Application {
     public void onCreate() {
         super.onCreate();
 
+        CalligraphyConfig.initDefault(new CalligraphyConfig.Builder()
+                        .setDefaultFontPath("fonts/Bangers/Bangers.ttf")
+                        .setFontAttrId(R.attr.fontPath)
+                        .build()
+        );
+
         // Initialize Crash Reporting.
         ParseCrashReporting.enable(this);
 
         // Enable Local Datastore.
         Parse.enableLocalDatastore(this);
 
+        Parse.setLogLevel(Parse.LOG_LEVEL_DEBUG);
+
         // Add your initialization code here
-        Parse.initialize(this, "D0sMMsYRwdpZFDdzaiaaxEjjH1lWatoIvowSssl5", "YVBXHp0Yr2r9quCmtjMS2JfhokwqeK2OHIzubJet");
+        Parse.initialize(this, getString(R.string.parse_app_id),
+                getString(R.string.parse_client_key));
 
-
-        ParseUser.enableAutomaticUser();
-        ParseACL defaultACL = new ParseACL();
-        // Optionally enable public read access.
-        // defaultACL.setPublicReadAccess(true);
-        ParseACL.setDefaultACL(defaultACL, true);
-
-/*
-        ParseUser user = new ParseUser();
-        user.setUsername("my name");
-        user.setPassword("my pass");
-        user.setEmail("email@example.com");
-
-// other fields can be set just like with ParseObject
-        user.put("phone", "650-555-0000");
-
-        user.signUpInBackground(new SignUpCallback() {
-            public void done(ParseException e) {
-                if (e == null) {
-                    // Hooray! Let them use the app now.
-                } else {
-                    // Sign up didn't succeed. Look at the ParseException
-                    // to figure out what went wrong
-                }
-            }
-        });
-        */
-
+        ParseFacebookUtils.initialize(getString(R.string.facebook_app_id));
     }
 }
