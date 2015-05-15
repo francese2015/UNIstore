@@ -1,6 +1,7 @@
 package com.unisa.unistore;
 
 import android.app.Fragment;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
@@ -11,12 +12,17 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.Toast;
+
+import com.parse.ParseUser;
 
 public class HomeFragment extends Fragment {
 
     private MainActivity activity;
     private Toolbar toolbar;
     private ActionBar supportActionBar;
+
+    private ParseUser currentUser;
 
     public HomeFragment(){}
 
@@ -33,11 +39,13 @@ public class HomeFragment extends Fragment {
             Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_home, container, false);
 
+        currentUser = ParseUser.getCurrentUser();
+
         return rootView;
     }
 
     @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
+    public void onViewCreated(final View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
         setHasOptionsMenu(true);
@@ -48,8 +56,17 @@ public class HomeFragment extends Fragment {
         fab_aggiungiAnnuncio.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View arg0) {
-                Intent intent = new Intent(getActivity(), PubblicaAnnuncioActivity.class);
-                getActivity().startActivityForResult(intent, 12345);
+                if(currentUser != null) {
+                    Intent intent = new Intent(getActivity(), PubblicaAnnuncioActivity.class);
+                    getActivity().startActivityForResult(intent, 12345);
+                } else {
+                    Context context = activity.getApplicationContext();
+                    CharSequence text = getString(R.string.profile_title_logged_out);
+                    int duration = Toast.LENGTH_LONG;
+
+                    Toast toast = Toast.makeText(context, text, duration);
+                    toast.show();
+                }
             }
         });
 
