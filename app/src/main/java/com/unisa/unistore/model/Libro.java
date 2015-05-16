@@ -1,6 +1,5 @@
 package com.unisa.unistore.model;
 
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -11,11 +10,11 @@ public class Libro {
 
     private String titolo;
     private ArrayList<String> autori;
-    private URL url_immagine_copertina;
+    private String url_immagine_copertina;
     private Date data_pubblicazione;
 
     public Libro(String titolo_libro,
-                 ArrayList<String> autori_libro, URL url_immagine_copertina,
+                 ArrayList<String> autori_libro, String url_immagine_copertina,
                  Date data_pubblicazione_annuncio) {
         this.titolo = titolo_libro;
         this.autori = autori_libro;
@@ -39,11 +38,11 @@ public class Libro {
         return autori;
     }
 
-    public void setUrlImmagineCopertina(URL url_immagine_copertina) {
+    public void setUrlImmagineCopertina(String url_immagine_copertina) {
         this.url_immagine_copertina = url_immagine_copertina;
     }
 
-    public URL getUrlImmagineCopertina() {
+    public String getUrlImmagineCopertina() {
         return url_immagine_copertina;
     }
 

@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.os.Build;
@@ -22,7 +23,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.Toast;
 
+import com.parse.ParseUser;
 import com.unisa.unistore.adapter.NavDrawerListAdapter;
 import com.unisa.unistore.model.NavDrawerItem;
 
@@ -57,6 +60,9 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
     private boolean clickFlag = false;
     private ActionBar supportActionBar;
 
+    private ParseUser currentUser;
+    private boolean firstVisit = true;
+
 
     protected void setActionBarIcon(int iconRes) {
         toolbar.setNavigationIcon(iconRes);
@@ -70,13 +76,9 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
 
 		super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-/*
-        CalligraphyConfig.initDefault(new CalligraphyConfig.Builder()
-                        .setDefaultFontPath("fonts/Bangers/Bangers.ttf")
-                        .setFontAttrId(R.attr.fontPath)
-                        .build()
-        );
-*/
+
+        currentUser = ParseUser.getCurrentUser();
+
         mRootView = (ViewGroup) findViewById(R.id.layout_root_view);
 
         toolbar = (Toolbar) findViewById(R.id.fragment_toolbar);
@@ -85,7 +87,6 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
             supportActionBar = getSupportActionBar();
             supportActionBar.setDisplayShowTitleEnabled(false);
             supportActionBar.setDisplayHomeAsUpEnabled(true);
-            supportActionBar.setHomeAsUpIndicator(R.drawable.ic_home);
         }
 
         mTitle = mDrawerTitle = getTitle();
@@ -112,9 +113,13 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
         // Agenda
         navDrawerItems.add(new NavDrawerItem(navMenuTitles[3], navMenuIcons.getResourceId(3, -1), true, "22"));
 
+        if(currentUser == null)
+            // Logout
+            navDrawerItems.add(new NavDrawerItem(navMenuTitles[4], navMenuIcons.getResourceId(4, -1)));
+        else
+            // Login
+            navDrawerItems.add(new NavDrawerItem(navMenuTitles[5], navMenuIcons.getResourceId(5, -1)));
 
-		// Recycle the typed array
-		navMenuIcons.recycle();
 
 		mDrawerList.setOnItemClickListener(new SlideMenuClickListener());
 
@@ -130,10 +135,28 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
         mRootView.setOnClickListener(this);
 
         if (savedInstanceState == null) {
-			// on first time display view for first nav item
-			displayView(0);
-		}
+            // on first time display view for first nav item
+            displayView(0);
+        }
+
 	}
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        if(firstVisit && currentUser != null) {
+            Context context = getApplicationContext();
+            CharSequence text = getString(R.string.welcome) + " " +
+                    currentUser.getString("name");
+            int duration = Toast.LENGTH_LONG;
+
+            Toast toast = Toast.makeText(context, text, duration);
+            toast.show();
+
+            firstVisit = false;
+        }
+    }
 
 	/**
 	 * Slide menu item click listener
@@ -207,7 +230,32 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
         case 3:
             fragment = new AgendaFragment();
 			break;
+        case 4:
+            if(currentUser != null) {
+                ParseUser.logOut();
+                currentUser = null;
 
+                navDrawerItems.remove(4);
+                // Login
+                navDrawerItems.add(new NavDrawerItem(navMenuTitles[4], navMenuIcons.getResourceId(4, -1)));
+
+                // setting the nav drawer list adapter
+                adapter = new NavDrawerListAdapter(getApplicationContext(),
+                        navDrawerItems);
+                mDrawerList.setAdapter(adapter);
+
+                Context context = getApplicationContext();
+                CharSequence text = getString(R.string.logout);
+                int duration = Toast.LENGTH_LONG;
+
+                Toast toast = Toast.makeText(context, text, duration);
+                toast.show();
+            } else {
+                Intent intent = new Intent(this, LoginActivity.class);
+                startActivityForResult(intent, 12345);
+            }
+
+			break;
 		default:
 			break;
 		}
@@ -218,8 +266,6 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
                     // Add this t.the front of the card.
                     .addToBackStack(null)
                     .commit();
-
-            clickFlag = false;
 
 			// update selected item and title, then close the drawer
 			mDrawerList.setItemChecked(position, true);
@@ -329,6 +375,4 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
             invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
         }
     }
-
-
 }
