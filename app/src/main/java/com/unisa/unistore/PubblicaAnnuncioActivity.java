@@ -1,13 +1,13 @@
 package com.unisa.unistore;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.StrictMode;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -17,25 +17,23 @@ import android.widget.Toast;
 
 import com.unisa.unistore.android.IntentIntegrator;
 import com.unisa.unistore.android.IntentResult;
+import com.unisa.unistore.utilities.GetBookThumb;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
-import java.net.URLConnection;
 
-import uk.co.chrisjenx.calligraphy.CalligraphyConfig;
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
-public class PubblicaAnnuncioActivity extends Activity implements View.OnClickListener {
-    private final String apiKey = "";
+public class PubblicaAnnuncioActivity extends ActionBarActivity implements View.OnClickListener {
+    private final String apiKey = "AIzaSyAfEoQrjMoSaurzBJpkht783jvAB6trYkM";
     private String url1 = "https://www.googleapis.com/books/v1/volumes?q=isbn:";
 
     private Button scanBtn;
@@ -43,19 +41,19 @@ public class PubblicaAnnuncioActivity extends Activity implements View.OnClickLi
 
     private ImageView thumbView;
 
-    private Bitmap thumbImg;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pubblica_annuncio);
 
-        CalligraphyConfig.initDefault(new CalligraphyConfig.Builder()
-                        .setDefaultFontPath("fonts/Bangers/Bangers.ttf")
-                        .setFontAttrId(R.attr.fontPath)
-                        .build()
-        );
-
+        Toolbar toolbar = (Toolbar) findViewById(R.id.fragment_toolbar);
+        if (toolbar != null) {
+            setSupportActionBar(toolbar);
+            ActionBar supportActionBar = getSupportActionBar();
+            supportActionBar.setDisplayShowTitleEnabled(false);
+            supportActionBar.setDisplayHomeAsUpEnabled(true);
+        }
+        
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
 
@@ -205,7 +203,7 @@ public class PubblicaAnnuncioActivity extends Activity implements View.OnClickLi
 
                 try{
                     JSONObject imageInfo = volumeObject.getJSONObject("imageLinks");
-                    new GetBookThumb().execute(imageInfo.getString("thumbnail"));
+                    new GetBookThumb(thumbView).execute(imageInfo.getString("thumbnail"));
                 }
                 catch(JSONException jse){
                     thumbView.setImageBitmap(null);
@@ -219,32 +217,6 @@ public class PubblicaAnnuncioActivity extends Activity implements View.OnClickLi
                 dateText.setText("");
                 thumbView.setImageBitmap(null);
             }
-        }
-    }
-
-    private class GetBookThumb extends AsyncTask<String, Void, String> {
-        @Override
-        protected String doInBackground(String... thumbURLs) {
-            try{
-                URL thumbURL = new URL(thumbURLs[0]);
-                URLConnection thumbConn = thumbURL.openConnection();
-                thumbConn.connect();
-
-                InputStream thumbIn = thumbConn.getInputStream();
-                BufferedInputStream thumbBuff = new BufferedInputStream(thumbIn);
-
-                thumbImg = BitmapFactory.decodeStream(thumbBuff);
-                thumbBuff.close();
-                thumbIn.close();
-            }
-            catch(Exception e) {
-                e.printStackTrace();
-            }
-            return "";
-        }
-
-        protected void onPostExecute(String result) {
-            thumbView.setImageBitmap(thumbImg);
         }
     }
 }
