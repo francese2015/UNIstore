@@ -15,6 +15,9 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.parse.ParseException;
+import com.parse.ParseObject;
+import com.parse.SaveCallback;
 import com.unisa.unistore.android.IntentIntegrator;
 import com.unisa.unistore.android.IntentResult;
 import com.unisa.unistore.utilities.GetBookThumb;
@@ -33,7 +36,6 @@ import java.net.URL;
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
 public class PubblicaAnnuncioActivity extends ActionBarActivity implements View.OnClickListener {
-    private final String apiKey = "AIzaSyAfEoQrjMoSaurzBJpkht783jvAB6trYkM";
     private String url1 = "https://www.googleapis.com/books/v1/volumes?q=isbn:";
 
     private Button scanBtn;
@@ -60,7 +62,7 @@ public class PubblicaAnnuncioActivity extends ActionBarActivity implements View.
         scanBtn = (Button)findViewById(R.id.scan_button);
         scanBtn.setOnClickListener(this);
 
-        authorText = (TextView)findViewById(R.id.book_author);
+        authorText = (TextView)findViewById(R.id.book_authors);
         titleText = (TextView)findViewById(R.id.book_title);
         descriptionText = (TextView)findViewById(R.id.book_description);
         dateText = (TextView)findViewById(R.id.book_date);
@@ -85,7 +87,7 @@ public class PubblicaAnnuncioActivity extends ActionBarActivity implements View.
 
             if(scanContent!=null && scanFormat!=null && scanFormat.equalsIgnoreCase("EAN_13")){
                 String bookSearchString = "https://www.googleapis.com/books/v1/volumes?"+
-                        "q=isbn:"+scanContent+"&key=" + apiKey;
+                        "q=isbn:"+scanContent+"&key=" + getString(R.string.google_isbn_search_api_key);
 
                 ImageView barImg = (ImageView) findViewById(R.id.barcode_image);
                 barImg.setVisibility(View.INVISIBLE);
@@ -127,6 +129,13 @@ public class PubblicaAnnuncioActivity extends ActionBarActivity implements View.
 
     private class GetBookInfo extends AsyncTask<String, Void, String> {
 
+        private ParseObject parseObject;
+        private String title;
+        private String authors;
+        private String publishedDate;
+        private String description;
+        private String thumbnailURL;
+
         @Override
         protected String doInBackground(String... bookURLs) {
             String data = "";
@@ -165,9 +174,12 @@ public class PubblicaAnnuncioActivity extends ActionBarActivity implements View.
                 JSONArray bookArray = resultObject.getJSONArray("items");
                 JSONObject bookObject = bookArray.getJSONObject(0);
                 JSONObject volumeObject = bookObject.getJSONObject("volumeInfo");
+                parseObject = new ParseObject("Libri");
 
                 try {
-                    titleText.setText("TITLE: "+volumeObject.getString("title"));
+                    title = volumeObject.getString("title");
+                    parseObject.put("titolo", title);
+                    titleText.setText("TITLE: " + title);
                 } catch(JSONException jse){
                     titleText.setText("");
                     jse.printStackTrace();
@@ -176,11 +188,14 @@ public class PubblicaAnnuncioActivity extends ActionBarActivity implements View.
                 StringBuilder authorBuild = new StringBuilder("");
                 try {
                     JSONArray authorArray = volumeObject.getJSONArray("authors");
-                    for(int a=0; a<authorArray.length(); a++){
-                        if(a>0) authorBuild.append(", ");
-                        authorBuild.append(authorArray.getString(a));
+                    for(int a = 0; a < authorArray.length(); a++) {
+                        if(a > 0)
+                            authorBuild.append(", ");
+                        authors = authorArray.getString(a);
+                        parseObject.put("autori", authors);
+                        authorBuild.append(authors);
                     }
-                    authorText.setText("AUTHOR(S): "+authorBuild.toString());
+                    authorText.setText("AUTHOR(S): " + authorBuild.toString());
                 }
                 catch(JSONException jse) {
                     authorText.setText("");
@@ -188,14 +203,18 @@ public class PubblicaAnnuncioActivity extends ActionBarActivity implements View.
                 }
 
                 try {
-                    dateText.setText("PUBLISHED: "+volumeObject.getString("publishedDate"));
+                    publishedDate = volumeObject.getString("publishedDate");
+                    parseObject.put("data_pubblicazione", publishedDate);
+                    dateText.setText("PUBLISHED: " + publishedDate);
                 } catch(JSONException jse){
                     dateText.setText("");
                     jse.printStackTrace();
                 }
 
                 try{
-                    descriptionText.setText("DESCRIPTION: "+volumeObject.getString("description"));
+                    description = volumeObject.getString("description");
+                    parseObject.put("descrizione", description);
+                    descriptionText.setText("DESCRIPTION: " + description);
                 } catch(JSONException jse){
                     descriptionText.setText("");
                     jse.printStackTrace();
@@ -203,12 +222,27 @@ public class PubblicaAnnuncioActivity extends ActionBarActivity implements View.
 
                 try{
                     JSONObject imageInfo = volumeObject.getJSONObject("imageLinks");
-                    new GetBookThumb(thumbView).execute(imageInfo.getString("thumbnail"));
+                    thumbnailURL = imageInfo.getString("thumbnail");
+                    parseObject.put("url_immagine_copertina", thumbnailURL);
+                    new GetBookThumb(thumbView).execute(thumbnailURL);
                 }
                 catch(JSONException jse){
                     thumbView.setImageBitmap(null);
                     jse.printStackTrace();
                 }
+
+                parseObject.saveInBackground(new SaveCallback() {
+                    @Override
+                    public void done(ParseException e) {
+                        if(e == null)
+                            Log.d("Parse", "Salvataggio dati sul cloud avvenuto con successo!");
+                        else {
+                            Log.d("Parse", "Problemi durante il salvataggio dati sul cloud.");
+                            e.getStackTrace();
+                        }
+
+                    }
+                });
             } catch (Exception e) {
                 e.printStackTrace();
                 titleText.setText("NOT FOUND");
