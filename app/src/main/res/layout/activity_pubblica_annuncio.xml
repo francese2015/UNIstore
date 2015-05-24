@@ -8,11 +8,40 @@
         android:id="@+id/fragment_toolbar"
         layout="@layout/toolbar" />
 
-    <LinearLayout
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:orientation="vertical"
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
         android:id="@+id/linear"
+        android:layout_below="@+id/fragment_toolbar" >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginRight="@dimen/activity_horizontal_margin"
+            android:layout_marginLeft="@dimen/activity_horizontal_margin"
+            android:gravity="center_horizontal"
+            android:textColor="@color/secondary_text"
+            android:text="@string/barcode_instruction"
+            android:textSize="21dp"
+            android:id="@+id/barcode_instruction"
+            android:layout_marginTop="25dp"
+            android:layout_centerHorizontal="true"
+            android:visibility="visible"
+            android:layout_alignParentTop="true" />
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/detecting_isbn"
+            android:id="@+id/barcode_image" />
+
+    </RelativeLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
         android:layout_below="@+id/fragment_toolbar"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
@@ -28,7 +57,7 @@
             android:textStyle="bold" />
 
         <TextView
-            android:id="@+id/book_author"
+            android:id="@+id/book_authors"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="#ffa13143"
@@ -46,22 +75,6 @@
             android:layout_height="wrap_content"
             android:textColor="#ff592d94"
             android:textIsSelectable="true" />
-
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical|center"
-            android:src="@drawable/barcode"
-            android:id="@+id/barcode_image"/>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="@dimen/activity_horizontal_margin"
-            android:layout_above="@+id/fragment_toolbar"
-            android:textColor="@color/secondary_text"
-            android:text="@string/barcode_instruction"
-            android:id="@+id/barcode_instruction" />
 
         <TextView
             android:id="@+id/book_description"
@@ -82,6 +95,21 @@
         android:layout_marginBottom="@dimen/activity_vertical_margin"
         android:background="@drawable/my_button"
         android:textColor="@color/icons"
+        android:textSize="18dp"
         android:text="@string/scan" />
+
+    <Button android:id="@+id/save_on_cloud_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentBottom="true"
+        android:padding="10dp"
+        android:elevation="@dimen/elevation_high"
+        android:layout_marginBottom="@dimen/activity_vertical_margin"
+        android:background="@drawable/my_button"
+        android:textColor="@color/icons"
+        android:textSize="18dp"
+        android:visibility="invisible"
+        android:text="@string/salva_annuncio" />
 
 </RelativeLayout>

@@ -69,6 +69,7 @@
 
     <string name="search">Cerca</string>
     <string name="scan">Scan ISBN</string>
+    <string name="salva_annuncio">Salva Annuncio</string>
 
     <string name="thumb">La foto del libro</string>
     <string name="barcode_instruction">Premi il pulsante \"<b>Scan ISBN</b>\" e aspetta qualche secondo. Quindi posiziona la fotocamera sul codice a barre del libro.</string>
@@ -77,4 +78,5 @@
     <string name="no_login_button_label">Salta il Login</string>
     <string name="welcome">Benvenuto</string>
     <string name="logout">Ora non sei più loggato</string>
+    <string name="no_connection_message">Attivare la connessione per visualizzare gli annunci di vendita.</string>
 </resources>

@@ -17,6 +17,7 @@ import android.widget.Toast;
 
 import com.parse.ParseException;
 import com.parse.ParseObject;
+import com.parse.ParseUser;
 import com.parse.SaveCallback;
 import com.unisa.unistore.android.IntentIntegrator;
 import com.unisa.unistore.android.IntentResult;
@@ -36,12 +37,13 @@ import java.net.URL;
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
 public class PubblicaAnnuncioActivity extends ActionBarActivity implements View.OnClickListener {
-    private String url1 = "https://www.googleapis.com/books/v1/volumes?q=isbn:";
 
     private Button scanBtn;
     private TextView authorText, titleText, descriptionText, dateText;
-
     private ImageView thumbView;
+    private String title = "", authors = "", publishedDate = "", description = "", thumbnailURL = "";
+
+    private ParseObject parseObject;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -98,18 +100,63 @@ public class PubblicaAnnuncioActivity extends ActionBarActivity implements View.
                 Button scanBtn = (Button) findViewById(R.id.scan_button);
                 scanBtn.setVisibility(View.INVISIBLE);
 
+                Button saveCloudBtn = (Button) findViewById(R.id.save_on_cloud_button);
+                saveCloudBtn.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View arg0) {
+                        if (ParseUser.getCurrentUser() != null) {
+                            parseObject = new ParseObject("Libri");
+
+                            parseObject.put("titolo", title);
+                            parseObject.put("autori", authors);
+                            parseObject.put("data_pubblicazione", publishedDate);
+                            parseObject.put("descrizione", description);
+                            parseObject.put("url_immagine_copertina", thumbnailURL);
+
+                            parseObject.saveInBackground(new SaveCallback() {
+                                @Override
+                                public void done(ParseException e) {
+                                    if (e == null) {
+                                        Log.d("AnnuncioParse", "Salvataggio dati sul cloud avvenuto con successo!");
+                                        Toast toast = Toast.makeText(getApplicationContext(),
+                                                "Annuncio salvato", Toast.LENGTH_SHORT);
+                                        toast.show();
+                                    } else {
+                                        Log.d("AnnuncioParse", "Problemi durante il salvataggio dati sul cloud.");
+                                        e.getStackTrace();
+                                        Toast toast = Toast.makeText(getApplicationContext(),
+                                                "Errore durante il salvataggio dell'annuncio", Toast.LENGTH_SHORT);
+                                        toast.show();
+                                    }
+
+                                }
+                            });
+
+                            finish();
+                        } else {
+                            Context context = getApplicationContext();
+                            CharSequence text = getString(R.string.profile_title_logged_out);
+                            int duration = Toast.LENGTH_LONG;
+
+                            Toast toast = Toast.makeText(context, text, duration);
+                            toast.show();
+                        }
+                    }
+                });
+                saveCloudBtn.setVisibility(View.VISIBLE);
+
                 new GetBookInfo().execute(bookSearchString);
             }
             else {
                 Toast toast = Toast.makeText(getApplicationContext(),
-                        "Not a valid scan!", Toast.LENGTH_SHORT);
+                        "Scan non valido!", Toast.LENGTH_SHORT);
                 toast.show();
             }
         }
         else{
             //invalid scan data or scan canceled
             Toast toast = Toast.makeText(getApplicationContext(),
-                    "No book scan data received!", Toast.LENGTH_SHORT);
+                    "Problemi con la scanning del codice ISBN!", Toast.LENGTH_SHORT);
             toast.show();
         }
     }
@@ -128,13 +175,6 @@ public class PubblicaAnnuncioActivity extends ActionBarActivity implements View.
     }
 
     private class GetBookInfo extends AsyncTask<String, Void, String> {
-
-        private ParseObject parseObject;
-        private String title;
-        private String authors;
-        private String publishedDate;
-        private String description;
-        private String thumbnailURL;
 
         @Override
         protected String doInBackground(String... bookURLs) {
@@ -174,11 +214,9 @@ public class PubblicaAnnuncioActivity extends ActionBarActivity implements View.
                 JSONArray bookArray = resultObject.getJSONArray("items");
                 JSONObject bookObject = bookArray.getJSONObject(0);
                 JSONObject volumeObject = bookObject.getJSONObject("volumeInfo");
-                parseObject = new ParseObject("Libri");
 
                 try {
                     title = volumeObject.getString("title");
-                    parseObject.put("titolo", title);
                     titleText.setText("TITLE: " + title);
                 } catch(JSONException jse){
                     titleText.setText("");
@@ -192,7 +230,6 @@ public class PubblicaAnnuncioActivity extends ActionBarActivity implements View.
                         if(a > 0)
                             authorBuild.append(", ");
                         authors = authorArray.getString(a);
-                        parseObject.put("autori", authors);
                         authorBuild.append(authors);
                     }
                     authorText.setText("AUTHOR(S): " + authorBuild.toString());
@@ -204,7 +241,6 @@ public class PubblicaAnnuncioActivity extends ActionBarActivity implements View.
 
                 try {
                     publishedDate = volumeObject.getString("publishedDate");
-                    parseObject.put("data_pubblicazione", publishedDate);
                     dateText.setText("PUBLISHED: " + publishedDate);
                 } catch(JSONException jse){
                     dateText.setText("");
@@ -213,7 +249,6 @@ public class PubblicaAnnuncioActivity extends ActionBarActivity implements View.
 
                 try{
                     description = volumeObject.getString("description");
-                    parseObject.put("descrizione", description);
                     descriptionText.setText("DESCRIPTION: " + description);
                 } catch(JSONException jse){
                     descriptionText.setText("");
@@ -223,26 +258,12 @@ public class PubblicaAnnuncioActivity extends ActionBarActivity implements View.
                 try{
                     JSONObject imageInfo = volumeObject.getJSONObject("imageLinks");
                     thumbnailURL = imageInfo.getString("thumbnail");
-                    parseObject.put("url_immagine_copertina", thumbnailURL);
                     new GetBookThumb(thumbView).execute(thumbnailURL);
                 }
                 catch(JSONException jse){
                     thumbView.setImageBitmap(null);
                     jse.printStackTrace();
                 }
-
-                parseObject.saveInBackground(new SaveCallback() {
-                    @Override
-                    public void done(ParseException e) {
-                        if(e == null)
-                            Log.d("Parse", "Salvataggio dati sul cloud avvenuto con successo!");
-                        else {
-                            Log.d("Parse", "Problemi durante il salvataggio dati sul cloud.");
-                            e.getStackTrace();
-                        }
-
-                    }
-                });
             } catch (Exception e) {
                 e.printStackTrace();
                 titleText.setText("NOT FOUND");
