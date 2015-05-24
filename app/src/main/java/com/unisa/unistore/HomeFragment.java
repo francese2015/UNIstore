@@ -3,46 +3,46 @@ package com.unisa.unistore;
 import android.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.os.Handler;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
+import com.parse.FindCallback;
+import com.parse.ParseException;
+import com.parse.ParseObject;
+import com.parse.ParseQuery;
 import com.parse.ParseUser;
 import com.unisa.unistore.adapter.RVAdapter;
 import com.unisa.unistore.model.ListaAnnunci;
 
-import java.util.ArrayList;
+import java.util.List;
 
-import it.gmariotti.cardslib.library.internal.Card;
-import it.gmariotti.cardslib.library.internal.CardExpand;
-import it.gmariotti.cardslib.library.internal.CardHeader;
-import it.gmariotti.cardslib.library.recyclerview.internal.CardArrayRecyclerViewAdapter;
-import it.gmariotti.cardslib.library.view.CardView;
+public class HomeFragment extends Fragment implements AbsListView.OnScrollListener {
 
-public class HomeFragment extends Fragment {
-
-    private MainActivity activity;
     private Toolbar toolbar;
     private ActionBar supportActionBar;
 
-    private boolean mListShown;
-    protected View mProgressContainer;
-    protected View mListContainer;
-    private CardArrayRecyclerViewAdapter mCardArrayAdapter;
+    private ListaAnnunci LA;
+    private RecyclerView rv;
+    private LinearLayoutManager mLayoutManager;
+    private SwipeRefreshLayout mSwipeRefreshLayout;
+    private RVAdapter adapter;
 
     public HomeFragment(){}
-
-    public void setActivity(MainActivity a) {
-        activity = a;
-    }
 
     public void setToolbar(Toolbar t) {
         toolbar = t;
@@ -52,21 +52,86 @@ public class HomeFragment extends Fragment {
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        RecyclerView rv = (RecyclerView) getActivity().findViewById(R.id.rv);
-        rv.setHasFixedSize(true);
+        adapter = new RVAdapter(getActivity());
 
-        ListaAnnunci la = new ListaAnnunci();
-        la.initializeData();
-
+        mSwipeRefreshLayout = (SwipeRefreshLayout) getActivity().findViewById(R.id.annuncio_swipe_refresh_layout);
+        rv = (RecyclerView) getActivity().findViewById(R.id.recycler_view);
         // use a linear layout manager
-        LinearLayoutManager mLayoutManager = new LinearLayoutManager(activity);
+        mLayoutManager = new LinearLayoutManager(getActivity());
         rv.setLayoutManager(mLayoutManager);
 
-        RVAdapter adapter = new RVAdapter(la);
-        rv.setAdapter(adapter);
+        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                refreshContent();
+            }
+        });
 
+        mSwipeRefreshLayout.setColorSchemeResources(R.color.primary_dark,
+                R.color.primary,
+                R.color.accent
+        );
+
+        rv.setHasFixedSize(true);
+
+        if(checkConnection()) {
+            getActivity().findViewById(R.id.no_connection_message).setVisibility(View.INVISIBLE);
+            downloadAnnunci();
+        } else {
+            getActivity().findViewById(R.id.no_connection_message).setVisibility(View.VISIBLE);
+        }
     }
 
+    private boolean checkConnection() {
+        String DEBUG_TAG = "NetworkStatus";
+
+        ConnectivityManager connMgr = (ConnectivityManager)
+                getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        NetworkInfo networkInfo = connMgr.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+        boolean isWifiConn = networkInfo.isConnected();
+        networkInfo = connMgr.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
+        boolean isMobileConn = networkInfo.isConnected();
+
+        Log.d(DEBUG_TAG, "Wifi connected: " + isWifiConn);
+        Log.d(DEBUG_TAG, "Mobile connected: " + isMobileConn);
+
+        return isMobileConn || isWifiConn;
+    }
+
+    private void refreshContent() {
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if(checkConnection()) {
+                    downloadAnnunci();
+                    mSwipeRefreshLayout.setRefreshing(false);
+                } else {
+                    Toast.makeText(getActivity(),
+                            "Attivare la connessione per scaricare la lista degli annunci",
+                            Toast.LENGTH_SHORT).show();
+                }
+            }
+        }, 5000);
+    }
+
+    private void downloadAnnunci() {
+        LA = new ListaAnnunci();
+        ParseQuery<ParseObject> query = ParseQuery.getQuery("Libri");
+        query.orderByDescending("updatedAt");
+        query.findInBackground(new FindCallback<ParseObject>() {
+            public void done(List<ParseObject> scoreList, ParseException e) {
+                if (e == null) {
+                    Log.d("Libri", "Trovati " + scoreList.size() + " libri");
+                    LA.addAnnuncio(scoreList);
+                    adapter.setListaAnnunci(LA);
+                    rv.setAdapter(adapter);
+                } else {
+                    Log.d("Libri", "Errore: " + e.getMessage());
+                }
+            }
+        });
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -84,7 +149,7 @@ public class HomeFragment extends Fragment {
         // update the actionbar to show the up carat/affordance
         supportActionBar.setDisplayHomeAsUpEnabled(true);
 
-        ImageButton fab_aggiungiAnnuncio = (ImageButton) activity.findViewById(R.id.fab_image_button);
+        ImageButton fab_aggiungiAnnuncio = (ImageButton) getActivity().findViewById(R.id.fab_image_button);
         fab_aggiungiAnnuncio.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View arg0) {
@@ -92,7 +157,7 @@ public class HomeFragment extends Fragment {
                     Intent intent = new Intent(getActivity(), PubblicaAnnuncioActivity.class);
                     getActivity().startActivityForResult(intent, 12345);
                 } else {
-                    Context context = activity.getApplicationContext();
+                    Context context = getActivity().getApplicationContext();
                     CharSequence text = getString(R.string.profile_title_logged_out);
                     int duration = Toast.LENGTH_LONG;
 
@@ -127,84 +192,13 @@ public class HomeFragment extends Fragment {
         this.supportActionBar = supportActionBar;
     }
 
-    /*
-    private class LoaderAsyncTask extends AsyncTask<Void, Void, ArrayList<Card>> {
-
-        LoaderAsyncTask() {
-        }
-
-        @Override
-        protected ArrayList<Card> doInBackground(Void... params) {
-            //elaborate images
-            ArrayList<Card> cards = initCards();
-            return cards;
-        }
-
-        @Override
-        protected void onPostExecute(ArrayList<Card> cards) {
-            CardArrayRecyclerViewAdapter mCardArrayAdapter = new CardArrayRecyclerViewAdapter(getActivity(), cards);
-
-            //Staggered grid view
-            CardRecyclerView mRecyclerView = (CardRecyclerView) getActivity().findViewById(R.id.carddemo_recyclerview);
-            mRecyclerView.setHasFixedSize(false);
-            mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-
-            //Set the empty view
-            if (mRecyclerView != null) {
-                mRecyclerView.setAdapter(mCardArrayAdapter);
-            }
-        }
-    }
-*/
-    private Card initCard() {
-        //Create a Card
-        Card card = new Card(getActivity());
-
-        //Create a CardHeader
-        CardHeader header = new CardHeader(getActivity());
-
-        //Set visible the expand/collapse button
-        header.setButtonExpandVisible(true);
-
-        //Set the header title
-        header.setTitle("Book Title");
-
-        //Add ClickListener
-        card.setOnClickListener(new Card.OnCardClickListener() {
-            @Override
-            public void onClick(Card card, View view) {
-                Toast.makeText(getActivity(), "Click Listener card=" + card.getTitle(), Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        //Set visible the expand/collapse button
-        header.setButtonExpandVisible(true);
-
-        //Add Header to card
-        card.addCardHeader(header);
-
-        //This provides a simple (and useless) expand area
-        CardExpand expand = new CardExpand(getActivity());
-        //Set inner title in Expand Area
-        expand.setTitle("Card Expand Title");
-        card.addCardExpand(expand);
-
-        //Set card in the cardView
-        CardView cardView = (CardView) getActivity().findViewById(R.id.expandable_card_view);
-        cardView.setCard(card);
-
-        return card;
+    @Override
+    public void onScrollStateChanged(AbsListView view, int scrollState) {
+        Toast.makeText(getActivity(), "D:", Toast.LENGTH_SHORT).show();
     }
 
-    private ArrayList<Card> initCards() {
-        //Init an array of Cards
-        ArrayList<Card> cards = new ArrayList<Card>();
-        for (int i = 0; i < 200; i++) {
-            Card card = initCard();
-            cards.add(card);
-        }
-
-        return cards;
+    @Override
+    public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+        Toast.makeText(getActivity(), "DDDDDDD:", Toast.LENGTH_SHORT).show();
     }
-
 }

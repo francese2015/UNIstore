@@ -5,11 +5,28 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <android.support.v7.widget.RecyclerView
+    <android.support.v4.widget.SwipeRefreshLayout
+        android:id="@+id/annuncio_swipe_refresh_layout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:id="@+id/rv"
-        android:scrollbars="vertical" />
+        android:layout_height="wrap_content">
+
+        <android.support.v7.widget.RecyclerView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/recycler_view"
+            android:scrollbars="vertical" />
+
+    </android.support.v4.widget.SwipeRefreshLayout>
+
+    <TextView
+        android:id="@+id/no_connection_message"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="25dp"
+        android:textColor="@color/primary_text"
+        android:layout_centerInParent="true"
+        android:text="@string/no_connection_message"
+        android:visibility="invisible"/>
 
     <ImageButton
         android:id="@+id/fab_image_button"
@@ -23,4 +40,13 @@
         android:background="@drawable/fab_shape"
         android:src="@drawable/fab_ic_add"
         android:tint="@android:color/white"/>
+
+    <ImageView
+        android:id="@+id/loading_image"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="37dp"
+        android:src="@animator/loading"
+        android:visibility="invisible" />
 </RelativeLayout>

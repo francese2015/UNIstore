@@ -158,7 +158,7 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
         }
     }
 
-	/**
+    /**
 	 * Slide menu item click listener
 	 * */
 	private class SlideMenuClickListener implements
@@ -217,8 +217,7 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
 		switch (position) {
 		case 0:
 			fragment = new HomeFragment();
-            ((HomeFragment)fragment).setActivity(this);
-            ((HomeFragment)fragment).setToolbar(toolbar);
+            //((HomeFragment)fragment).setToolbar(toolbar);
             ((HomeFragment)fragment).setToolbar(supportActionBar);
 			break;
 		case 1:
