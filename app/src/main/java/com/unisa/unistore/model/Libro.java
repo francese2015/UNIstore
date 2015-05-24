@@ -1,7 +1,7 @@
 package com.unisa.unistore.model;
 
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.List;
 
 /**
  * Created by Daniele on 15/05/2015.
@@ -9,16 +9,18 @@ import java.util.Date;
 public class Libro {
 
     private String titolo;
-    private ArrayList<String> autori;
+    private List<String> autori;
     private String url_immagine_copertina;
-    private Date data_pubblicazione;
+    private String data_pubblicazione;
+    private String descrizione;
 
     public Libro(String titolo_libro,
-                 ArrayList<String> autori_libro, String url_immagine_copertina,
-                 Date data_pubblicazione_annuncio) {
+                 List<String> autori_libro, String url_immagine_copertina, String descrizione,
+                 String data_pubblicazione_annuncio) {
         this.titolo = titolo_libro;
         this.autori = autori_libro;
         this.url_immagine_copertina = url_immagine_copertina;
+        this.descrizione = descrizione;
         this.data_pubblicazione = data_pubblicazione_annuncio;
     }
 
@@ -34,7 +36,7 @@ public class Libro {
         this.autori = autori_libro;
     }
 
-    public ArrayList<String> getAutoriLibro() {
+    public List<String> getAutoriLibro() {
         return autori;
     }
 
@@ -42,15 +44,23 @@ public class Libro {
         this.url_immagine_copertina = url_immagine_copertina;
     }
 
-    public String getUrlImmagineCopertina() {
+    public String getURLImmagineCopertina() {
         return url_immagine_copertina;
     }
 
-    public void setDataPubblicazioneAnnuncio(Date data_pubblicazione_annuncio) {
+    public void setDataPubblicazioneAnnuncio(String data_pubblicazione_annuncio) {
         this.data_pubblicazione = data_pubblicazione_annuncio;
     }
 
-    public Date getDataPubblicazioneAnnuncio() {
+    public String getDataPubblicazioneAnnuncio() {
         return data_pubblicazione;
+    }
+
+    public void setDescrizione(String descrizione) {
+        this.descrizione = descrizione;
+    }
+
+    public String getDescrizione() {
+        return descrizione;
     }
 }
