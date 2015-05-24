@@ -4,16 +4,16 @@
     android:oneshot="false" >
 
     <item
-        android:drawable="@drawable/ic_search_dark"
+        android:drawable="@drawable/ic_loading1"
         android:duration="300"/>
     <item
-        android:drawable="@drawable/ic_user"
+        android:drawable="@drawable/ic_loading1"
         android:duration="300"/>
     <item
-        android:drawable="@drawable/ic_user_light"
+        android:drawable="@drawable/ic_loading1"
         android:duration="300"/>
     <item
-        android:drawable="@drawable/ic_user_dark"
+        android:drawable="@drawable/ic_loading1"
         android:duration="300"/>
 
 </animation-list>
