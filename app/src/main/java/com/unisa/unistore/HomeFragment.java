@@ -17,7 +17,6 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AbsListView;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
@@ -31,8 +30,9 @@ import com.unisa.unistore.model.ListaAnnunci;
 
 import java.util.List;
 
-public class HomeFragment extends Fragment implements AbsListView.OnScrollListener {
+public class HomeFragment extends Fragment {
 
+    private static final int QUERY_LIMIT = 10;
     private Toolbar toolbar;
     private ActionBar supportActionBar;
 
@@ -41,6 +41,10 @@ public class HomeFragment extends Fragment implements AbsListView.OnScrollListen
     private LinearLayoutManager mLayoutManager;
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private RVAdapter adapter;
+
+    private boolean loading = true;
+    static int queryCnt = 0;
+    int pastVisiblesItems, visibleItemCount, totalItemCount;
 
     public HomeFragment(){}
 
@@ -52,7 +56,8 @@ public class HomeFragment extends Fragment implements AbsListView.OnScrollListen
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        adapter = new RVAdapter(getActivity());
+        LA = new ListaAnnunci();
+
 
         mSwipeRefreshLayout = (SwipeRefreshLayout) getActivity().findViewById(R.id.annuncio_swipe_refresh_layout);
         rv = (RecyclerView) getActivity().findViewById(R.id.recycler_view);
@@ -60,9 +65,34 @@ public class HomeFragment extends Fragment implements AbsListView.OnScrollListen
         mLayoutManager = new LinearLayoutManager(getActivity());
         rv.setLayoutManager(mLayoutManager);
 
+        queryCnt = 0;
+
+        adapter = new RVAdapter(getActivity());
+        adapter.setListaAnnunci(LA);
+        rv.setAdapter(adapter);
+
+        rv.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                visibleItemCount = mLayoutManager.getChildCount();
+                totalItemCount = mLayoutManager.getItemCount();
+                pastVisiblesItems = mLayoutManager.findFirstVisibleItemPosition();
+                Log.d("onScrolled", "visibleItemCount + pastVisiblesItems = " + (visibleItemCount + pastVisiblesItems) + "\ntotalItemCount = " + totalItemCount);
+                if (loading) {
+                    if ((visibleItemCount + pastVisiblesItems) >= totalItemCount) {
+                        loading = false;
+                        Log.d("onScrolled", "Last Item Wow !");
+                        downloadAnnunci();
+                    }
+                }
+            }
+        });
+
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
+                queryCnt = 0;
                 refreshContent();
             }
         });
@@ -116,16 +146,17 @@ public class HomeFragment extends Fragment implements AbsListView.OnScrollListen
     }
 
     private void downloadAnnunci() {
-        LA = new ListaAnnunci();
         ParseQuery<ParseObject> query = ParseQuery.getQuery("Libri");
         query.orderByDescending("updatedAt");
+        query.setLimit(QUERY_LIMIT);
+        query.setSkip(queryCnt);
         query.findInBackground(new FindCallback<ParseObject>() {
             public void done(List<ParseObject> scoreList, ParseException e) {
                 if (e == null) {
                     Log.d("Libri", "Trovati " + scoreList.size() + " libri");
                     LA.addAnnuncio(scoreList);
-                    adapter.setListaAnnunci(LA);
-                    rv.setAdapter(adapter);
+                    adapter.notifyDataSetChanged();
+                    queryCnt += 10;
                 } else {
                     Log.d("Libri", "Errore: " + e.getMessage());
                 }
@@ -153,7 +184,7 @@ public class HomeFragment extends Fragment implements AbsListView.OnScrollListen
         fab_aggiungiAnnuncio.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View arg0) {
-                if(ParseUser.getCurrentUser() != null) {
+                if(ParseUser.getCurrentUser().isAuthenticated()) {
                     Intent intent = new Intent(getActivity(), PubblicaAnnuncioActivity.class);
                     getActivity().startActivityForResult(intent, 12345);
                 } else {
@@ -190,15 +221,5 @@ public class HomeFragment extends Fragment implements AbsListView.OnScrollListen
 
     public void setToolbar(ActionBar supportActionBar) {
         this.supportActionBar = supportActionBar;
-    }
-
-    @Override
-    public void onScrollStateChanged(AbsListView view, int scrollState) {
-        Toast.makeText(getActivity(), "D:", Toast.LENGTH_SHORT).show();
-    }
-
-    @Override
-    public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-        Toast.makeText(getActivity(), "DDDDDDD:", Toast.LENGTH_SHORT).show();
     }
 }
