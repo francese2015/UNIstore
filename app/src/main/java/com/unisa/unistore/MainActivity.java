@@ -113,12 +113,12 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
         // Agenda
         navDrawerItems.add(new NavDrawerItem(navMenuTitles[3], navMenuIcons.getResourceId(3, -1), true, "22"));
 
-        if(currentUser == null)
+        if(currentUser != null && currentUser.isAuthenticated())
             // Logout
-            navDrawerItems.add(new NavDrawerItem(navMenuTitles[4], navMenuIcons.getResourceId(4, -1)));
+            navDrawerItems.add(new NavDrawerItem(navMenuTitles[5], navMenuIcons.getResourceId(5, -1)));
         else
             // Login
-            navDrawerItems.add(new NavDrawerItem(navMenuTitles[5], navMenuIcons.getResourceId(5, -1)));
+            navDrawerItems.add(new NavDrawerItem(navMenuTitles[4], navMenuIcons.getResourceId(4, -1)));
 
 
 		mDrawerList.setOnItemClickListener(new SlideMenuClickListener());
@@ -145,7 +145,7 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
     protected void onStart() {
         super.onStart();
 
-        if(firstVisit && currentUser != null) {
+        if(firstVisit && currentUser != null && currentUser.isAuthenticated()) {
             Context context = getApplicationContext();
             CharSequence text = getString(R.string.welcome) + " " +
                     currentUser.getString("name");
@@ -230,7 +230,7 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
             fragment = new AgendaFragment();
 			break;
         case 4:
-            if(currentUser != null) {
+            if(currentUser != null && currentUser.isAuthenticated()) {
                 ParseUser.logOut();
                 currentUser = null;
 
@@ -251,7 +251,8 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
                 toast.show();
             } else {
                 Intent intent = new Intent(this, LoginActivity.class);
-                startActivityForResult(intent, 12345);
+                startActivity(intent);
+                finish();
             }
 
 			break;

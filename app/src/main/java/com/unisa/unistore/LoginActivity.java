@@ -66,7 +66,7 @@ public class LoginActivity extends Activity {
         loginOrLogoutButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (currentUser != null) {
+                if (currentUser != null && currentUser.isAuthenticated()) {
                     // User clicked to log out.
                     ParseUser.logOut();
                     currentUser = null;
@@ -101,7 +101,7 @@ public class LoginActivity extends Activity {
         super.onStart();
 
         currentUser = ParseUser.getCurrentUser();
-        if (currentUser != null) {
+        if (currentUser != null && currentUser.isAuthenticated()) {
             Intent i = new Intent(LoginActivity.this, MainActivity.class);
             startActivity(i);
             finish();
