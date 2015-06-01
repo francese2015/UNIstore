@@ -115,7 +115,7 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.AnnuncioViewHolder
             this.titoloLibro = (TextView) itemView.findViewById(R.id.book_title);
             this.autoriLibro = (TextView) itemView.findViewById(R.id.book_authors);
             this.prezzoLibro = (TextView) itemView.findViewById(R.id.book_price);
-            this.fotoLibro = (ImageView) itemView.findViewById(R.id.book_photo);
+            this.fotoLibro = (ImageView) itemView.findViewById(R.id.book_image);
             //this.descrizioneLibro = (TextView) itemView.findViewById(R.id.book_description);
 
             cardView = (CardView)itemView.findViewById(R.id.expandable_card_view);

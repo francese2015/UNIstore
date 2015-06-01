@@ -28,6 +28,7 @@ import android.widget.Toast;
 import com.parse.ParseUser;
 import com.unisa.unistore.adapter.NavDrawerListAdapter;
 import com.unisa.unistore.model.NavDrawerItem;
+import com.unisa.unistore.utilities.Utilities;
 
 import java.util.ArrayList;
 
@@ -60,8 +61,8 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
     private boolean clickFlag = false;
     private ActionBar supportActionBar;
 
-    private ParseUser currentUser;
     private boolean firstVisit = true;
+    private ParseUser currentUser;
 
 
     protected void setActionBarIcon(int iconRes) {
@@ -113,7 +114,7 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
         // Agenda
         navDrawerItems.add(new NavDrawerItem(navMenuTitles[3], navMenuIcons.getResourceId(3, -1), true, "22"));
 
-        if(currentUser != null && currentUser.isAuthenticated())
+        if(Utilities.isUserAuthenticated())
             // Logout
             navDrawerItems.add(new NavDrawerItem(navMenuTitles[5], navMenuIcons.getResourceId(5, -1)));
         else
@@ -145,7 +146,7 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
     protected void onStart() {
         super.onStart();
 
-        if(firstVisit && currentUser != null && currentUser.isAuthenticated()) {
+        if(firstVisit && Utilities.isUserAuthenticated()) {
             Context context = getApplicationContext();
             CharSequence text = getString(R.string.welcome) + " " +
                     currentUser.getString("name");
@@ -230,7 +231,7 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
             fragment = new AgendaFragment();
 			break;
         case 4:
-            if(currentUser != null && currentUser.isAuthenticated()) {
+            if(Utilities.isUserAuthenticated()) {
                 ParseUser.logOut();
                 currentUser = null;
 

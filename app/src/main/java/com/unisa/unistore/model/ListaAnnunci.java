@@ -92,7 +92,7 @@ public class ListaAnnunci {
         lista_annunci.add(a3);
     }
 
-    public void addAnnuncio(List<ParseObject> scoreList) {
+    public void addAnnunci(List<ParseObject> scoreList, boolean onTop) {
         String titolo = "";
         JSONArray autori = new JSONArray();
         ArrayList<String> lista_autori = null;
@@ -120,10 +120,20 @@ public class ListaAnnunci {
             String descrizione = libroParse.getString("descrizione");
             data = libroParse.getString("data");
 
+            Date date = libroParse.getDate("updatedAt");
 
             libro = new Libro(titolo, lista_autori, url, descrizione, data);
-            lista_annunci.add(new Annuncio(ParseUser.getCurrentUser(), new Date(), libro, 30));
+            Annuncio annuncio = new Annuncio(ParseUser.getCurrentUser(), date, libro, 30);
+
+            if(onTop)
+                lista_annunci.add(0, annuncio);
+            else
+                lista_annunci.add(annuncio);
         }
 
+    }
+
+    public void clear() {
+        lista_annunci.clear();
     }
 }

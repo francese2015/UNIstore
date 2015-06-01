@@ -22,7 +22,9 @@
 package com.unisa.unistore;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -66,7 +68,7 @@ public class LoginActivity extends Activity {
         loginOrLogoutButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (currentUser != null && currentUser.isAuthenticated()) {
+                if (userAuthenticated()) {
                     // User clicked to log out.
                     ParseUser.logOut();
                     currentUser = null;
@@ -83,10 +85,7 @@ public class LoginActivity extends Activity {
         noLoginButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                ParseLoginBuilder loginBuilder = new ParseLoginBuilder(
-                        LoginActivity.this);
-                Intent i = new Intent(LoginActivity.this, MainActivity.class);
-                startActivity(i);
+                open(v);
             }
         });
     }
@@ -101,13 +100,40 @@ public class LoginActivity extends Activity {
         super.onStart();
 
         currentUser = ParseUser.getCurrentUser();
-        if (currentUser != null && currentUser.isAuthenticated()) {
-            Intent i = new Intent(LoginActivity.this, MainActivity.class);
-            startActivity(i);
-            finish();
+        if(userAuthenticated()) {
+            //showProfileLoggedIn();
+            launchMainActivity();
         } else {
             showProfileLoggedOut();
         }
+    }
+
+    private boolean userAuthenticated() {
+        if(currentUser != null)
+            return true;
+
+        return false;
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        // Check which request we're responding to
+        if (requestCode == LOGIN_REQUEST) {
+            // Make sure the request was successful
+            if (resultCode == RESULT_OK) {
+                currentUser = ParseUser.getCurrentUser();
+                if(userAuthenticated())
+                    launchMainActivity();
+                else
+                    showProfileLoggedOut();
+            }
+        }
+    }
+
+    private void launchMainActivity() {
+        Intent i = new Intent(LoginActivity.this, MainActivity.class);
+        startActivity(i);
+        finish();
     }
 
     /**
@@ -121,6 +147,7 @@ public class LoginActivity extends Activity {
             nameTextView.setText(fullName);
         }
         loginOrLogoutButton.setText(R.string.profile_logout_button_label);
+        noLoginButton.setVisibility(View.GONE);
     }
 
     /**
@@ -131,5 +158,31 @@ public class LoginActivity extends Activity {
         emailTextView.setText("");
         nameTextView.setText("");
         loginOrLogoutButton.setText(R.string.profile_login_button_label);
+        noLoginButton.setVisibility(View.VISIBLE);
     }
+
+    public void open(View view){
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+        alertDialogBuilder.setMessage(getString(R.string.skip_message) + " " +
+                getString(R.string.app_name));
+
+        alertDialogBuilder.setPositiveButton(R.string.skip, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface arg0, int arg1) {
+                ParseLoginBuilder loginBuilder = new ParseLoginBuilder(
+                        LoginActivity.this);
+                launchMainActivity();
+            }
+        });
+
+        alertDialogBuilder.setNegativeButton(R.string.no_skip, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+            }
+        });
+
+        AlertDialog alertDialog = alertDialogBuilder.create();
+        alertDialog.show();
+    }
+
 }

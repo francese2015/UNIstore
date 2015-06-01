@@ -7,6 +7,8 @@ import android.graphics.drawable.Drawable;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
+import com.parse.ParseUser;
+
 /**
  * Created by Daniele on 20/04/2015.
  */
@@ -54,4 +56,11 @@ public class Utilities {
         }
     }
 
+
+    public static boolean isUserAuthenticated() {
+        if(ParseUser.getCurrentUser() != null)
+            return true;
+
+        return false;
+    }
 }

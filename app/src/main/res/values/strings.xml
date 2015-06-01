@@ -79,4 +79,8 @@
     <string name="welcome">Benvenuto</string>
     <string name="logout">Ora non sei più loggato</string>
     <string name="no_connection_message">Attivare la connessione per visualizzare gli annunci di vendita.</string>
+
+     <string name="no_skip">NON SALTARE</string>
+    <string name="skip">SALTA</string>
+    <string name="skip_message">Sei sicuro di voler saltare il login? Così facendo non potrai accedere a tutte le funzionalità di</string>
 </resources>

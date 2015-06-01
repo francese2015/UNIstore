@@ -12,4 +12,6 @@
     <style name="MyToolbarTheme" parent="@android:style/Widget.Holo.Light.ActionBar.Solid.Inverse">
         <item name="android:background">@android:color/holo_purple</item>
     </style>
+
+
 </resources>

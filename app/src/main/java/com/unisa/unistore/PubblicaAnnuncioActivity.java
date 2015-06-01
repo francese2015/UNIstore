@@ -15,6 +15,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.parse.ParseACL;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseUser;
@@ -38,11 +39,11 @@ import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
 public class PubblicaAnnuncioActivity extends ActionBarActivity implements View.OnClickListener {
 
-    private Button scanBtn;
+    private Button scanBtn, saveCloudBtn;
     private TextView authorText, titleText, descriptionText, dateText;
     private ImageView thumbView;
-    private String title = "", authors = "", publishedDate = "", description = "", thumbnailURL = "";
 
+    private String title = "", authors = "", publishedDate = "", description = "", thumbnailURL = "";
     private ParseObject parseObject;
 
     @Override
@@ -97,10 +98,9 @@ public class PubblicaAnnuncioActivity extends ActionBarActivity implements View.
                 TextView barInstr = (TextView) findViewById(R.id.barcode_instruction);
                 barInstr.setVisibility(View.INVISIBLE);
 
-                Button scanBtn = (Button) findViewById(R.id.scan_button);
                 scanBtn.setVisibility(View.INVISIBLE);
 
-                Button saveCloudBtn = (Button) findViewById(R.id.save_on_cloud_button);
+                saveCloudBtn = (Button) findViewById(R.id.save_on_cloud_button);
                 saveCloudBtn.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View arg0) {
@@ -113,16 +113,21 @@ public class PubblicaAnnuncioActivity extends ActionBarActivity implements View.
                             parseObject.put("descrizione", description);
                             parseObject.put("url_immagine_copertina", thumbnailURL);
 
+                            ParseACL groupACL = new ParseACL();
+                            groupACL.setPublicReadAccess(true);
+                            groupACL.setPublicWriteAccess(false);
+
+                            parseObject.setACL(groupACL);
                             parseObject.saveInBackground(new SaveCallback() {
                                 @Override
                                 public void done(ParseException e) {
                                     if (e == null) {
-                                        Log.d("AnnuncioParse", "Salvataggio dati sul cloud avvenuto con successo!");
+                                        Log.d("AnnuncioParse", "Salvataggio dell'annuncio sul cloud avvenuto con successo!");
                                         Toast toast = Toast.makeText(getApplicationContext(),
                                                 "Annuncio salvato", Toast.LENGTH_SHORT);
                                         toast.show();
                                     } else {
-                                        Log.d("AnnuncioParse", "Problemi durante il salvataggio dati sul cloud.");
+                                        Log.d("AnnuncioParse", "Problemi durante il salvataggio dell'annuncio sul cloud.");
                                         e.getStackTrace();
                                         Toast toast = Toast.makeText(getApplicationContext(),
                                                 "Errore durante il salvataggio dell'annuncio", Toast.LENGTH_SHORT);
@@ -144,6 +149,7 @@ public class PubblicaAnnuncioActivity extends ActionBarActivity implements View.
                     }
                 });
                 saveCloudBtn.setVisibility(View.VISIBLE);
+                saveCloudBtn.setClickable(false);
 
                 new GetBookInfo().execute(bookSearchString);
             }
@@ -264,6 +270,8 @@ public class PubblicaAnnuncioActivity extends ActionBarActivity implements View.
                     thumbView.setImageBitmap(null);
                     jse.printStackTrace();
                 }
+
+                saveCloudBtn.setClickable(true);
             } catch (Exception e) {
                 e.printStackTrace();
                 titleText.setText("NOT FOUND");
