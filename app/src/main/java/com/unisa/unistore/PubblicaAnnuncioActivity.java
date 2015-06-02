@@ -69,7 +69,7 @@ public class PubblicaAnnuncioActivity extends ActionBarActivity implements View.
         titleText = (TextView)findViewById(R.id.book_title);
         descriptionText = (TextView)findViewById(R.id.book_description);
         dateText = (TextView)findViewById(R.id.book_date);
-        thumbView = (ImageView)findViewById(R.id.thumb);
+        thumbView = (ImageView)findViewById(R.id.book_image);
 
     }
 
@@ -148,10 +148,10 @@ public class PubblicaAnnuncioActivity extends ActionBarActivity implements View.
                         }
                     }
                 });
+                new GetBookInfo().execute(bookSearchString);
                 saveCloudBtn.setVisibility(View.VISIBLE);
                 saveCloudBtn.setClickable(false);
-
-                new GetBookInfo().execute(bookSearchString);
+                findViewById(R.id.book_info).setVisibility(View.VISIBLE);
             }
             else {
                 Toast toast = Toast.makeText(getApplicationContext(),
