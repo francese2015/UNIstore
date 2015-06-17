@@ -72,9 +72,6 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
 	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
     @Override
 	protected void onCreate(Bundle savedInstanceState) {
-        //requestWindowFeature(Window.FEATURE_NO_TITLE);
-        //getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
-
 		super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
