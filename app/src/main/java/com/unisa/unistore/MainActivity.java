@@ -22,6 +22,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -343,7 +344,7 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
 	 */
 
 	@Override
-	protected void onPostCreate(Bundle savedInstanceState) {
+	public void onPostCreate(Bundle savedInstanceState) {
 		super.onPostCreate(savedInstanceState);
 		// Sync the toggle state after onRestoreInstanceState has occurred.
 		mDrawerToggle.syncState();
@@ -375,5 +376,8 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
             toolbar.setTitle(getString(R.string.menu_open));
             invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
         }
+
     }
+
+
 }
