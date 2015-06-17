@@ -1,5 +1,7 @@
 package com.unisa.unistore;
 
+import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
@@ -17,48 +19,98 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AbsListView;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
+import com.parse.CountCallback;
 import com.parse.FindCallback;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
-import com.parse.ParseUser;
+import com.pnikosis.materialishprogress.ProgressWheel;
 import com.unisa.unistore.adapter.RVAdapter;
 import com.unisa.unistore.model.ListaAnnunci;
+import com.unisa.unistore.utilities.Utilities;
 
 import java.util.List;
 
-public class HomeFragment extends Fragment implements AbsListView.OnScrollListener {
+public class HomeFragment extends Fragment {
 
+    private static final int QUERY_LIMIT = 5;
+
+    private Activity activity;
     private Toolbar toolbar;
     private ActionBar supportActionBar;
 
     private ListaAnnunci LA;
-    private RecyclerView rv;
+    private RecyclerView recyclerView;
     private LinearLayoutManager mLayoutManager;
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private RVAdapter adapter;
 
-    public HomeFragment(){}
+    private boolean loading = true;
+    private static int queryCnt = 0;
+    private int pastVisiblesItems, visibleItemCount, totalItemCount;
+
+    private int lastNoticesCnt = 0;
+    private boolean noConnection = false;
+    private boolean firstLaunch = true;
+    private ProgressWheel wheel;
+
+    public HomeFragment(){ }
 
     public void setToolbar(Toolbar t) {
         toolbar = t;
     }
 
+    @SuppressLint("ResourceAsColor")
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        adapter = new RVAdapter(getActivity());
+        LA = new ListaAnnunci();
 
         mSwipeRefreshLayout = (SwipeRefreshLayout) getActivity().findViewById(R.id.annuncio_swipe_refresh_layout);
-        rv = (RecyclerView) getActivity().findViewById(R.id.recycler_view);
+        recyclerView = (RecyclerView) getActivity().findViewById(R.id.recycler_view);
         // use a linear layout manager
         mLayoutManager = new LinearLayoutManager(getActivity());
-        rv.setLayoutManager(mLayoutManager);
+        recyclerView.setLayoutManager(mLayoutManager);
+
+        queryCnt = 0;
+
+        adapter = new RVAdapter(getActivity());
+        adapter.setListaAnnunci(LA);
+        recyclerView.setAdapter(adapter);
+
+        wheel = (ProgressWheel) getActivity().findViewById(R.id.progress_wheel);
+        wheel.setBarColor(R.color.primary);
+
+        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                visibleItemCount = mLayoutManager.getChildCount();
+                totalItemCount = mLayoutManager.getItemCount();
+                pastVisiblesItems = mLayoutManager.findFirstVisibleItemPosition();
+                Log.d("onScrolled", "visibleItemCount (" + visibleItemCount +
+                        ") + pastVisiblesItems (" + pastVisiblesItems + ") = " +
+                        (visibleItemCount + pastVisiblesItems) +
+                        "\ntotalItemCount = " + totalItemCount);
+
+                if (dy != 0 && loading) {
+                    if ((visibleItemCount + pastVisiblesItems) >= totalItemCount) {
+                        loading = false;
+                        Log.d("onScrolled-last", "Ultimo annuncio caricato!");
+                        downloadAnnunci(false);
+                    }
+                } else {
+                    if ((visibleItemCount + pastVisiblesItems) == totalItemCount - 1) {
+                        if(!loading)
+                            loading = true;
+                    }
+                }
+            }
+        });
 
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
@@ -72,13 +124,14 @@ public class HomeFragment extends Fragment implements AbsListView.OnScrollListen
                 R.color.accent
         );
 
-        rv.setHasFixedSize(true);
+        recyclerView.setHasFixedSize(true);
 
         if(checkConnection()) {
             getActivity().findViewById(R.id.no_connection_message).setVisibility(View.INVISIBLE);
-            downloadAnnunci();
+            downloadAnnunci(false);
         } else {
             getActivity().findViewById(R.id.no_connection_message).setVisibility(View.VISIBLE);
+            noConnection = true;
         }
     }
 
@@ -86,7 +139,7 @@ public class HomeFragment extends Fragment implements AbsListView.OnScrollListen
         String DEBUG_TAG = "NetworkStatus";
 
         ConnectivityManager connMgr = (ConnectivityManager)
-                getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
+                activity.getSystemService(Context.CONNECTIVITY_SERVICE);
 
         NetworkInfo networkInfo = connMgr.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
         boolean isWifiConn = networkInfo.isConnected();
@@ -104,10 +157,14 @@ public class HomeFragment extends Fragment implements AbsListView.OnScrollListen
             @Override
             public void run() {
                 if(checkConnection()) {
-                    downloadAnnunci();
+                    wheel.setVisibility(View.VISIBLE);
+                    downloadAnnunci(true);
+                    wheel.setVisibility(View.GONE);
                     mSwipeRefreshLayout.setRefreshing(false);
+                    if(noConnection)
+                        activity.findViewById(R.id.no_connection_message).setVisibility(View.INVISIBLE);
                 } else {
-                    Toast.makeText(getActivity(),
+                    Toast.makeText(activity,
                             "Attivare la connessione per scaricare la lista degli annunci",
                             Toast.LENGTH_SHORT).show();
                 }
@@ -115,19 +172,69 @@ public class HomeFragment extends Fragment implements AbsListView.OnScrollListen
         }, 5000);
     }
 
-    private void downloadAnnunci() {
-        LA = new ListaAnnunci();
-        ParseQuery<ParseObject> query = ParseQuery.getQuery("Libri");
+    private void downloadAnnunci(boolean isRefreshing) {
+        final boolean refresh = isRefreshing;
+        final ParseQuery<ParseObject> query = ParseQuery.getQuery("Libri");
         query.orderByDescending("updatedAt");
-        query.findInBackground(new FindCallback<ParseObject>() {
-            public void done(List<ParseObject> scoreList, ParseException e) {
-                if (e == null) {
-                    Log.d("Libri", "Trovati " + scoreList.size() + " libri");
-                    LA.addAnnuncio(scoreList);
-                    adapter.setListaAnnunci(LA);
-                    rv.setAdapter(adapter);
+
+        query.countInBackground(new CountCallback() {
+            @Override
+            public void done(int i, ParseException e) {
+                Log.d("Libri", "i = " + i);
+
+                if(i < lastNoticesCnt || !refresh) {
+                    if(i < lastNoticesCnt) { // sono stati eliminati uno o più annunci
+                        query.setLimit(i);
+                        LA.clear();
+                    }
+                    else {
+                        query.setLimit(QUERY_LIMIT);
+                        query.setSkip(queryCnt);
+                    }
+                    lastNoticesCnt = i;
+
+                    query.findInBackground(new FindCallback<ParseObject>() {
+                        public void done(List<ParseObject> scoreList, ParseException e) {
+                            if (e == null) {
+                                if(scoreList.size() > 0) {
+                                    LA.addAnnunci(scoreList, false);
+                                    adapter.notifyDataSetChanged();
+                                    queryCnt += scoreList.size();
+                                }
+
+                                Log.d("Libri", "Trovati " + scoreList.size() + " libri" +
+                                        "\nlastNoticesCnt = " + lastNoticesCnt +
+                                        "\nqueryCnt = " + queryCnt);
+                            } else {
+                                Log.d("Libri", "Errore: " + e.getMessage());
+                            }
+                        }
+                    });
                 } else {
-                    Log.d("Libri", "Errore: " + e.getMessage());
+                    int count = Math.abs(lastNoticesCnt - i);
+
+                    if(count <= 0)
+                        return;
+
+                    query.setLimit(count);
+                    lastNoticesCnt += count;
+                    query.findInBackground(new FindCallback<ParseObject>() {
+                        public void done(List<ParseObject> scoreList, ParseException e) {
+                            if (e == null) {
+                                if(scoreList.size() > 0) {
+                                    LA.addAnnunci(scoreList, true);
+                                    adapter.notifyDataSetChanged();
+                                    queryCnt += scoreList.size();
+                                }
+
+                                Log.d("Libri-refresh", "Trovati " + scoreList.size() + " libri" +
+                                        "\nlastNoticesCnt = " + lastNoticesCnt +
+                                        "\nqueryCnt = " + queryCnt);
+                            } else {
+                                Log.d("Libri", "Errore: " + e.getMessage());
+                            }
+                        }
+                    });
                 }
             }
         });
@@ -137,6 +244,8 @@ public class HomeFragment extends Fragment implements AbsListView.OnScrollListen
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_home, container, false);
+
+        activity = getActivity();
 
         return rootView;
     }
@@ -149,15 +258,15 @@ public class HomeFragment extends Fragment implements AbsListView.OnScrollListen
         // update the actionbar to show the up carat/affordance
         supportActionBar.setDisplayHomeAsUpEnabled(true);
 
-        ImageButton fab_aggiungiAnnuncio = (ImageButton) getActivity().findViewById(R.id.fab_image_button);
+        ImageButton fab_aggiungiAnnuncio = (ImageButton) activity.findViewById(R.id.fab_image_button);
         fab_aggiungiAnnuncio.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View arg0) {
-                if(ParseUser.getCurrentUser() != null) {
-                    Intent intent = new Intent(getActivity(), PubblicaAnnuncioActivity.class);
-                    getActivity().startActivityForResult(intent, 12345);
+                if(Utilities.isUserAuthenticated()) {
+                    Intent intent = new Intent(activity, PubblicaAnnuncioActivity.class);
+                    activity.startActivityForResult(intent, 12345);
                 } else {
-                    Context context = getActivity().getApplicationContext();
+                    Context context = activity.getApplicationContext();
                     CharSequence text = getString(R.string.profile_title_logged_out);
                     int duration = Toast.LENGTH_LONG;
 
@@ -177,12 +286,24 @@ public class HomeFragment extends Fragment implements AbsListView.OnScrollListen
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+
+        if(firstLaunch) {
+            firstLaunch = false;
+            return;
+        }
+
+        refreshContent();
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Get item selected and deal with it
         switch (item.getItemId()) {
             case android.R.id.home:
                 //called when the up affordance/carat in actionbar is pressed
-                getActivity().onBackPressed();
+                activity.onBackPressed();
                 return true;
         }
         return super.onOptionsItemSelected(item);
@@ -190,15 +311,5 @@ public class HomeFragment extends Fragment implements AbsListView.OnScrollListen
 
     public void setToolbar(ActionBar supportActionBar) {
         this.supportActionBar = supportActionBar;
-    }
-
-    @Override
-    public void onScrollStateChanged(AbsListView view, int scrollState) {
-        Toast.makeText(getActivity(), "D:", Toast.LENGTH_SHORT).show();
-    }
-
-    @Override
-    public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-        Toast.makeText(getActivity(), "DDDDDDD:", Toast.LENGTH_SHORT).show();
     }
 }

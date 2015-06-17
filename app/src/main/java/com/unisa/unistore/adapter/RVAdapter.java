@@ -24,7 +24,10 @@ import java.util.ArrayList;
  */
 public class RVAdapter extends RecyclerView.Adapter<RVAdapter.AnnuncioViewHolder>{
     private Activity activity;
-    private ListaAnnunci annunci;
+    private ListaAnnunci annunci = new ListaAnnunci();
+
+    private com.nostra13.universalimageloader.core.ImageLoader imageLoader;
+    private DisplayImageOptions options;
 
     public void setListaAnnunci(ListaAnnunci annunci){
         this.annunci = annunci;
@@ -32,7 +35,8 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.AnnuncioViewHolder
 
     public RVAdapter(Activity activity) {
         this.activity = activity;
-        this.annunci = annunci;
+
+        initImageLoader();
     }
 
     @Override
@@ -61,21 +65,6 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.AnnuncioViewHolder
         String URLImmagineCopertina = annunci.getAnnuncio(position).getLibro().getURLImmagineCopertina();
         //new GetBookThumb(annuncioHolder.fotoLibro).execute(URLImmagineCopertina);
 
-        // Load image, decode it to Bitmap and display Bitmap in ImageView (or any other view
-        //  which implements ImageAware interface)
-        AnimationDrawable mAnimation = (AnimationDrawable) (
-                (ImageView) activity.findViewById(R.id.loading_image)).getDrawable();
-
-        DisplayImageOptions options = new DisplayImageOptions.Builder()
-                .showImageOnLoading(mAnimation)
-                .showImageForEmptyUri(R.drawable.image_not_found)
-                .showImageOnFail(R.drawable.image_not_found)
-                .delayBeforeLoading(2000) //da decrementare (serve per i test dell'animazione)
-                .cacheInMemory(true)
-                .cacheOnDisk(true)
-                .considerExifParams(true).build();
-        ImageLoader imageLoader = ImageLoader.getInstance();
-        imageLoader.init(ImageLoaderConfiguration.createDefault(activity));
         imageLoader.displayImage(URLImmagineCopertina, annuncioHolder.fotoLibro, options);
 
         String prezzo = Double.toString(annunci.getAnnuncio(position).getPrezzo());
@@ -83,6 +72,25 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.AnnuncioViewHolder
 
         String descrizione = annunci.getAnnuncio(position).getLibro().getDescrizione();
         //annuncioHolder.customizeCard(titolo, strAutori, prezzo, URLImmagineCopertina, descrizione);
+    }
+
+    private void initImageLoader() {
+        // Load image, decode it to Bitmap and display Bitmap in ImageView (or any other view
+        //  which implements ImageAware interface)
+        AnimationDrawable mAnimation = (AnimationDrawable) (
+                (ImageView) activity.findViewById(R.id.loading_image)).getDrawable();
+
+        options = new DisplayImageOptions.Builder()
+                .showImageOnLoading(mAnimation)
+                .showImageForEmptyUri(R.drawable.image_not_found)
+                .showImageOnFail(R.drawable.image_not_found)
+                //.delayBeforeLoading(2000) //da decrementare (serve per i test dell'animazione)
+                .cacheInMemory(true)
+                .cacheOnDisk(true)
+                .considerExifParams(true).build();
+
+        imageLoader = ImageLoader.getInstance();
+        imageLoader.init(ImageLoaderConfiguration.createDefault(activity));
     }
 
     @Override
@@ -107,7 +115,7 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.AnnuncioViewHolder
             this.titoloLibro = (TextView) itemView.findViewById(R.id.book_title);
             this.autoriLibro = (TextView) itemView.findViewById(R.id.book_authors);
             this.prezzoLibro = (TextView) itemView.findViewById(R.id.book_price);
-            this.fotoLibro = (ImageView) itemView.findViewById(R.id.book_photo);
+            this.fotoLibro = (ImageView) itemView.findViewById(R.id.book_image);
             //this.descrizioneLibro = (TextView) itemView.findViewById(R.id.book_description);
 
             cardView = (CardView)itemView.findViewById(R.id.expandable_card_view);

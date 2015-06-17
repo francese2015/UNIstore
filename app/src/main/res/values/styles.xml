@@ -4,22 +4,31 @@
     <style name="AppTheme.Holo" parent="android:Theme.Holo.Light">
         <!-- theme customizations -->
         <item name="android:windowActionBar">false</item>
-        <item name="android:windowNoTitle">true</item>
+    </style>
+
+    <style name="Theme.BookInfoTheme" parent="Theme.AppCompat.Light">
+        <item name="android:layout_margin">5dp</item>
+
+        <item name="android:textColorPrimary">@color/secondary_text</item>
+
+        <item name="colorControlNormal">@color/divider</item>
+        <item name="colorControlActivated">@color/accent</item>
+        <item name="colorControlHighlight">@color/accent</item>
     </style>
 
     <style name="Theme.MyTheme" parent="Theme.AppCompat.Light">
         <!-- colorPrimary is used for the default action bar background -->
         <item name="colorPrimary">@color/primary_material_light</item>
+        <item name="android:windowNoTitle">true</item>
+        <!-- colorPrimaryDark is used for the status bar -->
+        <item name="colorPrimaryDark">@color/primary_dark_material_dark</item>
 
-    <!-- colorPrimaryDark is used for the status bar -->
-    <item name="colorPrimaryDark">@color/primary_dark_material_dark</item>
+        <!-- colorAccent is used as the default value for colorControlActivated,
+             which is used to tint widgets -->
+        <item name="colorAccent">@color/accent_material_light</item>
 
-    <!-- colorAccent is used as the default value for colorControlActivated,
-         which is used to tint widgets -->
-    <item name="colorAccent">@color/accent_material_light</item>
-
-    <!-- You can also set colorControlNormal, colorControlActivated
-         colorControlHighlight, and colorSwitchThumbNormal. -->
+        <!-- You can also set colorControlNormal, colorControlActivated
+             colorControlHighlight, and colorSwitchThumbNormal. -->
 
     </style>
 
@@ -66,10 +75,54 @@
 
     <style name="ParseLoginUI.TextView" parent="@android:style/Widget.TextView">
         <item name="android:textColor">@color/com_parse_ui_parse_login_display_text</item>
-        <item name="android:textSize">18sp</item>
+        <item name="android:textSize">20sp</item>
     </style>
 
     <style name="ParseLoginUI.EditText" parent="@android:style/Widget.EditText">
         <item name="android:singleLine">true</item>
+    </style>
+
+    <style name="FrameworkRoot.Theme" parent="Theme.AppCompat.Light" />
+    <style name="FrameworkRoot.Widget" parent="Theme.AppCompat" />
+
+    <!-- Immediate parent theme to specify base values for custom attributes -->
+    <style name="Theme" parent="FrameworkRoot.Theme">
+        <!-- Only needed for pre-L -->
+    </style>
+    <style name="Theme.Carddemo.Base" parent="Theme">
+
+        <!--<item name="android:actionBarStyle">@style/ActionBar</item>-->
+        <item name="homeAsUpIndicator">@drawable/ic_up</item>
+
+
+        <item name="colorPrimary">@color/primary</item>
+        <item name="colorPrimaryDark">@color/primary_dark</item>
+        <item name="colorAccent">@color/accent</item>
+
+        <item name="android:textColorLink">@color/accent</item>
+
+        <item name="windowActionBar">false</item>
+        <item name="android:windowNoTitle">true</item>
+
+        <item name="android:windowBackground">@android:color/white</item>
+        <item name="android:homeAsUpIndicator">@drawable/ic_up</item>
+        <!--
+                <item name="android:popupMenuStyle">@style/Widget.Carddemo.PopupMenu</item>
+                <item name="android:listPopupWindowStyle">@style/Widget.Carddemo.PopupMenu</item>
+                <item name="android:dropDownListViewStyle">@style/Widget.Carddemo.ListView.DropDown</item>
+                <item name="android:textAppearanceLargePopupMenu">@style/TextAppearance.LargePopupMenu</item>
+        -->
+    </style>
+
+    <style name="Theme.Carddemo" parent="Theme.Carddemo.Base" />
+    <!-- Text for sections -->
+    <style name="Theme.Carddemo.TitleText">
+        <item name="android:textSize">@dimen/title_section_textsize</item>
+        <item name="android:layout_marginLeft">@dimen/title_section_margin</item>
+        <item name="android:layout_marginRight">@dimen/title_section_margin</item>
+        <item name="android:layout_marginBottom">@dimen/title_section_margin_bottom</item>
+        <item name="android:layout_marginTop">@dimen/title_section_margin_top</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/accent</item>
     </style>
 </resources>

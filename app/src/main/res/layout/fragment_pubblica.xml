@@ -1,123 +1,162 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:id="@+id/home_layout"
+    android:id="@+id/pubblica_layout"
     android:orientation="vertical"
     android:background="#fff">
 
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="Titolo:"
-        android:id="@+id/textView2"
-        android:textSize="30dp"
-        android:autoText="false"
-        android:layout_margin="15dp"
-        android:layout_below="@+id/card_view"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_marginTop="38dp"
-        android:layout_alignParentEnd="false"
-        android:editable="true"
-        android:textColor="#ff000000" />
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="Autore:"
-        android:id="@+id/textView3"
-        android:layout_marginTop="15dp"
-        android:textSize="25dp"
-        android:autoText="false" android:layout_margin="15dp"
-        android:layout_below="@+id/textView2"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:textColor="#ff000000"
-        />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:text="Titolo:"
+                android:id="@+id/textView2"
+                android:textSize="30dp"
+                android:autoText="false"
+                android:layout_margin="15dp"
+                android:layout_below="@+id/card_view"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:layout_marginTop="38dp"
+                android:layout_alignParentEnd="false"
+                android:editable="true"
+                android:textColor="#ff000000" />
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="ISBN:"
-        android:id="@+id/textView4"
-        android:layout_marginTop="15dp"
-        android:layout_margin="15dp"
-        android:textSize="25dp"
-        android:layout_gravity="center"
-        android:autoText="false"
-        android:layout_below="@+id/textView3"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:textColor="#ff000000"
-        />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:text="Autore:"
+                android:id="@+id/textView3"
+                android:layout_marginTop="15dp"
+                android:textSize="25dp"
+                android:autoText="false" android:layout_margin="15dp"
+                android:layout_below="@+id/textView2"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:textColor="#ff000000"
+                />
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="Descrizione prodotto:"
-        android:id="@+id/textView5"
-        android:layout_marginTop="15dp"
-        android:layout_margin="15dp"
-        android:textSize="15dp"
-        android:layout_gravity="center"
-        android:autoText="false"
-        android:layout_below="@+id/textView4"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:textColor="#ff000000" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:text="ISBN:"
+                android:id="@+id/textView4"
+                android:layout_marginTop="15dp"
+                android:layout_margin="15dp"
+                android:textSize="25dp"
+                android:layout_gravity="center"
+                android:autoText="false"
+                android:layout_below="@+id/textView3"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:textColor="#ff000000"
+                />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="Descrizione prodotto:"
+                android:id="@+id/textView5"
+                android:layout_marginTop="15dp"
+                android:layout_margin="15dp"
+                android:textSize="15dp"
+                android:layout_gravity="center"
+                android:autoText="false"
+                android:layout_below="@+id/textView4"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:textColor="#ff000000" />
 
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Pubblica"
-        android:id="@+id/button"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="30dp"
-        android:background="#4CAF50"
-        android:enabled="true"
-         />
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="256dp"
+                android:textSize="15dp"
+                android:id="@+id/editText"
+                android:text="@string/descrizione_libro"
+                android:background="#178a619e"
+                android:textColor="@color/secondary_text"
+                android:layout_below="@+id/textView5"
+                android:layout_alignLeft="@+id/textView5"
+                android:layout_alignStart="@+id/textView5"
+                android:layout_alignRight="@+id/book_image"
+                android:layout_alignEnd="@+id/book_image" />
 
-    <EditText
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/editText"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true"
-        android:layout_above="@+id/button"
-        android:layout_alignTop="@+id/textView5"
-        android:background="#178a619e" />
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Inserisci Immagine"
+                android:id="@+id/button2"
+                android:background="#4CAF50"
+                android:layout_above="@+id/textView3"
+                android:layout_toRightOf="@+id/pubblica_button"
+                android:layout_toEndOf="@+id/pubblica_button" />
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Inserisci Immagine"
-        android:id="@+id/button2"
-        android:background="#4CAF50"
-        android:layout_above="@+id/textView3"
-        android:layout_toRightOf="@+id/button"
-        android:layout_toEndOf="@+id/button" />
+            <EditText
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/book_image"
+                android:editable="false"
+                android:layout_alignRight="@+id/button2"
+                android:layout_alignEnd="@+id/button2"
+                android:layout_alignLeft="@+id/button2"
+                android:layout_alignStart="@+id/button2"
+                android:layout_above="@+id/textView5"
+                android:layout_alignTop="@+id/textView3"
+                android:background="#178a619e"/>
 
-    <EditText
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/editText2"
-        android:layout_alignRight="@+id/button2"
-        android:layout_alignEnd="@+id/button2"
-        android:layout_alignLeft="@+id/button2"
-        android:layout_alignStart="@+id/button2"
-        android:layout_above="@+id/textView5"
-        android:layout_alignTop="@+id/textView3"
-        android:background="#178a619e"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:textColor="@color/secondary_text"
+                android:text="Small Text"
+                android:id="@+id/textView6"
+                android:layout_alignTop="@+id/button2"
+                android:layout_toRightOf="@+id/textView2"
+                android:layout_alignBottom="@+id/textView2"
+                android:layout_alignRight="@+id/pubblica_button"
+                android:layout_alignEnd="@+id/pubblica_button"
+                android:background="#178a619e"/>
 
-</RelativeLayout>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:textColor="@color/secondary_text"
+                android:text="Small Text"
+                android:id="@+id/textView7"
+                android:layout_toRightOf="@+id/textView3"
+                android:layout_alignBottom="@+id/textView3"
+                android:layout_alignRight="@+id/pubblica_button"
+                android:layout_alignEnd="@+id/pubblica_button"
+                android:background="#178a619e"
+                android:layout_alignTop="@+id/editText2" />
 
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Pubblica"
+                android:id="@+id/pubblica_button"
+                android:background="#4CAF50"
+                android:enabled="true"
+                android:layout_below="@+id/textView5"
+                android:layout_centerHorizontal="true" />
+
+        </RelativeLayout>
+
+    </ScrollView>
+
+</LinearLayout>

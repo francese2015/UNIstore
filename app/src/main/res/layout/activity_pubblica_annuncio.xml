@@ -1,8 +1,9 @@
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    android:background="@color/material_background" >
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/material_background"
+    android:scrollbars="vertical">
 
     <include
         android:id="@+id/fragment_toolbar"
@@ -10,9 +11,11 @@
 
     <RelativeLayout
         android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:id="@+id/linear"
-        android:layout_below="@+id/fragment_toolbar" >
+        android:layout_height="wrap_content"
+        android:id="@+id/isbn_scan_instruction"
+        android:visibility="gone"
+        android:layout_below="@+id/fragment_toolbar"
+        android:layout_marginBottom="@dimen/activity_vertical_margin">
 
         <TextView
             android:layout_width="wrap_content"
@@ -26,9 +29,7 @@
             android:textSize="21dp"
             android:id="@+id/barcode_instruction"
             android:layout_marginTop="25dp"
-            android:layout_centerHorizontal="true"
-            android:visibility="visible"
-            android:layout_alignParentTop="true" />
+            android:visibility="visible" />
 
         <ImageView
             android:layout_width="wrap_content"
@@ -36,80 +37,169 @@
             android:src="@drawable/detecting_isbn"
             android:id="@+id/barcode_image" />
 
+        <Button android:id="@+id/scan_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_alignParentBottom="true"
+            android:clickable="true"
+            android:padding="10dp"
+            android:elevation="@dimen/elevation_high"
+            android:background="@drawable/my_button"
+            android:textColor="@color/icons"
+            android:textSize="18dp"
+            android:text="@string/scan" />
+
     </RelativeLayout>
 
-    <LinearLayout
+    <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:layout_below="@+id/fragment_toolbar"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_margin="@dimen/activity_horizontal_margin">
+        android:visibility="visible"
+        android:layout_margin="@dimen/activity_horizontal_margin"
+        android:theme="@style/Theme.BookInfoTheme"
+        android:layout_below="@+id/fragment_toolbar">
 
-        <TextView
-            android:id="@+id/book_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="34px"
-            android:textColor="#ff000000"
-            android:textIsSelectable="true"
-            android:textStyle="bold" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:id="@+id/book_info" >
 
-        <TextView
-            android:id="@+id/book_authors"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="#ffa13143"
-            android:textIsSelectable="true" />
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textPersonName"
+                android:ems="10"
+                android:id="@+id/book_authors"
+                android:text="Autore"
+                android:layout_alignParentTop="true"
+                android:layout_alignLeft="@+id/new_state"/>
 
-        <ImageView
-            android:id="@+id/thumb"
-            android:layout_width="120dp"
-            android:layout_height="150dp"
-            android:contentDescription="@string/thumb" />
+            <EditText
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:inputType="textMultiLine"
+                android:ems="10"
+                android:id="@+id/book_title"
+                android:text="Titolo"
+                android:layout_below="@+id/book_authors"
+                android:layout_alignLeft="@+id/book_authors"/>
 
-        <TextView
-            android:id="@+id/book_date"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="#ff592d94"
-            android:textIsSelectable="true" />
+            <EditText
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:inputType="textMultiLine"
+                android:ems="10"
+                android:id="@+id/book_date"
+                android:text="Data"
+                android:layout_below="@+id/book_title"
+                android:layout_alignLeft="@+id/book_title"/>
 
-        <TextView
-            android:id="@+id/book_description"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="#ff000000"
-            android:textIsSelectable="true" />
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/book_image"
+                android:src="@drawable/image_not_found"
+                android:layout_margin="8dp"
+                android:contentDescription="Immagine della copertina del libro"
+                android:layout_alignLeft="@+id/book_date"
+                android:layout_alignStart="@+id/book_date"
+                android:layout_below="@+id/book_date" />
 
-    </LinearLayout>
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center">
 
-    <Button android:id="@+id/scan_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_alignParentBottom="true"
-        android:padding="10dp"
-        android:elevation="@dimen/elevation_high"
-        android:layout_marginBottom="@dimen/activity_vertical_margin"
-        android:background="@drawable/my_button"
-        android:textColor="@color/icons"
-        android:textSize="18dp"
-        android:text="@string/scan" />
+                <RadioButton
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:text="Nuovo"
+                    android:id="@+id/new_state"
+                    android:checked="false"
+                    android:clickable="true"
+                    android:enabled="true"/>
 
-    <Button android:id="@+id/save_on_cloud_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_alignParentBottom="true"
-        android:padding="10dp"
-        android:elevation="@dimen/elevation_high"
-        android:layout_marginBottom="@dimen/activity_vertical_margin"
-        android:background="@drawable/my_button"
-        android:textColor="@color/icons"
-        android:textSize="18dp"
-        android:visibility="invisible"
-        android:text="@string/salva_annuncio" />
+                <RadioButton
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:text="Pari al nuovo"
+                    android:id="@+id/like_new_state"
+                    android:checked="false"
+                    android:clickable="true"
+                    android:enabled="true"/>
+
+                <RadioButton
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:text="Usato"
+                    android:id="@+id/used_state"
+                    android:checked="false"
+                    android:clickable="true"
+                    android:enabled="true"/>
+
+            </TableRow>
+
+            <EditText
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:inputType="number"
+                android:ems="10"
+                android:id="@+id/book_price"
+                android:text="Prezzo"
+                android:editable="true"
+                android:layout_below="@+id/like_new_state"
+                android:layout_alignRight="@+id/like_new_state"
+                android:layout_alignEnd="@+id/like_new_state"/>
+
+            <EditText
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:inputType="number"
+                android:ems="10"
+                android:id="@+id/book_isbn"
+                android:layout_below="@+id/book_price"
+                android:layout_alignLeft="@+id/book_price"
+                android:layout_alignStart="@+id/book_price"
+                android:text="ISBN"/>
+
+            <EditText
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:inputType="number"
+                android:ems="10"
+                android:id="@+id/book_language"
+                android:text="Lingua"
+                android:layout_below="@+id/book_isbn"
+                android:layout_alignLeft="@+id/book_isbn"
+                android:layout_alignStart="@+id/book_isbn"/>
+
+            <EditText
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/book_description"
+                android:layout_below="@+id/book_language"
+                android:layout_alignLeft="@+id/book_language"
+                android:layout_alignStart="@+id/book_language"
+                android:layout_alignParentBottom="true"
+                android:editable="true"
+                android:text="Descrizione"/>
+
+            <Button android:id="@+id/save_on_cloud_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:layout_alignParentBottom="true"
+                android:padding="10dp"
+                android:elevation="@dimen/elevation_high"
+                android:layout_marginBottom="@dimen/activity_vertical_margin"
+                android:background="@drawable/my_button"
+                android:textColor="@color/icons"
+                android:textSize="18dp"
+                android:text="@string/salva_annuncio" />
+        </LinearLayout>
+
+    </ScrollView>
 
 </RelativeLayout>
