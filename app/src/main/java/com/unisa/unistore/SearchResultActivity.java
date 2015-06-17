@@ -1,4 +1,4 @@
-package com.unisa.unistore.utilities;
+package com.unisa.unistore;
 
 import android.app.Activity;
 import android.app.SearchManager;
