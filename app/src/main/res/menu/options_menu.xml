@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+    MenuInflater inflater = getMenuInflater();
+    inflater.inflate(R.menu.option_menu, menu);
+
+    // Associate searchable configuration with the SearchView
+    SearchManager searchManager =
+    (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+    SearchView searchView =
+    (SearchView) menu.findItem(R.id.search).getActionView();
+    searchView.setSearchableInfo(
+    searchManager.getSearchableInfo(getComponentName()));
+
+    return true;
+    }
+
+</menu>
+
