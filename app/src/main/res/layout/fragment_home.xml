@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:card="http://schemas.android.com/apk/res-auto"
-    xmlns:app="http://schemas.android.com/tools"
     xmlns:wheel="http://schemas.android.com/apk/res-auto"
+    xmlns:fab="http://schemas.android.com/apk/res-auto"
+    xmlns:tb="http://schemas.android.com/tools"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -26,23 +26,11 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="25dp"
+        android:src="@drawable/ic_barcode_white_24dp"
         android:textColor="@color/primary_text"
         android:layout_centerInParent="true"
         android:text="@string/no_connection_message"
         android:visibility="invisible"/>
-
-    <ImageButton
-        android:id="@+id/fab_image_button"
-        android:layout_width="@dimen/fab_button_diameter"
-        android:layout_height="@dimen/fab_button_diameter"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentBottom="true"
-        android:layout_marginBottom="@dimen/fab_button_margin_bottom"
-        android:layout_marginRight="@dimen/fab_button_margin_right"
-        android:background="@drawable/fab_shape"
-        android:src="@drawable/fab_ic_add"
-        android:tint="@android:color/white"/>
 
     <ImageView
         android:id="@+id/loading_image"
@@ -52,6 +40,21 @@
         android:layout_marginTop="37dp"
         android:src="@animator/loading"
         android:visibility="invisible" />
+
+    <!--
+        <ImageButton
+            android:id="@+id/fab_image_button"
+            android:layout_width="@dimen/fab_button_diameter"
+            android:layout_height="@dimen/fab_button_diameter"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="@dimen/fab_button_margin_bottom"
+            android:layout_marginRight="@dimen/fab_button_margin_right"
+            android:background="@drawable/fab_shape"
+            android:src="@drawable/fab_ic_add"
+            android:tint="@android:color/white"/>
+    -->
 
     <com.pnikosis.materialishprogress.ProgressWheel
         android:id="@+id/progress_wheel"
@@ -63,4 +66,64 @@
         wheel:matProg_progressIndeterminate="true"
         android:visibility="invisible" />
 
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/fab_background"
+        android:alpha="0"
+        android:background="@color/background_material_dark"
+        />
+
+    <com.github.clans.fab.FloatingActionMenu
+        android:id="@+id/fab_menu"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:paddingRight="10dp"
+        android:paddingBottom="10dp"
+        android:paddingLeft="10dp"
+        fab:menu_colorNormal="#4CAF50"
+        fab:menu_colorPressed="#43A047"
+        fab:menu_colorRipple="#64DD17"
+        fab:menu_labels_ellipsize="end"
+        fab:menu_labels_singleLine="true"
+        fab:menu_backgroundColor="#bb333333"
+        fab:menu_labels_position="left"
+        >
+
+        <com.github.clans.fab.FloatingActionButton
+            android:id="@+id/fab_camera"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_barcode_black_24dp"
+            fab:fab_label="Codice ISBN"
+            android:longClickable="true"
+            style="@style/MenuButtonsStyle" />
+
+        <com.github.clans.fab.FloatingActionButton
+            android:id="@+id/fab_form"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_format_list_bulleted_black_24dp"
+            fab:fab_label="Compila form"
+            style="@style/MenuButtonsStyle" />
+
+    </com.github.clans.fab.FloatingActionMenu>
+
+    <!--
+    <com.rey.material.widget.FloatingActionButton
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        app:fab_iconLineMorphing="@style/FloatingActionButtonIcon"
+        app:fab_backgroundColor="@color/primary"
+        style="@style/Material.Widget.FloatingActionButton.Light"
+        android:id="@+id/fab_line"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="@dimen/fab_button_margin_bottom"
+        android:layout_marginRight="@dimen/fab_button_margin_right" />
+-->
 </RelativeLayout>

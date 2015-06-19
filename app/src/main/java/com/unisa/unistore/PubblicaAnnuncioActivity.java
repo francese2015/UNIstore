@@ -1,5 +1,6 @@
 package com.unisa.unistore;
 
+import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
@@ -8,10 +9,16 @@ import android.os.StrictMode;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.InputType;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CompoundButton;
+import android.widget.DatePicker;
 import android.widget.ImageView;
+import android.widget.NumberPicker;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -20,9 +27,11 @@ import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseUser;
 import com.parse.SaveCallback;
+import com.rey.material.widget.RadioButton;
 import com.unisa.unistore.android.IntentIntegrator;
 import com.unisa.unistore.android.IntentResult;
-import com.unisa.unistore.utilities.GetBookThumb;
+import com.unisa.unistore.utilities.ImageUtilities;
+import com.unisa.unistore.utilities.Utilities;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -34,17 +43,30 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
+import java.util.Calendar;
 
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
-public class PubblicaAnnuncioActivity extends ActionBarActivity implements View.OnClickListener {
+public class PubblicaAnnuncioActivity extends ActionBarActivity
+        implements View.OnClickListener, NumberPicker.OnValueChangeListener {
+    private static final int MIN_YEAR = 1900;
+    private static final int MAX_YEAR = Calendar.getInstance().get(Calendar.YEAR);
 
     private Button scanBtn, saveCloudBtn;
+
     private TextView authorText, titleText, descriptionText, dateText;
     private ImageView thumbView;
 
+    private com.rey.material.widget.Spinner spinner;
+    private DatePicker datePicker;
+    private Calendar calendar;
+    private TextView dateView;
+    private int year, month, day;
+
+
     private String title = "", authors = "", publishedDate = "", description = "", thumbnailURL = "";
     private ParseObject parseObject;
+    private CompoundButton rb_new_state, rb_like_new_state, rb_used_state;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,7 +80,7 @@ public class PubblicaAnnuncioActivity extends ActionBarActivity implements View.
             supportActionBar.setDisplayShowTitleEnabled(false);
             supportActionBar.setDisplayHomeAsUpEnabled(true);
         }
-        
+
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
 
@@ -69,8 +91,96 @@ public class PubblicaAnnuncioActivity extends ActionBarActivity implements View.
         titleText = (TextView)findViewById(R.id.book_title);
         descriptionText = (TextView)findViewById(R.id.book_description);
         dateText = (TextView)findViewById(R.id.book_date);
+        dateText.setEnabled(true);
+        dateText.setInputType(InputType.TYPE_NULL);
+        calendar = Calendar.getInstance();
+        year = calendar.get(Calendar.YEAR);
+        dateText.setOnTouchListener(new View.OnTouchListener() {
+
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                //show();
+                return false;
+            }
+
+        });
+
         thumbView = (ImageView)findViewById(R.id.book_image);
 
+        rb_new_state = (RadioButton) findViewById(R.id.new_state);
+        rb_like_new_state = (RadioButton) findViewById(R.id.like_new_state);
+        rb_used_state = (RadioButton) findViewById(R.id.used_state);
+
+        CompoundButton.OnCheckedChangeListener listener = new CompoundButton.OnCheckedChangeListener() {
+
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if(isChecked){
+                    rb_new_state.setChecked(rb_new_state == buttonView);
+                    rb_like_new_state.setChecked(rb_like_new_state == buttonView);
+                    rb_used_state.setChecked(rb_used_state == buttonView);
+                }
+            }
+
+        };
+
+        rb_new_state.setOnCheckedChangeListener(listener);
+        rb_like_new_state.setOnCheckedChangeListener(listener);
+        rb_used_state.setOnCheckedChangeListener(listener);
+
+        spinner = (com.rey.material.widget.Spinner) findViewById(R.id.book_language_spinner);
+        ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<>(this, R.layout.row_spn, getResources().getStringArray(R.array.language_array));
+        spinnerAdapter.setDropDownViewResource(R.layout.row_spn_dropdown);
+        spinner.setAdapter(spinnerAdapter);
+
+/*
+        ArrayAdapter<CharSequence> spinnerAdapter = ArrayAdapter.createFromResource(this,
+                R.array.language_array, R.layout.spinner_row);
+        spinnerAdapter.setDropDownViewResource(R.layout.spinner_list);
+        spinner.setAdapter(spinnerAdapter);
+
+        // Create an ArrayAdapter using the string array and a default spinner layout
+        ArrayAdapter<CharSequence> spinnerAdapter = ArrayAdapter.createFromResource(this,
+                R.array.language_array, R.layout.spinner_item);
+        // Specify the layout to use when the list of choices appears
+        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        // Apply the spinnerAdapter to the spinner
+        spinner.setAdapter(spinnerAdapter);
+        */
+
+    }
+
+    public void show()
+    {
+        final Dialog dialog = new Dialog(PubblicaAnnuncioActivity.this);
+        dialog.setTitle(getString(R.string.choose_published_year_hint));
+        dialog.setContentView(R.layout.dialog);
+        Button ok = (Button) dialog.findViewById(R.id.button1);
+        Button cancel = (Button) dialog.findViewById(R.id.button2);
+
+        final NumberPicker numberPicker = (NumberPicker) dialog.findViewById(R.id.numberPicker1);
+        numberPicker.setMaxValue(year);
+        numberPicker.setMinValue(1900);
+        numberPicker.setWrapSelectorWheel(false);
+        numberPicker.setValue(year);
+        numberPicker.setOnValueChangedListener(this);
+
+        ok.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dateText.setText(String.valueOf(numberPicker.getValue()));
+                dialog.dismiss();
+            }
+        });
+
+        cancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+            }
+        });
+
+        dialog.show();
     }
 
     @Override
@@ -169,15 +279,17 @@ public class PubblicaAnnuncioActivity extends ActionBarActivity implements View.
 
     @Override
     public void onClick(View v) {
-        if(v.getId()==R.id.scan_button){
+        if(v.getId() == R.id.scan_button){
             IntentIntegrator scanIntegrator = new IntentIntegrator(this);
             scanIntegrator.initiateScan();
+        } else if(v.getId() == R.id.save_on_cloud_button) {
+            
         }
     }
 
-    static String convertStreamToString(InputStream is) {
-        java.util.Scanner s = new java.util.Scanner(is).useDelimiter("\\A");
-        return s.hasNext() ? s.next() : "";
+    @Override
+    public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
+        return;
     }
 
     private class GetBookInfo extends AsyncTask<String, Void, String> {
@@ -197,7 +309,7 @@ public class PubblicaAnnuncioActivity extends ActionBarActivity implements View.
                     conn.connect();
                     InputStream stream = conn.getInputStream();
 
-                    data = convertStreamToString(stream);
+                    data = Utilities.convertStreamToString(stream);
 
                     stream.close();
 
@@ -264,7 +376,7 @@ public class PubblicaAnnuncioActivity extends ActionBarActivity implements View.
                 try{
                     JSONObject imageInfo = volumeObject.getJSONObject("imageLinks");
                     thumbnailURL = imageInfo.getString("thumbnail");
-                    new GetBookThumb(thumbView).execute(thumbnailURL);
+                    new ImageUtilities(PubblicaAnnuncioActivity.this, thumbView).displayImage(thumbnailURL);
                 }
                 catch(JSONException jse){
                     thumbView.setImageBitmap(null);

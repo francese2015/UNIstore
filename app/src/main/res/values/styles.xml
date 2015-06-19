@@ -58,6 +58,16 @@
         <item name="android:textSize">18sp</item>
     </style>
 
+    <style name="Buy.Button" parent="@android:style/Widget.Button">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">48dp</item>
+        <item name="android:background">
+            @drawable/buy_button_background_selector
+        </item>
+        <item name="android:textColor">@color/com_parse_ui_parse_login_display_text</item>
+        <item name="android:textSize">18sp</item>
+    </style>
+
     <style name="ParseLoginUI.Button.ThirdPartyLogin" parent="ParseLoginUI.Button">
         <item name="android:paddingLeft">16dp</item>
         <item name="android:paddingRight">24dp</item>
@@ -124,5 +134,49 @@
         <item name="android:layout_marginTop">@dimen/title_section_margin_top</item>
         <item name="android:textStyle">bold</item>
         <item name="android:textColor">@color/accent</item>
+    </style>
+
+    <style name="MenuItemRippleStyle" parent="Material.Drawable.Ripple.Wave">
+        <item name="rd_rippleColor">#902DA0FF</item>
+        <item name="rd_rippleAnimDuration">300</item>
+        <item name="rd_maskType">rectangle</item>
+        <item name="rd_cornerRadius">0dp</item>
+    </style>
+
+    <style name="RadioButtonDrawable" parent="Material.Drawable.RadioButton"/>
+
+    <style name="FloatingActionButtonIcon" >
+        <item name="lmd_state">@xml/fab_icon_states</item>
+        <item name="lmd_curState">0</item>
+        <item name="lmd_padding">2dp</item>
+        <item name="lmd_animDuration">200</item>
+        <item name="lmd_interpolator">@android:anim/accelerate_decelerate_interpolator</item>
+        <item name="lmd_strokeSize">3dp</item>
+        <item name="lmd_strokeColor">#FFFFFFFF</item>
+        <item name="lmd_strokeCap">round</item>
+        <item name="lmd_strokeJoin">bevel</item>
+        <item name="lmd_clockwise">true</item>
+    </style>
+
+    <style name="FloatingActionButtonIcon.Light" parent="FloatingActionButtonIcon">
+        <item name="lmd_strokeColor">#FF000000</item>
+    </style>
+
+    <style name="MenuButtonsStyle">
+        <item name="fab_size">mini</item>
+        <item name="fab_showAnimation">@anim/jump_from_down</item>
+        <item name="fab_hideAnimation">@anim/jump_to_down</item>
+        <item name="fab_shadowColor">#444</item>
+        <item name="fab_colorNormal">@color/background_floating_material_light</item>
+        <item name="fab_colorPressed">#ffffff</item>
+        <item name="fab_colorRipple">#eeeeee</item>
+    </style>
+
+    <style name="MenuLabelsStyle">
+        <item name="android:background">@drawable/fab_label_background</item>
+        <item name="android:textColor">#FFFFFF</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:maxLines">2</item>
+        <item name="android:ellipsize">end</item>
     </style>
 </resources>

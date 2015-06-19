@@ -19,9 +19,10 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
 import android.widget.Toast;
 
+import com.github.clans.fab.FloatingActionButton;
+import com.github.clans.fab.FloatingActionMenu;
 import com.parse.CountCallback;
 import com.parse.FindCallback;
 import com.parse.ParseException;
@@ -37,13 +38,14 @@ import java.util.List;
 public class HomeFragment extends Fragment {
 
     private static final int QUERY_LIMIT = 5;
+    private static boolean clicked;
+    private static boolean isFABMenuOpened;
 
     private Activity activity;
     private Toolbar toolbar;
     private ActionBar supportActionBar;
 
     private ListaAnnunci LA;
-    private RecyclerView recyclerView;
     private LinearLayoutManager mLayoutManager;
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private RVAdapter adapter;
@@ -55,7 +57,12 @@ public class HomeFragment extends Fragment {
     private int lastNoticesCnt = 0;
     private boolean noConnection = false;
     private boolean firstLaunch = true;
+    private View fab_background;
+    private FloatingActionMenu fab_menu;
+    private FloatingActionButton fab_camera, fab_form;
+    //private FloatingActionButton fab_line;
     private ProgressWheel wheel;
+    private RecyclerView recyclerView;
 
     public HomeFragment(){ }
 
@@ -82,6 +89,36 @@ public class HomeFragment extends Fragment {
         adapter.setListaAnnunci(LA);
         recyclerView.setAdapter(adapter);
 
+        fab_menu = (FloatingActionMenu) activity.findViewById(R.id.fab_menu);
+
+        fab_camera = (FloatingActionButton) activity.findViewById(R.id.fab_camera);
+
+        fab_form = (FloatingActionButton) activity.findViewById(R.id.fab_form);
+
+        setFABListener(fab_form, fab_camera);
+
+        /*
+        fab_line = (FloatingActionButton) activity.findViewById(R.id.fab_line);
+        fab_line.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                fab_line.setLineMorphingState((fab_line.getLineMorphingState() + 1) % 2, true);
+
+
+                if (Utilities.isUserAuthenticated()) {
+                    Intent intent = new Intent(activity, PubblicaAnnuncioActivity.class);
+                    //activity.startActivityForResult(intent, 12345);
+                } else {
+                    Context context = activity.getApplicationContext();
+                    CharSequence text = getString(R.string.profile_title_logged_out);
+                    int duration = Toast.LENGTH_LONG;
+
+                    Toast toast = Toast.makeText(context, text, duration);
+                    toast.show();
+                }
+            }
+        });
+*/
         wheel = (ProgressWheel) getActivity().findViewById(R.id.progress_wheel);
         wheel.setBarColor(R.color.primary);
 
@@ -132,6 +169,43 @@ public class HomeFragment extends Fragment {
         } else {
             getActivity().findViewById(R.id.no_connection_message).setVisibility(View.VISIBLE);
             noConnection = true;
+        }
+    }
+
+    private void setFABListener(final FloatingActionButton... fab_form) {
+        int len = fab_form.length;
+        FloatingActionButton tmp = null;
+
+        for(int i = 0; i < len; i++) {
+            tmp = fab_form[i];
+            tmp.setLabelVisibility(View.INVISIBLE);
+
+            tmp.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (Utilities.isUserAuthenticated()) {
+                        Intent intent = new Intent(activity, PubblicaAnnuncioActivity.class);
+                        activity.startActivityForResult(intent, 12345);
+                    } else {
+                        Context context = activity.getApplicationContext();
+                        CharSequence text = getString(R.string.profile_title_logged_out);
+                        int duration = Toast.LENGTH_LONG;
+
+                        Toast toast = Toast.makeText(context, text, duration);
+                        toast.show();
+                    }
+                }
+            });
+
+            final FloatingActionButton finalTmp = tmp;
+            tmp.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    finalTmp.setLabelVisibility(View.VISIBLE);
+
+                    return false;
+                }
+            });
         }
     }
 
@@ -258,6 +332,7 @@ public class HomeFragment extends Fragment {
         // update the actionbar to show the up carat/affordance
         supportActionBar.setDisplayHomeAsUpEnabled(true);
 
+        /*
         ImageButton fab_aggiungiAnnuncio = (ImageButton) activity.findViewById(R.id.fab_image_button);
         fab_aggiungiAnnuncio.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -275,7 +350,7 @@ public class HomeFragment extends Fragment {
                 }
             }
         });
-
+*/
         /*
         Utilities utilities = new Utilities();
         utilities.scaleImage((ImageView) activity.findViewById(R.id.bookPhoto));
@@ -294,6 +369,10 @@ public class HomeFragment extends Fragment {
             return;
         }
 
+//        fab_line.setLineMorphingState(0, true);
+        fab_menu.close(true);
+
+        setClicked(false);
         refreshContent();
     }
 
@@ -311,5 +390,13 @@ public class HomeFragment extends Fragment {
 
     public void setToolbar(ActionBar supportActionBar) {
         this.supportActionBar = supportActionBar;
+    }
+
+    public static boolean isClicked() {
+        return clicked;
+    }
+
+    public static void setClicked(boolean isClicked) {
+        clicked = isClicked;
     }
 }

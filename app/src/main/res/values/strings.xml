@@ -5,12 +5,14 @@
     <string name="profile_logo_content_description">Logo</string>
     <string name="profile_title_logged_in">Sei registrato come</string>
     <string name="profile_logout_button_label">Log out</string>
-    <string name="profile_title_logged_out">Devi essere registrato per accedere alle funzionalità principali di UNIstore</string>
+    <string name="profile_title_logged_out">Devi essere registrato per accedere alle funzionalit&#224; principali di UNIstore</string>
     <string name="profile_login_button_label">Log in</string>
 
     <string name="action_settings">Impostazioni</string>
 
     <string name="greeting">Ciao Anonimo</string>
+
+    <string name="icon_heart">&#xf004;</string>
 
     <string name="drawer_open">Slider Menu Opened</string>
     <string name="drawer_close">Slider Menu Closed</string>
@@ -63,7 +65,7 @@
     <string name="title">Titolo</string>
 
     <string name="find_1">Cosa stai cercando?</string>
-    <string name="find_2">Riceverai una notifica appena verrà messo in vendita!</string>
+    <string name="find_2">Riceverai una notifica appena verr&#224; messo in vendita!</string>
 
     <string name="descrizione_libro">Descrizione del libro</string>
 
@@ -77,10 +79,42 @@
     <string name="com_parse_ui_logo_content_description">Logo</string>
     <string name="no_login_button_label">Salta il Login</string>
     <string name="welcome">Benvenuto</string>
-    <string name="logout">Ora non sei più loggato</string>
+    <string name="logout">Ora non sei pi&#249; loggato</string>
     <string name="no_connection_message">Attivare la connessione per visualizzare gli annunci di vendita.</string>
 
      <string name="no_skip">NON SALTARE</string>
     <string name="skip">SALTA</string>
-    <string name="skip_message">Sei sicuro di voler saltare il login? Così facendo non potrai accedere a tutte le funzionalità di</string>
+    <string name="skip_message">Sei sicuro di voler saltare il login? Così facendo non potrai accedere a tutte le funzionalit&#224; di</string>
+    <string name="detail_transition_name">detail_animation</string>
+    <string name="title_detail_transition_name">transizione titolo</string>
+    <string name="image_detail_transition_name">transizione foto</string>
+    <string name="price_detail_transition_name">transizione prezzo</string>
+    <string name="authors_detail_transition_name">transizione autori</string>
+    <string name="euro_symbol">€</string>
+    <string name="authors">Autori</string>
+    <string name="language">Lingua</string>
+    <string name="date">Data</string>
+    <string name="published_date">Data di pubblicazione</string>
+    <string name="description">Descrizione</string>
+    <string name="price">Prezzo</string>
+
+    <string name="new_state">Nuovo</string>
+    <string name="like_new_state">Pari al nuovo</string>
+    <string name="used_state">Usato</string>
+
+    <string name="choose_published_year_hint">Selezionare l\'anno di pubblicazione del libro</string>
+    <string name="choose_language_hint">Selezionare una lingua</string>
+    <string name="book_state">Stato del libro</string>
+    <string name="home">Home</string>
+    <string name="message_error">Si &#232; verificato un errore</string>
+    <string name="fab_form">Compila il form</string>
+    <string name="fab_camera">Scan del codice ISBN</string>
+    <string-array name="language_array">
+        <item>Italiano</item>
+        <item>Inglese</item>
+        <item>Francese</item>
+        <item>Spagnolo</item>
+        <item>Tedesco</item>
+        <item>Russo</item>
+    </string-array>
 </resources>

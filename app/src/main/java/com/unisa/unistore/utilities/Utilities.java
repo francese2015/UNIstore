@@ -9,6 +9,8 @@ import android.widget.RelativeLayout;
 
 import com.parse.ParseUser;
 
+import java.io.InputStream;
+
 /**
  * Created by Daniele on 20/04/2015.
  */
@@ -56,11 +58,15 @@ public class Utilities {
         }
     }
 
-
     public static boolean isUserAuthenticated() {
         if(ParseUser.getCurrentUser() != null)
             return true;
 
         return false;
+    }
+
+    public static String convertStreamToString(InputStream is) {
+        java.util.Scanner s = new java.util.Scanner(is).useDelimiter("\\A");
+        return s.hasNext() ? s.next() : "";
     }
 }

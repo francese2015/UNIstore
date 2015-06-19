@@ -1,5 +1,5 @@
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/material_background"
@@ -56,7 +56,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:visibility="visible"
-        android:layout_margin="@dimen/activity_horizontal_margin"
         android:theme="@style/Theme.BookInfoTheme"
         android:layout_below="@+id/fragment_toolbar">
 
@@ -64,7 +63,18 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical"
+            android:layout_margin="@dimen/activity_horizontal_margin"
             android:id="@+id/book_info" >
+
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/book_title"
+                android:hint="@string/title"
+                android:editable="false"
+                android:textColorHint="#9E9E9E"
+                android:paddingLeft="16dp"
+                android:textSize="@dimen/font_size" />
 
             <EditText
                 android:layout_width="match_parent"
@@ -72,29 +82,10 @@
                 android:inputType="textPersonName"
                 android:ems="10"
                 android:id="@+id/book_authors"
-                android:text="Autore"
-                android:layout_alignParentTop="true"
-                android:layout_alignLeft="@+id/new_state"/>
-
-            <EditText
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:inputType="textMultiLine"
-                android:ems="10"
-                android:id="@+id/book_title"
-                android:text="Titolo"
-                android:layout_below="@+id/book_authors"
-                android:layout_alignLeft="@+id/book_authors"/>
-
-            <EditText
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:inputType="textMultiLine"
-                android:ems="10"
-                android:id="@+id/book_date"
-                android:text="Data"
-                android:layout_below="@+id/book_title"
-                android:layout_alignLeft="@+id/book_title"/>
+                android:hint="@string/authors"
+                android:paddingLeft="16dp"
+                android:textColorHint="#9E9E9E"
+                android:textSize="@dimen/font_size" />
 
             <ImageView
                 android:layout_width="wrap_content"
@@ -102,67 +93,77 @@
                 android:id="@+id/book_image"
                 android:src="@drawable/image_not_found"
                 android:layout_margin="8dp"
-                android:contentDescription="Immagine della copertina del libro"
-                android:layout_alignLeft="@+id/book_date"
-                android:layout_alignStart="@+id/book_date"
-                android:layout_below="@+id/book_date" />
+                android:contentDescription="Immagine della copertina del libro"/>
 
-            <TableRow
+            <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:gravity="center">
+                android:textSize="@dimen/title_text"
+                android:textColor="#FF000000"
+                android:textAppearance="@style/Base.TextAppearance.AppCompat.Title"
+                android:text="@string/book_state"/>
 
-                <RadioButton
-                    android:layout_width="100dp"
-                    android:layout_height="wrap_content"
-                    android:text="Nuovo"
+            <RadioGroup xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/activity_horizontal_margin"
+                android:layout_marginRight="@dimen/activity_horizontal_margin"
+                android:orientation="vertical">
+
+                <com.rey.material.widget.RadioButton
+                    style="@style/RadioButtonDrawable"
                     android:id="@+id/new_state"
-                    android:checked="false"
-                    android:clickable="true"
-                    android:enabled="true"/>
-
-                <RadioButton
                     android:layout_width="100dp"
                     android:layout_height="wrap_content"
-                    android:text="Pari al nuovo"
+                    android:text="@string/new_state"
+                    android:textSize="14sp"
+                    android:checked="true"
+                    android:textColor="@color/primary_text"
+                    android:gravity="center_vertical"/>
+
+                <com.rey.material.widget.RadioButton
+                    style="@style/RadioButtonDrawable"
                     android:id="@+id/like_new_state"
-                    android:checked="false"
-                    android:clickable="true"
-                    android:enabled="true"/>
-
-                <RadioButton
                     android:layout_width="100dp"
                     android:layout_height="wrap_content"
-                    android:text="Usato"
+                    android:text="@string/like_new_state"
+                    android:textSize="14sp"
+                    android:textColor="@color/primary_text"
+                    android:gravity="center_vertical"/>
+
+                <com.rey.material.widget.RadioButton
+                    style="@style/RadioButtonDrawable"
                     android:id="@+id/used_state"
-                    android:checked="false"
-                    android:clickable="true"
-                    android:enabled="true"/>
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:text="@string/used_state"
+                    android:textSize="14sp"
+                    android:textColor="@color/primary_text"
+                    android:gravity="center_vertical"/>
 
-            </TableRow>
+            </RadioGroup>
 
             <EditText
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:inputType="number"
-                android:ems="10"
                 android:id="@+id/book_price"
-                android:text="Prezzo"
-                android:editable="true"
-                android:layout_below="@+id/like_new_state"
-                android:layout_alignRight="@+id/like_new_state"
-                android:layout_alignEnd="@+id/like_new_state"/>
+                android:hint="@string/price"
+                android:inputType="number"
+                android:ems="10"
+                android:maxLength="10"
+                android:paddingLeft="16dp"
+                android:textColorHint="#9E9E9E"
+                android:textSize="@dimen/font_size" />
 
             <EditText
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:inputType="number"
-                android:ems="10"
-                android:id="@+id/book_isbn"
-                android:layout_below="@+id/book_price"
-                android:layout_alignLeft="@+id/book_price"
-                android:layout_alignStart="@+id/book_price"
-                android:text="ISBN"/>
+                android:ems="4"
+                android:id="@+id/book_date"
+                android:hint="@string/date"
+                android:paddingLeft="16dp"
+                android:textColorHint="#9E9E9E"
+                android:textSize="@dimen/font_size" />
 
             <EditText
                 android:layout_width="wrap_content"
@@ -170,33 +171,63 @@
                 android:inputType="number"
                 android:ems="10"
                 android:id="@+id/book_language"
-                android:text="Lingua"
-                android:layout_below="@+id/book_isbn"
-                android:layout_alignLeft="@+id/book_isbn"
-                android:layout_alignStart="@+id/book_isbn"/>
+                android:hint="@string/language"
+                android:visibility="gone"
+                android:paddingLeft="16dp"
+                android:textColorHint="#9E9E9E"
+                android:textSize="@dimen/font_size" />
+
+            <com.rey.material.widget.Spinner
+                style="@style/Material.Widget.Spinner.Light"
+                android:id="@+id/book_language_spinner"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minWidth="128dp"
+                app:rd_style="@style/Material.Drawable.Ripple.Wave.Light"
+                app:rd_enable="true"
+                app:rd_delayClick="none"
+                app:spn_labelEnable="true"
+                app:spn_label="@string/choose_language_hint"
+                app:spn_arrowSwitchMode="true"
+                app:spn_arrowAnimDuration="@android:integer/config_shortAnimTime"
+                app:spn_arrowInterpolator="@android:anim/decelerate_interpolator"/>
+
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/book_description"
+                android:layout_below="@+id/book_language"
+                android:inputType="textMultiLine"
+                android:textSize="@dimen/font_size"
+                android:paddingLeft="16dp"
+                android:textColorHint="#9E9E9E"
+                android:hint="@string/description"/>
 
             <EditText
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:id="@+id/book_description"
-                android:layout_below="@+id/book_language"
-                android:layout_alignLeft="@+id/book_language"
-                android:layout_alignStart="@+id/book_language"
-                android:layout_alignParentBottom="true"
-                android:editable="true"
-                android:text="Descrizione"/>
+                android:id="@+id/book_isbn"
+                android:inputType="number"
+                android:ems="13"
+                android:maxLength="13"
+                android:textSize="@dimen/font_size"
+                android:paddingLeft="16dp"
+                android:textColorHint="#9E9E9E"
+                android:hint="@string/isbn"/>
 
-            <Button android:id="@+id/save_on_cloud_button"
+            <Button
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:id="@+id/save_on_cloud_button"
                 android:layout_centerHorizontal="true"
                 android:layout_alignParentBottom="true"
                 android:padding="10dp"
                 android:elevation="@dimen/elevation_high"
+                android:layout_marginTop="@dimen/activity_vertical_margin"
                 android:layout_marginBottom="@dimen/activity_vertical_margin"
                 android:background="@drawable/my_button"
                 android:textColor="@color/icons"
-                android:textSize="18dp"
+                android:textSize="@dimen/font_size"
                 android:text="@string/salva_annuncio" />
         </LinearLayout>
 
