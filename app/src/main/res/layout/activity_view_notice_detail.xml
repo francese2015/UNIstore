@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/visualizza_layout"
+    android:orientation="vertical"
+    android:background="@color/material_background">
+
+    <include
+        android:id="@+id/fragment_toolbar"
+        layout="@layout/toolbar" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="165dp" >
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/background_book_image_detail"
+            android:background="@color/book_detail_background"
+            android:visibility="invisible" />
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/activity_vertical_margin"
+            android:layout_marginBottom="@dimen/activity_vertical_margin"
+            android:id="@+id/book_image_detail"
+            android:src="@drawable/material_book"
+            android:layout_centerHorizontal="true" />
+
+    </RelativeLayout>
+
+    <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:id="@+id/background_book_description_detail"
+            android:layout_below="@+id/background_book_image_detail"
+            android:layout_marginTop="@dimen/activity_vertical_margin"
+            android:background="@color/material_background">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Il libro è in ottime condizioni. No perditempo"
+                android:id="@+id/book_description_detail"
+                android:layout_marginTop="@dimen/activity_vertical_margin"
+                android:layout_marginLeft="@dimen/activity_horizontal_margin"
+                android:layout_marginRight="@dimen/activity_horizontal_margin"
+                android:textAlignment="center"
+                android:textSize="17dp"
+                android:layout_gravity="center"
+                android:layout_below="@+id/book_price_detail"
+                android:textColor="@color/primary_text"
+                />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/book_title_detail"
+                android:textSize="21dp"
+                android:autoText="false"
+                android:layout_marginTop="@dimen/activity_vertical_margin"
+                android:layout_marginLeft="@dimen/activity_horizontal_margin"
+                android:layout_marginRight="@dimen/activity_horizontal_margin"
+                android:textColor="@color/primary_text"
+                android:text="Titolo"
+                 />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/book_price_detail"
+                android:textSize="18dp"
+                android:layout_gravity="center"
+                android:autoText="false"
+                android:text="Prezzo"
+                android:layout_marginTop="@dimen/activity_vertical_margin"
+                android:layout_marginLeft="@dimen/activity_horizontal_margin"
+                android:layout_marginRight="@dimen/activity_horizontal_margin"
+                android:layout_below="@+id/book_authors_detail"
+                android:textColor="@color/secondary_text"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/book_authors_detail"
+                android:textSize="20dp"
+                android:autoText="false"
+                android:textColor="@color/secondary_text"
+                android:layout_marginTop="@dimen/activity_vertical_margin"
+                android:layout_marginLeft="@dimen/activity_horizontal_margin"
+                android:layout_marginRight="@dimen/activity_horizontal_margin"
+                android:layout_below="@+id/book_title_detail"
+                android:text="Autori"
+                android:layout_centerHorizontal="true" />
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="55dp"
+            android:id="@+id/pubblica_button"
+            android:text="@string/buy_button"
+            style="@style/Buy.Button"
+            android:textSize="18dp"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:textColor="@color/icons"
+            android:enabled="true"
+            />
+
+    </RelativeLayout>
+
+</LinearLayout>
