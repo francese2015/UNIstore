@@ -41,7 +41,6 @@ public class HomeFragment extends Fragment {
 
     private static final int QUERY_LIMIT = 5;
     private static boolean clicked;
-    private static boolean isFABMenuOpened;
 
     private Activity activity;
     private Toolbar toolbar;
@@ -53,13 +52,14 @@ public class HomeFragment extends Fragment {
     private RVAdapter adapter;
 
     private boolean loading = true;
+    private boolean lastNoticeReached = false;
     private static int queryCnt = 0;
     private int pastVisiblesItems, visibleItemCount, totalItemCount;
 
     private int lastNoticesCnt = 0;
     private boolean noConnection = false;
     private boolean firstLaunch = true;
-    private View fab_background;
+
     private FloatingActionMenu fab_menu;
     private FloatingActionButton fab_camera, fab_form;
     //private FloatingActionButton fab_line;
@@ -136,11 +136,10 @@ public class HomeFragment extends Fragment {
                         (visibleItemCount + pastVisiblesItems) +
                         "\ntotalItemCount = " + totalItemCount);
 
-                if (dy != 0 && loading) {
+                if (dy != 0 && loading && !lastNoticeReached) {
                     if ((visibleItemCount + pastVisiblesItems) >= totalItemCount) {
                         loading = false;
                         Log.d("onScrolled-last", "Ultimo annuncio caricato!");
-                        Utilities.slideUP(activity, wheel);
                         downloadAnnunci(false);
                     }
                 } else {
@@ -266,7 +265,15 @@ public class HomeFragment extends Fragment {
                         query.setLimit(QUERY_LIMIT);
                         query.setSkip(queryCnt);
                     }
+
+                    if(i == adapter.getItemCount()) {
+                        lastNoticeReached = true;
+                        return;
+                    }
+
                     lastNoticesCnt = i;
+
+                    Utilities.slideUP(activity, wheel);
 
                     query.findInBackground(new FindCallback<ParseObject>() {
                         public void done(List<ParseObject> scoreList, ParseException e) {
