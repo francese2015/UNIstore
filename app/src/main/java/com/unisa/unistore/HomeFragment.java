@@ -1,12 +1,14 @@
 package com.unisa.unistore;
 
 import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -19,6 +21,7 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.Toast;
 
 import com.github.clans.fab.FloatingActionButton;
@@ -28,7 +31,6 @@ import com.parse.FindCallback;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
-import com.pnikosis.materialishprogress.ProgressWheel;
 import com.unisa.unistore.adapter.RVAdapter;
 import com.unisa.unistore.model.ListaAnnunci;
 import com.unisa.unistore.utilities.Utilities;
@@ -61,7 +63,7 @@ public class HomeFragment extends Fragment {
     private FloatingActionMenu fab_menu;
     private FloatingActionButton fab_camera, fab_form;
     //private FloatingActionButton fab_line;
-    private ProgressWheel wheel;
+    private FrameLayout wheel;
     private RecyclerView recyclerView;
 
     public HomeFragment(){ }
@@ -70,6 +72,7 @@ public class HomeFragment extends Fragment {
         toolbar = t;
     }
 
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
     @SuppressLint("ResourceAsColor")
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
@@ -119,8 +122,7 @@ public class HomeFragment extends Fragment {
             }
         });
 */
-        wheel = (ProgressWheel) getActivity().findViewById(R.id.progress_wheel);
-        wheel.setBarColor(R.color.primary);
+        wheel = (FrameLayout) getActivity().findViewById(R.id.progress_wheel_layout);
 
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
@@ -138,11 +140,12 @@ public class HomeFragment extends Fragment {
                     if ((visibleItemCount + pastVisiblesItems) >= totalItemCount) {
                         loading = false;
                         Log.d("onScrolled-last", "Ultimo annuncio caricato!");
+                        Utilities.slideUP(activity, wheel);
                         downloadAnnunci(false);
                     }
                 } else {
                     if ((visibleItemCount + pastVisiblesItems) == totalItemCount - 1) {
-                        if(!loading)
+                        if (!loading)
                             loading = true;
                     }
                 }
@@ -231,9 +234,7 @@ public class HomeFragment extends Fragment {
             @Override
             public void run() {
                 if(checkConnection()) {
-                    wheel.setVisibility(View.VISIBLE);
                     downloadAnnunci(true);
-                    wheel.setVisibility(View.GONE);
                     mSwipeRefreshLayout.setRefreshing(false);
                     if(noConnection)
                         activity.findViewById(R.id.no_connection_message).setVisibility(View.INVISIBLE);
@@ -272,6 +273,7 @@ public class HomeFragment extends Fragment {
                             if (e == null) {
                                 if(scoreList.size() > 0) {
                                     LA.addAnnunci(scoreList, false);
+                                    Utilities.slideDown(activity, wheel);
                                     adapter.notifyDataSetChanged();
                                     queryCnt += scoreList.size();
                                 }

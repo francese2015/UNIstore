@@ -1,13 +1,17 @@
 package com.unisa.unistore.utilities;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.view.View;
+import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
 import com.parse.ParseUser;
+import com.unisa.unistore.R;
 
 import java.io.InputStream;
 
@@ -68,5 +72,17 @@ public class Utilities {
     public static String convertStreamToString(InputStream is) {
         java.util.Scanner s = new java.util.Scanner(is).useDelimiter("\\A");
         return s.hasNext() ? s.next() : "";
+    }
+
+    public static void slideUP(Context context, View view) {
+        view.setVisibility(View.VISIBLE);
+        view.startAnimation(AnimationUtils.loadAnimation(context,
+                R.anim.slide_up));
+    }
+
+    public static void slideDown(Context context, View view) {
+        view.startAnimation(AnimationUtils.loadAnimation(context,
+                R.anim.slide_down));
+        view.setVisibility(View.GONE);
     }
 }
