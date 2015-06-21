@@ -79,7 +79,7 @@
     <string name="com_parse_ui_logo_content_description">Logo</string>
     <string name="no_login_button_label">Salta il Login</string>
     <string name="welcome">Benvenuto</string>
-    <string name="logout">Ora non sei pi&#249; loggato</string>
+    <string name="is_logout">Ora non sei pi&#249; loggato</string>
     <string name="no_connection_message">Attivare la connessione per visualizzare gli annunci di vendita.</string>
 
      <string name="no_skip">NON SALTARE</string>
@@ -109,6 +109,9 @@
     <string name="message_error">Si &#232; verificato un errore</string>
     <string name="fab_form">Compila il form</string>
     <string name="fab_camera">Scan del codice ISBN</string>
+    <string name="logout">Logout</string>
+    <string name="login">Login</string>
+    <string name="drawer_item_settings">Impostazioni</string>
     <string-array name="language_array">
         <item>Italiano</item>
         <item>Inglese</item>
