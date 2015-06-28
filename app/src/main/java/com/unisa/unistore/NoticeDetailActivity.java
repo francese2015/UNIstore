@@ -43,7 +43,7 @@ import java.util.List;
 
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
-public class NoticeDetailActivity extends ActionBarActivity {
+public class NoticeDetailActivity extends ActionBarActivity implements View.OnClickListener {
     private static final long ANIM_DURATION = 1500;
     private static final long LOLLIPOP_ANIM_DURATION = 1000;
     private static final TimeInterpolator sDecelerator = new DecelerateInterpolator();
@@ -52,6 +52,8 @@ public class NoticeDetailActivity extends ActionBarActivity {
     private static final int HEIGHT = 525;
     private static final int WIDTH = 525;
     private static final String PACKAGE_NAME = "com.unisa.unistore.adapter";
+    public static final String NOTICE_AUTHOR_ID_TAG = "notice author";
+    public static final String BOOK_TITLE_TAG = "notice author";
 
     static float sAnimatorScale = 2;
 
@@ -100,6 +102,8 @@ public class NoticeDetailActivity extends ActionBarActivity {
             supportActionBar.setDisplayShowTitleEnabled(false);
             supportActionBar.setDisplayHomeAsUpEnabled(true);
         }
+
+        findViewById(R.id.contact_the_author_button).setOnClickListener(this);
 
         setupLayout();
 
@@ -416,5 +420,20 @@ public class NoticeDetailActivity extends ActionBarActivity {
                 return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onClick(View v) {
+        if(v.getId() == R.id.contact_the_author_button) {
+            Intent intent = new Intent(this, ChatActivity.class);
+            String authorId = "";
+            try {
+                authorId = ParseUser.getQuery().whereEqualTo("name", autoreAnnuncio.getText().toString()).find().get(0).getObjectId();
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+            intent.putExtra(NOTICE_AUTHOR_ID_TAG, authorId);
+            startActivity(intent);
+        }
     }
 }

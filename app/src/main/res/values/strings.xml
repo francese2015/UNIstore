@@ -42,6 +42,7 @@
     <string name="desc_list_item_icon">Item Icon</string>
 
     <string name="buy_button">Acquista</string>
+    <string name="contact_the_author_button">Contatta</string>
     <string name="drawer_menu_title">Drawer_title</string>
     <string name="empty_string" />
     <string name="menu_open"></string>
@@ -121,6 +122,10 @@
     <string name="notice_author">Autore dell\'annuncio</string>
     <string name="not_found">Non disponibile</string>
     <string name="contact_administrator">Si &#232; verificato un errore. Contattare l\'amministratore.</string>
+    <string name="message_hint">Scrivi il messaggio</string>
+    <string name="send">Invia</string>
+    <string name="profile_other">Ricevente</string>
+    <string name="profile_me">Io</string>
     <string-array name="language_array">
         <item>Italiano</item>
         <item>Inglese</item>
