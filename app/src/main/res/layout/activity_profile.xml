@@ -2,11 +2,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/material_background">
-
-    <include
-        android:id="@+id/fragment_toolbar"
-        layout="@layout/toolbar" />
+    android:background="#263238">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -15,7 +11,6 @@
         android:paddingLeft="@dimen/com_parse_ui_horizontal_margin"
         android:paddingRight="@dimen/com_parse_ui_horizontal_margin"
         android:paddingBottom="@dimen/com_parse_ui_vertical_margin"
-        android:background="@color/material_background"
         android:gravity="center"
         android:orientation="vertical">
 
@@ -28,7 +23,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="0.5"
+            android:layout_weight="1.65"
             android:gravity="center"
             android:paddingLeft="3dp"
             android:paddingRight="3dp"
@@ -39,7 +34,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 style="@style/ParseLoginUI.TextView"
-                android:textColor="@color/primary_text"
+                android:textColor="#ffff"
                 android:text="@string/profile_title_logged_in" />
 
             <TextView
@@ -58,14 +53,14 @@
             <Button
                 android:id="@+id/login_or_logout_button"
                 style="@style/ParseLoginUI.Button"
-                android:textColor="@color/primary_text"
+                android:textColor="#ffff"
                 android:layout_marginTop="@dimen/com_parse_ui_large_vertical_spacing"
                 android:text="@string/profile_logout_button_label"/>
 
             <Button
                 android:id="@+id/no_login_button"
                 style="@style/NoLoginUI.Button"
-                android:textColor="@color/primary_text"
+                android:textColor="#ffff"
                 android:layout_marginTop="@dimen/com_parse_ui_large_vertical_spacing"
                 android:text="@string/no_login_button_label" />
 
