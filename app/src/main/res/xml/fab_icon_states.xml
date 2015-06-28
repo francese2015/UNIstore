@@ -1,4 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+<state-list>
+    <!-- the first state of the line segments !-->
+    <state>
+        <points>
+            <item>0.5</item>    <!-- the x value of start point of first line segment !-->
+            <item>0</item>      <!-- the y value of start point of first line segment !-->
+            <item>0.5</item>    <!-- the x value of end point of first line segment !-->
+            <item>1</item>      <!-- the y value of end point of first line segment !-->
 
-</PreferenceScreen>
+            <item>0</item>      <!-- the x value of start point of second line segment !-->
+            <item>0.5</item>    <!-- the y value of start point of second line segment !-->
+            <item>1</item>      <!-- the x value of end point of second line segment !-->
+            <item>0.5</item>    <!-- the y value of end point of second line segment !-->
+        </points>
+    </state>
+
+    <!-- the second state of the line segments !-->
+    <state>
+        <points>
+            <item>0.1</item>
+            <item>0.1</item>
+            <item>0.9</item>
+            <item>0.9</item>
+
+            <item>0.1</item>
+            <item>0.9</item>
+            <item>0.9</item>
+            <item>0.1</item>
+
+        </points>
+    </state>
+
+</state-list>
