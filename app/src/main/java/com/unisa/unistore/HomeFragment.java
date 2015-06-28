@@ -1,14 +1,9 @@
 package com.unisa.unistore;
 
-import android.annotation.SuppressLint;
-import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -19,8 +14,10 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AnimationUtils;
 import android.widget.FrameLayout;
 import android.widget.Toast;
 
@@ -39,9 +36,10 @@ import java.util.List;
 
 public class HomeFragment extends Fragment {
 
-    private static final int QUERY_LIMIT = 5;
+    private static final int QUERY_LIMIT = 6;
+    public static final String INPUT_TYPE_MESSAGE = "input type";
+    private static final int FAB_THRESHOLD = 1;
     private static boolean clicked;
-    private static boolean isFABMenuOpened;
 
     private Activity activity;
     private Toolbar toolbar;
@@ -53,30 +51,31 @@ public class HomeFragment extends Fragment {
     private RVAdapter adapter;
 
     private boolean loading = true;
+    private boolean lastNoticeReached = false;
     private static int queryCnt = 0;
-    private int pastVisiblesItems, visibleItemCount, totalItemCount;
 
+    private int pastVisiblesItems, visibleItemCount, totalItemCount;
     private int lastNoticesCnt = 0;
     private boolean noConnection = false;
     private boolean firstLaunch = true;
-    private View fab_background;
+
     private FloatingActionMenu fab_menu;
     private FloatingActionButton fab_camera, fab_form;
     //private FloatingActionButton fab_line;
     private FrameLayout wheel;
     private RecyclerView recyclerView;
 
-    public HomeFragment(){ }
+    public HomeFragment() { }
 
     public void setToolbar(Toolbar t) {
         toolbar = t;
     }
 
-    @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
-    @SuppressLint("ResourceAsColor")
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+
+        ((MainActivity) activity).setDrawerSelection(MainActivity.HOME_ID);
 
         LA = new ListaAnnunci();
 
@@ -93,11 +92,28 @@ public class HomeFragment extends Fragment {
         recyclerView.setAdapter(adapter);
 
         fab_menu = (FloatingActionMenu) activity.findViewById(R.id.fab_menu);
+        fab_menu.close(false);
+        fab_menu.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                /*
+                 * Se fab_menu è aperto, quando si clicca su qualsiasi parte dello schermo
+                 * (che non sia un elemento apartenente a fab_menu), lo stesso viene chiuso.
+                 */
+                if (fab_menu.isOpened()) {
+                    fab_menu.close(true);
+                    return true;
+                }
+
+                return false;
+            }
+
+        });
 
         fab_camera = (FloatingActionButton) activity.findViewById(R.id.fab_camera);
-
+        fab_camera.setTag("camera");
         fab_form = (FloatingActionButton) activity.findViewById(R.id.fab_form);
-
+        fab_form.setTag("form");
         setFABListener(fab_form, fab_camera);
 
         /*
@@ -128,6 +144,17 @@ public class HomeFragment extends Fragment {
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
+
+                if(dy < -FAB_THRESHOLD && fab_menu.getVisibility() != View.VISIBLE) {
+                    fab_menu.setVisibility(View.VISIBLE);
+                    fab_menu.startAnimation(AnimationUtils.loadAnimation(activity,
+                            R.anim.jump_from_down));
+                } else if(dy > FAB_THRESHOLD && fab_menu.getVisibility() != View.GONE) {
+                    fab_menu.setVisibility(View.GONE);
+                    fab_menu.startAnimation(AnimationUtils.loadAnimation(activity,
+                            R.anim.jump_to_down));
+                }
+
                 visibleItemCount = mLayoutManager.getChildCount();
                 totalItemCount = mLayoutManager.getItemCount();
                 pastVisiblesItems = mLayoutManager.findFirstVisibleItemPosition();
@@ -136,11 +163,10 @@ public class HomeFragment extends Fragment {
                         (visibleItemCount + pastVisiblesItems) +
                         "\ntotalItemCount = " + totalItemCount);
 
-                if (dy != 0 && loading) {
+                if (dy != 0 && loading && !lastNoticeReached) {
                     if ((visibleItemCount + pastVisiblesItems) >= totalItemCount) {
                         loading = false;
                         Log.d("onScrolled-last", "Ultimo annuncio caricato!");
-                        Utilities.slideUP(activity, wheel);
                         downloadAnnunci(false);
                     }
                 } else {
@@ -166,7 +192,8 @@ public class HomeFragment extends Fragment {
 
         recyclerView.setHasFixedSize(true);
 
-        if(checkConnection()) {
+        //TODO Questo if va inserito in qualche altro metodo
+        if(Utilities.checkConnection(activity)) {
             getActivity().findViewById(R.id.no_connection_message).setVisibility(View.INVISIBLE);
             downloadAnnunci(false);
         } else {
@@ -181,13 +208,16 @@ public class HomeFragment extends Fragment {
 
         for(int i = 0; i < len; i++) {
             tmp = fab_form[i];
-            tmp.setLabelVisibility(View.INVISIBLE);
 
             tmp.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+
                     if (Utilities.isUserAuthenticated()) {
                         Intent intent = new Intent(activity, PubblicaAnnuncioActivity.class);
+                        if(v.getTag().toString().equals("form")) {
+                            intent.putExtra(INPUT_TYPE_MESSAGE, true);
+                        }
                         activity.startActivityForResult(intent, 12345);
                     } else {
                         Context context = activity.getApplicationContext();
@@ -212,28 +242,11 @@ public class HomeFragment extends Fragment {
         }
     }
 
-    private boolean checkConnection() {
-        String DEBUG_TAG = "NetworkStatus";
-
-        ConnectivityManager connMgr = (ConnectivityManager)
-                activity.getSystemService(Context.CONNECTIVITY_SERVICE);
-
-        NetworkInfo networkInfo = connMgr.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
-        boolean isWifiConn = networkInfo.isConnected();
-        networkInfo = connMgr.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
-        boolean isMobileConn = networkInfo.isConnected();
-
-        Log.d(DEBUG_TAG, "Wifi connected: " + isWifiConn);
-        Log.d(DEBUG_TAG, "Mobile connected: " + isMobileConn);
-
-        return isMobileConn || isWifiConn;
-    }
-
     private void refreshContent() {
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                if(checkConnection()) {
+                if(Utilities.checkConnection(activity)) {
                     downloadAnnunci(true);
                     mSwipeRefreshLayout.setRefreshing(false);
                     if(noConnection)
@@ -257,6 +270,10 @@ public class HomeFragment extends Fragment {
             public void done(int i, ParseException e) {
                 Log.d("Libri", "i = " + i);
 
+                if(i <= 0) {
+                    return;
+                }
+
                 if(i < lastNoticesCnt || !refresh) {
                     if(i < lastNoticesCnt) { // sono stati eliminati uno o più annunci
                         query.setLimit(i);
@@ -266,7 +283,15 @@ public class HomeFragment extends Fragment {
                         query.setLimit(QUERY_LIMIT);
                         query.setSkip(queryCnt);
                     }
+
+                    if(i == adapter.getItemCount()) {
+                        lastNoticeReached = true;
+                        return;
+                    }
+
                     lastNoticesCnt = i;
+
+                    Utilities.slideUP(activity, wheel);
 
                     query.findInBackground(new FindCallback<ParseObject>() {
                         public void done(List<ParseObject> scoreList, ParseException e) {
@@ -332,7 +357,8 @@ public class HomeFragment extends Fragment {
 
         setHasOptionsMenu(true);
         // update the actionbar to show the up carat/affordance
-        supportActionBar.setDisplayHomeAsUpEnabled(true);
+        if(supportActionBar != null)
+            supportActionBar.setDisplayHomeAsUpEnabled(true);
 
         /*
         ImageButton fab_aggiungiAnnuncio = (ImageButton) activity.findViewById(R.id.fab_image_button);
@@ -371,7 +397,6 @@ public class HomeFragment extends Fragment {
             return;
         }
 
-//        fab_line.setLineMorphingState(0, true);
         fab_menu.close(true);
 
         setClicked(false);
@@ -394,11 +419,20 @@ public class HomeFragment extends Fragment {
         this.supportActionBar = supportActionBar;
     }
 
+    //TODO Metodi da inserire in una classe di utlities
     public static boolean isClicked() {
         return clicked;
     }
 
     public static void setClicked(boolean isClicked) {
         clicked = isClicked;
+    }
+
+    public boolean isFABMenuOpened() {
+        return fab_menu.isOpened();
+    }
+
+    public void closeFABMenu(boolean animated) {
+        fab_menu.close(animated);
     }
 }

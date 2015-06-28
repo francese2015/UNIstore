@@ -28,11 +28,16 @@ import java.util.ArrayList;
  * Created by Daniele on 16/05/2015.
  */
 public class RVAdapter extends RecyclerView.Adapter<RVAdapter.AnnuncioViewHolder>{
+    private static final String PACKAGE = "com.unisa.unistore.adapter";
     public static final String BOOK_TITLE_MESSAGE = "title";
     public static final String BOOK_AUTHORS_MESSAGE = "authors";
     public static final String BOOK_PRICE_MESSAGE = "price";
     public static final String BOOK_IMAGE_URL_MESSAGE = "image";
-    private static final String PACKAGE = "com.unisa.unistore.adapter";
+    public static final String BOOK_DESCRIPTION_MESSAGE = "description";
+    public static final String BOOK_STATE_MESSAGE = "state";
+    public static final String BOOK_LANGUAGE_MESSAGE = "language";
+    public static final String BOOK_ISBN_MESSAGE = "ISBN";
+    public static final String BOOK_ID_MESSAGE = "id";
 
     private Activity activity;
     private ListaAnnunci annunci = new ListaAnnunci();
@@ -57,6 +62,9 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.AnnuncioViewHolder
 
     @Override
     public void onBindViewHolder(AnnuncioViewHolder annuncioHolder, int position) {
+        String id = annunci.getAnnuncio(position).getLibro().getIDLibro();
+        annuncioHolder.idLibro.setText(id);
+
         String titolo = annunci.getAnnuncio(position).getLibro().getTitoloLibro();
         annuncioHolder.titoloLibro.setText(titolo);
 
@@ -77,7 +85,7 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.AnnuncioViewHolder
         //new GetBookThumb(annuncioHolder.fotoLibro).execute(URLImmagineCopertina);
 
 
-        String prezzo = Double.toString(annunci.getAnnuncio(position).getPrezzo());
+        String prezzo = String.valueOf(annunci.getAnnuncio(position).getPrezzo());
         annuncioHolder.prezzoLibro.setText(prezzo + activity.getString(R.string.euro_symbol));
 
         String descrizione = annunci.getAnnuncio(position).getLibro().getDescrizione();
@@ -91,8 +99,9 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.AnnuncioViewHolder
 
     public static class AnnuncioViewHolder extends RecyclerView.ViewHolder {
         private Activity activity;
-        private TextView titoloLibro;
 
+        private TextView idLibro;
+        private TextView titoloLibro;
         private TextView autoriLibro;
         private TextView prezzoLibro;
         private ImageView fotoLibro;
@@ -104,6 +113,7 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.AnnuncioViewHolder
             super(itemView);
             this.activity = activity;
 
+            this.idLibro = (TextView) itemView.findViewById(R.id.book_id);
             this.titoloLibro = (TextView) itemView.findViewById(R.id.book_title);
             this.autoriLibro = (TextView) itemView.findViewById(R.id.book_authors);
             this.prezzoLibro = (TextView) itemView.findViewById(R.id.book_price);
@@ -125,6 +135,8 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.AnnuncioViewHolder
                     HomeFragment.setClicked(true);
                     Intent i = new Intent(activity, NoticeDetailActivity.class);
 
+                    String id = idLibro.getText().toString();
+                    i.putExtra(BOOK_ID_MESSAGE, id);
                     String title = titoloLibro.getText().toString();
                     i.putExtra(BOOK_TITLE_MESSAGE, title);
                     String authors = autoriLibro.getText().toString();
@@ -157,23 +169,6 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.AnnuncioViewHolder
         public void setURLImmagineCopertina(String URLImmagineCopertina) {
             this.URLImmagineCopertina = URLImmagineCopertina;
         }
-        /*
-        private void customizeCard(String titolo, String autori, String prezzo, String URLImmagineCopertina, String descrizione) {
-            //Create a Card
-            AnnuncioCard card = new AnnuncioCard(activity, titolo, autori, prezzo, URLImmagineCopertina, descrizione);
-
-            //Animator listener
-            card.setOnExpandAnimatorEndListener(new Card.OnExpandAnimatorEndListener() {
-                @Override
-                public void onExpandEnd(Card card) {
-                    //Toast.makeText(getActivity(), "Expand " + card.getCardHeader().getTitle(), Toast.LENGTH_SHORT).show();
-                }
-            });
-
-            //Set card in the cardView
-            cardView.setCard(card);
-        }
-        */
     }
 
 }
