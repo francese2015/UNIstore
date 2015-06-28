@@ -12,9 +12,9 @@ public class Annuncio {
     private ParseObject autore;
     private Date data_pubblicazione;
     private Libro libro;
-    private double prezzo;
+    private Number prezzo;
 
-    public Annuncio(ParseUser autore_annuncio, Date data_pubblicazione_annuncio, Libro libro, double prezzo) {
+    public Annuncio(ParseUser autore_annuncio, Date data_pubblicazione_annuncio, Libro libro, Number prezzo) {
         this.autore = autore_annuncio;
         this.data_pubblicazione = data_pubblicazione_annuncio;
         this.libro = libro;
@@ -45,7 +45,7 @@ public class Annuncio {
         return libro;
     }
 
-    public double getPrezzo() {
+    public Number getPrezzo() {
         return prezzo;
     }
 
