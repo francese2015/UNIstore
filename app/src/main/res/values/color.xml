@@ -21,6 +21,9 @@
     <color name="book_detail_background">#CFD8DC</color>
     <color name="gray_background">#ececec</color>
     <color name="material_grey">#e0e0e0</color>
+    <color name="book_cardview_background">#ececec</color>
+    <color name="price_cardview_background">@color/md_red_300</color>
+
 
     <!-- OVERWRITE THESE COLORS FOR A LIGHT THEME -->
     <!-- MaterialDrawer DEFAULT colors -->

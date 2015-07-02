@@ -13,9 +13,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/isbn_scan_instruction"
-        android:visibility="gone"
+        android:visibility="visible"
         android:layout_below="@+id/fragment_toolbar"
-        android:layout_marginBottom="@dimen/activity_vertical_margin">
+        android:layout_alignParentBottom="true">
 
         <TextView
             android:layout_width="wrap_content"
@@ -28,17 +28,19 @@
             android:text="@string/barcode_instruction"
             android:textSize="21dp"
             android:id="@+id/barcode_instruction"
-            android:layout_marginTop="25dp"
+            android:layout_marginTop="16sp"
+            android:layout_below="@+id/toolbar"
             android:visibility="visible" />
 
         <ImageView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/detecting_isbn"
+            android:layout_marginTop="16dp"
+            android:src="@drawable/detecting_isbn2"
             android:id="@+id/barcode_image" />
 
         <Button android:id="@+id/scan_button"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
             android:layout_alignParentBottom="true"
@@ -55,23 +57,23 @@
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:visibility="visible"
+        android:id="@+id/book_info"
+        android:visibility="gone"
         android:theme="@style/Theme.BookInfoTheme"
-        android:layout_below="@+id/fragment_toolbar">
+        android:layout_below="@+id/fragment_toolbar"
+        android:layout_above="@+id/save_on_cloud_button">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical"
-            android:layout_margin="@dimen/activity_horizontal_margin"
-            android:id="@+id/book_info" >
+            android:layout_margin="@dimen/activity_horizontal_margin">
 
             <EditText
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:id="@+id/book_title"
                 android:hint="@string/title"
-                android:editable="false"
                 android:textColorHint="#9E9E9E"
                 android:paddingLeft="16dp"
                 android:textSize="@dimen/font_size" />
@@ -106,6 +108,7 @@
             <RadioGroup xmlns:android="http://schemas.android.com/apk/res/android"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:id="@+id/book_state"
                 android:layout_marginLeft="@dimen/activity_horizontal_margin"
                 android:layout_marginRight="@dimen/activity_horizontal_margin"
                 android:orientation="vertical">
@@ -113,18 +116,19 @@
                 <com.rey.material.widget.RadioButton
                     style="@style/RadioButtonDrawable"
                     android:id="@+id/new_state"
-                    android:layout_width="100dp"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/new_state"
                     android:textSize="14sp"
                     android:checked="true"
                     android:textColor="@color/primary_text"
-                    android:gravity="center_vertical"/>
+                    android:gravity="center_vertical"
+                    />
 
                 <com.rey.material.widget.RadioButton
                     style="@style/RadioButtonDrawable"
                     android:id="@+id/like_new_state"
-                    android:layout_width="100dp"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/like_new_state"
                     android:textSize="14sp"
@@ -134,7 +138,7 @@
                 <com.rey.material.widget.RadioButton
                     style="@style/RadioButtonDrawable"
                     android:id="@+id/used_state"
-                    android:layout_width="100dp"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/used_state"
                     android:textSize="14sp"
@@ -215,22 +219,22 @@
                 android:textColorHint="#9E9E9E"
                 android:hint="@string/isbn"/>
 
-            <Button
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/save_on_cloud_button"
-                android:layout_centerHorizontal="true"
-                android:layout_alignParentBottom="true"
-                android:padding="10dp"
-                android:elevation="@dimen/elevation_high"
-                android:layout_marginTop="@dimen/activity_vertical_margin"
-                android:layout_marginBottom="@dimen/activity_vertical_margin"
-                android:background="@drawable/my_button"
-                android:textColor="@color/icons"
-                android:textSize="@dimen/font_size"
-                android:text="@string/salva_annuncio" />
         </LinearLayout>
 
     </ScrollView>
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/save_on_cloud_button"
+        android:visibility="gone"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentBottom="true"
+        android:padding="10dp"
+        android:elevation="@dimen/elevation_high"
+        android:background="@drawable/my_button"
+        android:textColor="@color/icons"
+        android:textSize="@dimen/font_size"
+        android:text="@string/salva_annuncio" />
 
 </RelativeLayout>

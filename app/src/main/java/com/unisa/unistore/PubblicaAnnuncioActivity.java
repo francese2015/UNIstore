@@ -19,6 +19,7 @@ import android.widget.CompoundButton;
 import android.widget.DatePicker;
 import android.widget.ImageView;
 import android.widget.NumberPicker;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -28,6 +29,7 @@ import com.parse.ParseObject;
 import com.parse.ParseUser;
 import com.parse.SaveCallback;
 import com.rey.material.widget.RadioButton;
+import com.rey.material.widget.Spinner;
 import com.unisa.unistore.android.IntentIntegrator;
 import com.unisa.unistore.android.IntentResult;
 import com.unisa.unistore.utilities.ImageUtilities;
@@ -43,6 +45,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Calendar;
 
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
@@ -54,7 +57,10 @@ public class PubblicaAnnuncioActivity extends ActionBarActivity
 
     private Button scanBtn, saveCloudBtn;
 
-    private TextView authorText, titleText, descriptionText, dateText;
+    private TextView authorsText, titleText, descriptionText, publishedDateText, ISBNText,
+            priceText;
+    private RadioGroup stateGroup;
+    private com.rey.material.widget.Spinner languageSpinner;
     private ImageView thumbView;
 
     private com.rey.material.widget.Spinner spinner;
@@ -65,7 +71,8 @@ public class PubblicaAnnuncioActivity extends ActionBarActivity
 
 
     private String title = "", authors = "", publishedDate = "", description = "", thumbnailURL = "";
-    private ParseObject parseObject;
+    private ParseObject noticeParseObject;
+    private ParseObject bookParseObject;
     private CompoundButton rb_new_state, rb_like_new_state, rb_used_state;
 
     @Override
@@ -84,28 +91,38 @@ public class PubblicaAnnuncioActivity extends ActionBarActivity
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
 
-        scanBtn = (Button)findViewById(R.id.scan_button);
+        Intent intent = getIntent();
+        if(intent.getBooleanExtra(HomeFragment.INPUT_TYPE_MESSAGE, false)) {
+            findViewById(R.id.isbn_scan_instruction).setVisibility(View.GONE);
+            findViewById(R.id.save_on_cloud_button).setVisibility(View.VISIBLE);
+            findViewById(R.id.book_info).setVisibility(View.VISIBLE);
+        }
+
+        scanBtn = (Button) findViewById(R.id.scan_button);
         scanBtn.setOnClickListener(this);
 
-        authorText = (TextView)findViewById(R.id.book_authors);
-        titleText = (TextView)findViewById(R.id.book_title);
-        descriptionText = (TextView)findViewById(R.id.book_description);
-        dateText = (TextView)findViewById(R.id.book_date);
-        dateText.setEnabled(true);
-        dateText.setInputType(InputType.TYPE_NULL);
+        authorsText = (TextView) findViewById(R.id.book_authors);
+        titleText = (TextView) findViewById(R.id.book_title);
+        descriptionText = (TextView) findViewById(R.id.book_description);
+        publishedDateText = (TextView) findViewById(R.id.book_date);
+        publishedDateText.setEnabled(true);
+        publishedDateText.setInputType(InputType.TYPE_NULL);
         calendar = Calendar.getInstance();
         year = calendar.get(Calendar.YEAR);
-        dateText.setOnTouchListener(new View.OnTouchListener() {
+        publishedDateText.setOnTouchListener(new View.OnTouchListener() {
 
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-                //show();
+                show();
                 return false;
             }
 
         });
-
-        thumbView = (ImageView)findViewById(R.id.book_image);
+        ISBNText = (TextView) findViewById(R.id.book_isbn);
+        languageSpinner = (Spinner) findViewById(R.id.book_language_spinner);
+        stateGroup = (RadioGroup) findViewById(R.id.book_state);
+        priceText = (TextView) findViewById(R.id.book_price);
+        thumbView = (ImageView) findViewById(R.id.book_image);
 
         rb_new_state = (RadioButton) findViewById(R.id.new_state);
         rb_like_new_state = (RadioButton) findViewById(R.id.like_new_state);
@@ -133,6 +150,8 @@ public class PubblicaAnnuncioActivity extends ActionBarActivity
         spinnerAdapter.setDropDownViewResource(R.layout.row_spn_dropdown);
         spinner.setAdapter(spinnerAdapter);
 
+        saveCloudBtn = (Button) findViewById(R.id.save_on_cloud_button);
+        saveCloudBtn.setOnClickListener(this);
 /*
         ArrayAdapter<CharSequence> spinnerAdapter = ArrayAdapter.createFromResource(this,
                 R.array.language_array, R.layout.spinner_row);
@@ -168,7 +187,7 @@ public class PubblicaAnnuncioActivity extends ActionBarActivity
         ok.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                dateText.setText(String.valueOf(numberPicker.getValue()));
+                publishedDateText.setText(String.valueOf(numberPicker.getValue()));
                 dialog.dismiss();
             }
         });
@@ -215,20 +234,36 @@ public class PubblicaAnnuncioActivity extends ActionBarActivity
                     @Override
                     public void onClick(View arg0) {
                         if (ParseUser.getCurrentUser() != null) {
-                            parseObject = new ParseObject("Libri");
+                            bookParseObject = new ParseObject("Libri");
 
-                            parseObject.put("titolo", title);
-                            parseObject.put("autori", authors);
-                            parseObject.put("data_pubblicazione", publishedDate);
-                            parseObject.put("descrizione", description);
-                            parseObject.put("url_immagine_copertina", thumbnailURL);
+                            bookParseObject.put("titolo", title);
+                            bookParseObject.put("autori", authors);
+                            bookParseObject.put("data_pubblicazione", publishedDate);
+                            bookParseObject.put("descrizione", description);
+                            bookParseObject.put("url_immagine_copertina", thumbnailURL);
+                            bookParseObject.put("isbn", ISBNText.getText().toString());
+                            bookParseObject.put("lingua", languageSpinner.getSelectedItem().toString());
+                            bookParseObject.put("autore_annuncio", ParseUser.getCurrentUser().getObjectId());
+                            String bookState = "Nuovo";
+                            if(((RadioButton)findViewById(stateGroup.getCheckedRadioButtonId())) != null) {
+                                ((RadioButton)findViewById(stateGroup.getCheckedRadioButtonId())).getText().toString();
+                            }
+                            bookParseObject.put("stato", bookState);
+                            if(priceText.getText().toString().length() <= 0) {
+                                Toast toast = Toast.makeText(getApplicationContext(),
+                                        "Inserire un prezzo di vendita", Toast.LENGTH_SHORT);
+                                toast.show();
+
+                                return;
+                            }
+                            bookParseObject.put("prezzo_annuncio", Double.parseDouble(priceText.getText().toString()));
 
                             ParseACL groupACL = new ParseACL();
                             groupACL.setPublicReadAccess(true);
                             groupACL.setPublicWriteAccess(false);
 
-                            parseObject.setACL(groupACL);
-                            parseObject.saveInBackground(new SaveCallback() {
+                            bookParseObject.setACL(groupACL);
+                            bookParseObject.saveInBackground(new SaveCallback() {
                                 @Override
                                 public void done(ParseException e) {
                                     if (e == null) {
@@ -283,7 +318,85 @@ public class PubblicaAnnuncioActivity extends ActionBarActivity
             IntentIntegrator scanIntegrator = new IntentIntegrator(this);
             scanIntegrator.initiateScan();
         } else if(v.getId() == R.id.save_on_cloud_button) {
-            
+            if (ParseUser.getCurrentUser() != null) {
+                noticeParseObject = new ParseObject("Annunci");
+                bookParseObject = new ParseObject("Libri");
+
+                ArrayList<String> lista_autori = new ArrayList<>();
+                lista_autori.add(authorsText.getText().toString());
+                /*
+                Libro libro = new Libro(titleText.getText().toString(), lista_autori, "http://bks2.books.google.it/books/content?id=eZVvPgAACAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api",
+                        descriptionText.getText().toString(), publishedDateText.getText().toString());
+                bookParseObject.put("libro", libro);
+                */
+                bookParseObject.put("titolo", titleText.getText().toString());
+                bookParseObject.put("autori", authorsText.getText().toString());
+                bookParseObject.put("data_pubblicazione", publishedDateText.getText().toString());
+                bookParseObject.put("descrizione", descriptionText.getText().toString());
+                bookParseObject.put("isbn", ISBNText.getText().toString());
+                bookParseObject.put("lingua", languageSpinner.getSelectedItem().toString());
+                bookParseObject.put("autore_annuncio", ParseUser.getCurrentUser());
+                String bookState = "Nuovo";
+                if(((RadioButton)findViewById(stateGroup.getCheckedRadioButtonId())) != null) {
+                    ((RadioButton)findViewById(stateGroup.getCheckedRadioButtonId())).getText().toString();
+                }
+                bookParseObject.put("stato", bookState);
+                bookParseObject.put("prezzo_annuncio", Double.parseDouble(priceText.getText().toString()));
+                bookParseObject.put("url_immagine_copertina", "http://bks2.books.google.it/books/content?id=eZVvPgAACAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api");
+
+                ParseACL groupACL = new ParseACL();
+                groupACL.setPublicReadAccess(true);
+                groupACL.setPublicWriteAccess(false);
+
+                bookParseObject.setACL(groupACL);
+                bookParseObject.saveInBackground(new SaveCallback() {
+                    @Override
+                    public void done(ParseException e) {
+                        if (e == null) {
+                            Log.d("AnnuncioParse", "Salvataggio del libro sul cloud avvenuto con successo!");
+                            Toast toast = Toast.makeText(getApplicationContext(),
+                                    "Libro salvato", Toast.LENGTH_SHORT);
+                            //toast.show();
+                        } else {
+                            Log.d("AnnuncioParse", "Problemi durante il salvataggio del libro sul cloud.");
+                            e.getStackTrace();
+                            Toast toast = Toast.makeText(getApplicationContext(),
+                                    "Errore durante il salvataggio del libro", Toast.LENGTH_SHORT);
+                            //toast.show();
+                        }
+
+                    }
+                });
+
+                noticeParseObject.setACL(groupACL);
+                noticeParseObject.saveInBackground(new SaveCallback() {
+                    @Override
+                    public void done(ParseException e) {
+                        if (e == null) {
+                            Log.d("AnnuncioParse", "Salvataggio dell'annuncio sul cloud avvenuto con successo!");
+                            Toast toast = Toast.makeText(getApplicationContext(),
+                                    "Annuncio salvato", Toast.LENGTH_SHORT);
+                            toast.show();
+                        } else {
+                            Log.d("AnnuncioParse", "Problemi durante il salvataggio dell'annuncio sul cloud.");
+                            e.getStackTrace();
+                            Toast toast = Toast.makeText(getApplicationContext(),
+                                    "Errore durante il salvataggio dell'annuncio", Toast.LENGTH_SHORT);
+                            toast.show();
+                        }
+
+                    }
+                });
+
+                finish();
+            } else {
+                Context context = getApplicationContext();
+                CharSequence text = getString(R.string.profile_title_logged_out);
+                int duration = Toast.LENGTH_LONG;
+
+                Toast toast = Toast.makeText(context, text, duration);
+                toast.show();
+            }
         }
     }
 
@@ -335,7 +448,10 @@ public class PubblicaAnnuncioActivity extends ActionBarActivity
 
                 try {
                     title = volumeObject.getString("title");
-                    titleText.setText("TITLE: " + title);
+                    if(title.length() > 0) {
+                        titleText.setText(title);
+                        titleText.setEnabled(false);
+                    }
                 } catch(JSONException jse){
                     titleText.setText("");
                     jse.printStackTrace();
@@ -350,24 +466,35 @@ public class PubblicaAnnuncioActivity extends ActionBarActivity
                         authors = authorArray.getString(a);
                         authorBuild.append(authors);
                     }
-                    authorText.setText("AUTHOR(S): " + authorBuild.toString());
+                    if(authorBuild.toString().length() > 0) {
+                        authorsText.setText(authorBuild.toString());
+                        authorsText.setEnabled(false);
+                    }
                 }
                 catch(JSONException jse) {
-                    authorText.setText("");
+                    authorsText.setText("");
                     jse.printStackTrace();
                 }
 
                 try {
                     publishedDate = volumeObject.getString("publishedDate");
-                    dateText.setText("PUBLISHED: " + publishedDate);
+                    if(publishedDate.length() > 0) {
+                        publishedDateText.setText(publishedDate);
+                        publishedDateText.setEnabled(false);
+                    }
+                    publishedDateText.setText(publishedDate);
                 } catch(JSONException jse){
-                    dateText.setText("");
+                    publishedDateText.setText("");
                     jse.printStackTrace();
                 }
 
                 try{
                     description = volumeObject.getString("description");
-                    descriptionText.setText("DESCRIPTION: " + description);
+                    if(description.length() > 0) {
+                        descriptionText.setText(description);
+                        descriptionText.setEnabled(false);
+                    }
+                    descriptionText.setText(description);
                 } catch(JSONException jse){
                     descriptionText.setText("");
                     jse.printStackTrace();
@@ -387,9 +514,9 @@ public class PubblicaAnnuncioActivity extends ActionBarActivity
             } catch (Exception e) {
                 e.printStackTrace();
                 titleText.setText("NOT FOUND");
-                authorText.setText("");
+                authorsText.setText("");
                 descriptionText.setText("");
-                dateText.setText("");
+                publishedDateText.setText("");
                 thumbView.setImageBitmap(null);
             }
         }

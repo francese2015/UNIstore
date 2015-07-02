@@ -60,7 +60,7 @@
 
     <style name="Buy.Button" parent="@android:style/Widget.Button">
         <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">48dp</item>
+        <item name="android:layout_height">0dp</item>
         <item name="android:background">
             @drawable/buy_button_background_selector
         </item>

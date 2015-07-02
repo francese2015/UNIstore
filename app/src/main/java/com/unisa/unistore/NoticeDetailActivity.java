@@ -16,6 +16,7 @@ import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
 import android.transition.Explode;
 import android.transition.Transition;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewAnimationUtils;
@@ -30,31 +31,46 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
+import com.parse.FindCallback;
+import com.parse.ParseException;
+import com.parse.ParseObject;
+import com.parse.ParseQuery;
+import com.parse.ParseUser;
 import com.unisa.unistore.adapter.RVAdapter;
 import com.unisa.unistore.utilities.ImageUtilities;
 
+import java.util.List;
+
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
-public class NoticeDetailActivity extends ActionBarActivity {
+public class NoticeDetailActivity extends ActionBarActivity implements View.OnClickListener {
     private static final long ANIM_DURATION = 1500;
     private static final long LOLLIPOP_ANIM_DURATION = 1000;
     private static final TimeInterpolator sDecelerator = new DecelerateInterpolator();
     private static final TimeInterpolator sAccelerator = new AccelerateInterpolator();
 
-    private static final int HEIGHT = 325;
-    private static final int WIDTH = 325;
+    private static final int HEIGHT = 525;
+    private static final int WIDTH = 525;
     private static final String PACKAGE_NAME = "com.unisa.unistore.adapter";
+    public static final String NOTICE_AUTHOR_ID_TAG = "notice author";
+    public static final String BOOK_TITLE_TAG = "notice author";
 
     static float sAnimatorScale = 2;
 
-    private View bgBookImage;
+    private View backgroundFotoLibro;
     private View bgBookDescription;
 
+    private String idLibro;
     private TextView titoloLibro;
     private TextView autoriLibro;
     private TextView prezzoLibro;
-
+    private TextView descrizioneLibro;
+    private TextView statoLibro;
+    private TextView linguaLibro;
+    private TextView ISBNLibro;
+    private TextView autoreAnnuncio;
     private ImageView fotoLibro;
+
     private com.nostra13.universalimageloader.core.ImageLoader imageLoader;
     private DisplayImageOptions options;
     private int mLeftDelta;
@@ -87,6 +103,8 @@ public class NoticeDetailActivity extends ActionBarActivity {
             supportActionBar.setDisplayHomeAsUpEnabled(true);
         }
 
+        findViewById(R.id.contact_the_author_button).setOnClickListener(this);
+
         setupLayout();
 
         // Only run the animation if we're coming from the parent activity, not if
@@ -95,7 +113,7 @@ public class NoticeDetailActivity extends ActionBarActivity {
                 savedInstanceState == null) {
             //mShadowLayout = (ShadowLayout) findViewById(R.id.background_book_description_detail);
             mBackground = new ColorDrawable(getResources().getColor(R.color.book_detail_background));
-            bgBookImage.setBackground(mBackground);
+            backgroundFotoLibro.setBackground(mBackground);
 
             Bundle bundle = getIntent().getExtras();
 
@@ -141,18 +159,89 @@ public class NoticeDetailActivity extends ActionBarActivity {
     private void setupLayout() {
         Intent intent = getIntent();
 
-        bgBookImage = findViewById(R.id.background_book_image_detail);
-        bgBookDescription = findViewById(R.id.background_book_description_detail);
 
+        //this.bgBookDescription = findViewById(R.id.background_book_description_detail);
+        this.idLibro = intent.getStringExtra(RVAdapter.BOOK_ID_MESSAGE);
+        doParseQuery();
         this.titoloLibro = (TextView) findViewById(R.id.book_title_detail);
         this.titoloLibro.setText(intent.getStringExtra(RVAdapter.BOOK_TITLE_MESSAGE));
         this.autoriLibro = (TextView) findViewById(R.id.book_authors_detail);
         this.autoriLibro.setText(intent.getStringExtra(RVAdapter.BOOK_AUTHORS_MESSAGE));
         this.prezzoLibro = (TextView) findViewById(R.id.book_price_detail);
         this.prezzoLibro.setText(intent.getStringExtra(RVAdapter.BOOK_PRICE_MESSAGE));
+        this.descrizioneLibro = (TextView) findViewById(R.id.book_description_detail);
+        this.statoLibro = (TextView) findViewById(R.id.book_state_detail);
+        this.linguaLibro = (TextView) findViewById(R.id.book_language_detail);
+        this.ISBNLibro = (TextView) findViewById(R.id.book_isbn_detail);
+        this.backgroundFotoLibro = findViewById(R.id.background_book_image_detail);
+        this.autoreAnnuncio = (TextView) findViewById(R.id.notice_author_detail);
         this.fotoLibro = (ImageView) findViewById(R.id.book_image_detail);
         new ImageUtilities(this, fotoLibro).displayImage(intent.getStringExtra(RVAdapter.BOOK_IMAGE_URL_MESSAGE));
+
         resizeImage();
+    }
+
+    private void doParseQuery() {
+        ParseQuery<ParseObject> query = ParseQuery.getQuery("Libri");
+        query.whereEqualTo("objectId", idLibro);
+
+        query.findInBackground(new FindCallback<ParseObject>() {
+            public void done(List<ParseObject> scoreList, ParseException e) {
+                if (e == null) {
+                    if (scoreList.size() > 0) {
+                        String tmp = scoreList.get(0).getString("autore_annuncio");
+                        if (tmp != null && tmp.length() == 10) {
+                            try {
+                                List<ParseUser> user = ParseUser.getQuery().whereEqualTo("objectId", tmp).find();
+                                if(user.size() > 0)
+                                    autoreAnnuncio.setText(user.get(0).getString("name"));
+                                else
+                                    autoreAnnuncio.setText(R.string.not_found);
+                            } catch (ParseException e1) {
+                                e1.printStackTrace();
+                            }
+                        } else
+                            autoreAnnuncio.setText(R.string.not_found);
+                    }
+
+                    String tmp = scoreList.get(0).getString("descrizione");
+                    if (tmp != null && tmp.length() > 18) {
+                        descrizioneLibro.setText(tmp);
+                        descrizioneLibro.setVisibility(View.VISIBLE);
+                        findViewById(R.id.book_description_detail_description).setVisibility(View.VISIBLE);
+                        findViewById(R.id.book_description_detail_divider).setVisibility(View.VISIBLE);
+                    }
+
+                    tmp = scoreList.get(0).getString("stato");
+                    if (tmp != null) {
+                        statoLibro.setText(tmp);
+                        statoLibro.setVisibility(View.VISIBLE);
+                        findViewById(R.id.book_state_detail_description).setVisibility(View.VISIBLE);
+                        findViewById(R.id.book_state_detail_divider).setVisibility(View.VISIBLE);
+                    }
+
+                    tmp = scoreList.get(0).getString("lingua");
+                    if (tmp != null) {
+                        linguaLibro.setText(tmp);
+                        linguaLibro.setVisibility(View.VISIBLE);
+                        findViewById(R.id.book_language_detail_description).setVisibility(View.VISIBLE);
+                        findViewById(R.id.book_language_detail_divider).setVisibility(View.VISIBLE);
+                    }
+
+                    tmp = scoreList.get(0).getString("isbn");
+                    if (tmp != null && tmp.length() > 13) {
+                        ISBNLibro.setText(tmp);
+                        ISBNLibro.setVisibility(View.VISIBLE);
+                        findViewById(R.id.book_isbn_detail_description).setVisibility(View.VISIBLE);
+                        findViewById(R.id.book_isbn_detail_divider).setVisibility(View.VISIBLE);
+                    }
+
+                    Log.d("Annunci", "Trovati " + scoreList.size() + " annunci");
+                } else {
+                    Log.d("Annunci", "Errore: " + e.getMessage());
+                }
+            }
+        });
     }
 
     private void setupWindowAnimations() {
@@ -175,7 +264,7 @@ public class NoticeDetailActivity extends ActionBarActivity {
 
             @Override
             public void onTransitionEnd(Transition transition) {
-                animateRevealShow(bgBookImage);
+                animateRevealShow(backgroundFotoLibro);
             }
 
             @Override
@@ -202,7 +291,7 @@ public class NoticeDetailActivity extends ActionBarActivity {
         returnTransition.addListener(new Transition.TransitionListener() {
             @Override
             public void onTransitionStart(Transition transition) {
-                animateRevealHide(bgBookImage);
+                animateRevealHide(backgroundFotoLibro);
             }
 
             @Override
@@ -331,5 +420,20 @@ public class NoticeDetailActivity extends ActionBarActivity {
                 return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onClick(View v) {
+        if(v.getId() == R.id.contact_the_author_button) {
+            Intent intent = new Intent(this, ChatActivity.class);
+            String authorId = "";
+            try {
+                authorId = ParseUser.getQuery().whereEqualTo("name", autoreAnnuncio.getText().toString()).find().get(0).getObjectId();
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+            intent.putExtra(NOTICE_AUTHOR_ID_TAG, authorId);
+            startActivity(intent);
+        }
     }
 }

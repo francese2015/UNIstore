@@ -76,11 +76,11 @@ public class ListaAnnunci {
         ArrayList<String> autori = new ArrayList<>();
         autori.add("Deitel");
         autori.add("Manzoni");
-        Libro l1 = new Libro("titolo1", autori, "http://bks2.books.google.it/books/content?id=eZVvPgAACAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api",
+        Libro l1 = new Libro("id1", "titolo1", autori, "http://bks2.books.google.it/books/content?id=eZVvPgAACAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api",
                 "Questa è una descrizione", new Date().toString());
-        Libro l2 = new Libro("titolo2", autori, "http://bks2.books.google.it/books/content?id=eZVvPgAACAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api",
+        Libro l2 = new Libro("id2", "titolo2", autori, "http://bks2.books.google.it/books/content?id=eZVvPgAACAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api",
                 "Questa è un'altra descrizione", new Date().toString());
-        Libro l3 = new Libro("titolo3", autori, "http://bks2.books.google.it/books/content?id=eZVvPgAACAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api",
+        Libro l3 = new Libro("id3", "titolo3", autori, "http://bks2.books.google.it/books/content?id=eZVvPgAACAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api",
                 "Questa è ancora un'altra descrizione", new Date().toString());
 
         Annuncio a1 = new Annuncio(ParseUser.getCurrentUser(), new Date(), l1, 30);
@@ -93,15 +93,18 @@ public class ListaAnnunci {
     }
 
     public void addAnnunci(List<ParseObject> scoreList, boolean onTop) {
+        String id = "";
         String titolo = "";
         JSONArray autori = new JSONArray();
         ArrayList<String> lista_autori = null;
         int i, size = 0;
         String url = "";
         String data = "";
+        ParseUser autoreAnnuncio = null;
         Libro libro = null;
 
         for(ParseObject libroParse : scoreList) {
+            id = libroParse.getObjectId();
             titolo = libroParse.getString("titolo");
 
             lista_autori = new ArrayList<>();
@@ -120,10 +123,13 @@ public class ListaAnnunci {
             String descrizione = libroParse.getString("descrizione");
             data = libroParse.getString("data");
 
-            Date date = libroParse.getDate("updatedAt");
+            libro = new Libro(id, titolo, lista_autori, url, descrizione, data);
 
-            libro = new Libro(titolo, lista_autori, url, descrizione, data);
-            Annuncio annuncio = new Annuncio(ParseUser.getCurrentUser(), date, libro, 30);
+            autoreAnnuncio = (ParseUser) libroParse.getParseObject("autore_annuncio");
+            Date date = libroParse.getDate("updatedAt");
+            Number prezzo = libroParse.getNumber("prezzo_annuncio");
+
+            Annuncio annuncio = new Annuncio(autoreAnnuncio, date, libro, prezzo);
 
             if(onTop)
                 lista_annunci.add(0, annuncio);

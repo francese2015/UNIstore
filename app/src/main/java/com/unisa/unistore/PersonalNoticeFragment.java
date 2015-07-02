@@ -28,13 +28,15 @@ import com.parse.FindCallback;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
+import com.parse.ParseUser;
 import com.unisa.unistore.adapter.RVAdapter;
 import com.unisa.unistore.model.ListaAnnunci;
 import com.unisa.unistore.utilities.Utilities;
 
 import java.util.List;
 
-public class HomeFragment extends Fragment {
+//TODO Questa classe e HomeFragment devono essere reingegnerizzate (i metodi in comune vanno inseriti in una classe di utilities, oppure pensare se conviene inserire qualche metodo in MainActivity, tipo la gestione dei FAB)
+public class PersonalNoticeFragment extends Fragment {
 
     private static final int QUERY_LIMIT = 6;
     public static final String INPUT_TYPE_MESSAGE = "input type";
@@ -65,7 +67,7 @@ public class HomeFragment extends Fragment {
     private FrameLayout wheel;
     private RecyclerView recyclerView;
 
-    public HomeFragment() { }
+    public PersonalNoticeFragment() { }
 
     public void setToolbar(Toolbar t) {
         toolbar = t;
@@ -75,7 +77,7 @@ public class HomeFragment extends Fragment {
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        ((MainActivity) activity).setDrawerSelection(MainActivity.HOME_ID);
+        ((MainActivity) activity).setDrawerSelection(MainActivity.PERSONAL_NOTICE_ID);
 
         LA = new ListaAnnunci();
 
@@ -116,28 +118,6 @@ public class HomeFragment extends Fragment {
         fab_form.setTag("form");
         setFABListener(fab_form, fab_camera);
 
-        /*
-        fab_line = (FloatingActionButton) activity.findViewById(R.id.fab_line);
-        fab_line.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                fab_line.setLineMorphingState((fab_line.getLineMorphingState() + 1) % 2, true);
-
-
-                if (Utilities.isUserAuthenticated()) {
-                    Intent intent = new Intent(activity, PubblicaAnnuncioActivity.class);
-                    //activity.startActivityForResult(intent, 12345);
-                } else {
-                    Context context = activity.getApplicationContext();
-                    CharSequence text = getString(R.string.profile_title_logged_out);
-                    int duration = Toast.LENGTH_LONG;
-
-                    Toast toast = Toast.makeText(context, text, duration);
-                    toast.show();
-                }
-            }
-        });
-*/
         wheel = (FrameLayout) getActivity().findViewById(R.id.progress_wheel_layout);
 
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
@@ -192,7 +172,6 @@ public class HomeFragment extends Fragment {
 
         recyclerView.setHasFixedSize(true);
 
-        //TODO Questo if va inserito in qualche altro metodo
         if(Utilities.checkConnection(activity)) {
             getActivity().findViewById(R.id.no_connection_message).setVisibility(View.INVISIBLE);
             downloadAnnunci(false);
@@ -263,6 +242,9 @@ public class HomeFragment extends Fragment {
     private void downloadAnnunci(boolean isRefreshing) {
         final boolean refresh = isRefreshing;
         final ParseQuery<ParseObject> query = ParseQuery.getQuery("Libri");
+        if(ParseUser.getCurrentUser() == null)
+            return;
+        query.whereEqualTo("autore_annuncio", ParseUser.getCurrentUser().getObjectId());
         query.orderByDescending("updatedAt");
 
         query.countInBackground(new CountCallback() {

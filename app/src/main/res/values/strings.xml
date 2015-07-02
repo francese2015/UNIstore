@@ -42,6 +42,7 @@
     <string name="desc_list_item_icon">Item Icon</string>
 
     <string name="buy_button">Acquista</string>
+    <string name="contact_the_author_button">Contatta</string>
     <string name="drawer_menu_title">Drawer_title</string>
     <string name="empty_string" />
     <string name="menu_open"></string>
@@ -50,10 +51,12 @@
 
 
     <!-- Expand Example -->
-    <string name="demo_expand_customtitle1">Lorem ipsum dolor sit amet, consectetur adipisici elit...</string>
-    <string name="demo_expand_customtitle2">Quis aute iure reprehenderit in voluptate velit esse cillum ..</string>
-    <string name="demo_expand_customtitle3">Lorem ipsum dolor sit amet, consectetur adipisici elit...Lorem ipsum dolor sit amet, consectetur adipisici elit...Lorem ipsum dolor sit amet, consectetur adipisici elit...Lorem ipsum dolor sit amet, consectetur adipisici elit...</string>
-    <string name="demo_header_expand_area_inside">Card with expand area inside</string>
+    <string name="lorem_ipsum">Lorem ipsum dolor sit amet, consectetur adipisici elit...</string>
+    <string name="long_lorem_ipsum">"Lorem ipsum dolor sit amet, consectetur adipiscing elit,
+        sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+        Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+        Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
+        Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."</string>
 
     <string name="yes">Sì</string>
     <string name="no">No</string>
@@ -110,8 +113,19 @@
     <string name="fab_form">Compila il form</string>
     <string name="fab_camera">Scan del codice ISBN</string>
     <string name="logout">Logout</string>
-    <string name="login">Login</string>
+    <string name="enter_with_an_account">Accedi</string>
     <string name="drawer_item_settings">Impostazioni</string>
+    <string name="account_deleted">L\'account &#232; stato cancellato</string>
+    <string name="account_not_found">L\'account non &#232; stato trovato</string>
+    <string name="non_authenticated">Non sei autenticato</string>
+    <string name="personal_notice">Annunci personali</string>
+    <string name="notice_author">Autore dell\'annuncio</string>
+    <string name="not_found">Non disponibile</string>
+    <string name="contact_administrator">Si &#232; verificato un errore. Contattare l\'amministratore.</string>
+    <string name="message_hint">Scrivi il messaggio</string>
+    <string name="send">Invia</string>
+    <string name="profile_other">Ricevente</string>
+    <string name="profile_me">Io</string>
     <string-array name="language_array">
         <item>Italiano</item>
         <item>Inglese</item>

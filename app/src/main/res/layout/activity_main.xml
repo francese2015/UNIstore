@@ -8,38 +8,17 @@
         android:id="@+id/fragment_toolbar"
         layout="@layout/toolbar" />
 
-    <android.support.v4.widget.DrawerLayout
-        android:id="@+id/drawer_menu"
+    <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@+id/fragment_toolbar"
-        android:layout_marginTop="5dp"
-        tools:context=".MainActivity">
+        android:id="@+id/layout_root_view"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/fragment_toolbar">
 
-        <!-- Framelayout to display Fragments -->
-        <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-            xmlns:card_view="http://schemas.android.com/apk/res-auto"
-            android:orientation="vertical"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:id="@+id/layout_root_view">
-
-        </FrameLayout>
-
-        <!-- Listview to display slider menu -->
-        <ListView
-            android:id="@+id/list_slidermenu"
-            android:layout_width="240dp"
-            android:layout_height="match_parent"
-            android:layout_gravity="start"
-            android:layout_marginTop="-5dp"
-            android:choiceMode="singleChoice"
-            android:divider="@color/list_divider"
-            android:dividerHeight="1dp"
-            android:listSelector="@drawable/list_selector"
-            android:background="@drawable/list_selector"/>
-    </android.support.v4.widget.DrawerLayout>
-
+    </FrameLayout>
 
 
 </RelativeLayout>

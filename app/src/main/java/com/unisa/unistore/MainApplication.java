@@ -2,11 +2,13 @@ package com.unisa.unistore;
 
 import android.app.Application;
 
+import com.crashlytics.android.Crashlytics;
 import com.parse.Parse;
 import com.parse.ParseACL;
 import com.parse.ParseCrashReporting;
 import com.parse.ParseFacebookUtils;
 
+import io.fabric.sdk.android.Fabric;
 import uk.co.chrisjenx.calligraphy.CalligraphyConfig;
 
 public class MainApplication extends Application {
@@ -14,9 +16,10 @@ public class MainApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+        Fabric.with(this, new Crashlytics());
 
         CalligraphyConfig.initDefault(new CalligraphyConfig.Builder()
-                        .setDefaultFontPath("fonts/Bangers/Bangers.ttf")
+                        .setDefaultFontPath("fonts/Georgia/Georgia.ttf")
                         .setFontAttrId(R.attr.fontPath)
                         .build()
         );

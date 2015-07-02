@@ -1,21 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-    MenuInflater inflater = getMenuInflater();
-    inflater.inflate(R.menu.option_menu, menu);
+    <item
+        android:id="@+id/action_settings"
+        android:orderInCategory="100"
+        app:showAsAction="never"
+        android:title="@string/action_settings"/>
 
-    // Associate searchable configuration with the SearchView
-    SearchManager searchManager =
-    (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-    SearchView searchView =
-    (SearchView) menu.findItem(R.id.search).getActionView();
-    searchView.setSearchableInfo(
-    searchManager.getSearchableInfo(getComponentName()));
-
-    return true;
-    }
+    <item android:id="@+id/search"
+        android:title="@string/search"
+        android:orderInCategory="200"
+        android:icon="@drawable/ic_magnify_white_24dp"
+        app:showAsAction="collapseActionView|ifRoom"
+        app:actionViewClass="android.support.v7.widget.SearchView"/>
 
 </menu>
 

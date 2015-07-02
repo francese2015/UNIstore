@@ -15,10 +15,10 @@ import com.parse.FindCallback;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
+import com.parse.ParseUser;
 import com.unisa.unistore.adapter.RVAdapter;
 import com.unisa.unistore.model.ListaAnnunci;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
@@ -26,7 +26,7 @@ import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 /**
  * Created by utente pc on 17/06/2015.
  */
-public class SearchResultActivity extends ActionBarActivity {
+public class PersonalNoticeActivity extends ActionBarActivity {
 
     private LinearLayoutManager mLayoutManager;
     private SwipeRefreshLayout mSwipeRefreshLayout;
@@ -58,26 +58,18 @@ public class SearchResultActivity extends ActionBarActivity {
         adapter = new RVAdapter(this);
         adapter.setListaAnnunci(LA);
 
-        doParseQuery(getIntent().getStringExtra(MainActivity.QUERY_TAG));
+        doParseQuery();
 
         recyclerView.setAdapter(adapter);
         recyclerView.setHasFixedSize(true);
 
     }
 
-    private void doParseQuery(String queryString) {
-        final ParseQuery<ParseObject> titleQuery = ParseQuery.getQuery("Libri");
-        titleQuery.whereStartsWith("titolo", queryString);
+    private void doParseQuery() {
+        final ParseQuery<ParseObject> query = ParseQuery.getQuery("Libri");
+        query.whereEqualTo("autore_annuncio", ParseUser.getCurrentUser().getObjectId());
 
-        final ParseQuery<ParseObject> authorsQuery = ParseQuery.getQuery("Libri");
-        authorsQuery.whereStartsWith("autori", queryString);
-
-        List<ParseQuery<ParseObject>> queries = new ArrayList<ParseQuery<ParseObject>>();
-        queries.add(titleQuery);
-        queries.add(authorsQuery);
-
-        ParseQuery<ParseObject> mainQuery = ParseQuery.or(queries);
-        mainQuery.findInBackground(new FindCallback<ParseObject>() {
+        query.findInBackground(new FindCallback<ParseObject>() {
             public void done(List<ParseObject> scoreList, ParseException e) {
                 if (e == null) {
                     if (scoreList.size() > 0) {
