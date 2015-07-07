@@ -169,7 +169,7 @@
         <item name="fab_shadowColor">#444</item>
         <item name="fab_colorNormal">@color/background_floating_material_light</item>
         <item name="fab_colorPressed">#ffffff</item>
-        <item name="fab_colorRipple">#eeeeee</item>
+        <item name="fab_colorRipple">#f44336</item>
     </style>
 
     <style name="MenuLabelsStyle">
@@ -178,5 +178,17 @@
         <item name="android:textSize">14sp</item>
         <item name="android:maxLines">2</item>
         <item name="android:ellipsize">end</item>
+    </style>
+
+    <style name="SnackBarMultiLine" parent="Material.Widget.SnackBar.Mobile.MultiLine">
+        <item name="sb_actionTextColor">@color/primary</item>
+        <item name="sb_inAnimation">@anim/snackbar_slide_in</item>
+        <item name="sb_outAnimation">@anim/snackbar_slide_out</item>
+        <item name="sb_duration">5000</item>
+    </style>
+
+    <style name="menu_labels_style">
+        <item name="android:background">@drawable/fab_label_background</item>
+        <item name="android:textColor">@color/white</item>
     </style>
 </resources>
