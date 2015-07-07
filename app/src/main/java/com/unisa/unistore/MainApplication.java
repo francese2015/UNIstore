@@ -7,6 +7,9 @@ import com.parse.Parse;
 import com.parse.ParseACL;
 import com.parse.ParseCrashReporting;
 import com.parse.ParseFacebookUtils;
+import com.parse.ParseObject;
+import com.parse.PushService;
+import com.unisa.unistore.model.Message;
 
 import io.fabric.sdk.android.Fabric;
 import uk.co.chrisjenx.calligraphy.CalligraphyConfig;
@@ -32,6 +35,9 @@ public class MainApplication extends Application {
 
         Parse.setLogLevel(Parse.LOG_LEVEL_DEBUG);
 
+        // Register your parse models here
+        ParseObject.registerSubclass(Message.class);
+
         // Add your initialization code here
         Parse.initialize(this, getString(R.string.parse_app_id),
                 getString(R.string.parse_client_key));
@@ -43,5 +49,8 @@ public class MainApplication extends Application {
         ParseACL.setDefaultACL(defaultACL, true);
 
         ParseFacebookUtils.initialize(getString(R.string.facebook_app_id));
+
+        PushService.setDefaultPushCallback(getApplicationContext(), MainActivity.class);
+
     }
 }

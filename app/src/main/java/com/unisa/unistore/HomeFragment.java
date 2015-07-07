@@ -19,6 +19,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AnimationUtils;
 import android.widget.FrameLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.github.clans.fab.FloatingActionButton;
@@ -28,8 +29,11 @@ import com.parse.FindCallback;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
+import com.rey.material.widget.SnackBar;
 import com.unisa.unistore.adapter.RVAdapter;
+import com.unisa.unistore.model.Annuncio;
 import com.unisa.unistore.model.ListaAnnunci;
+import com.unisa.unistore.utilities.NetworkUtilities;
 import com.unisa.unistore.utilities.Utilities;
 
 import java.util.List;
@@ -64,6 +68,12 @@ public class HomeFragment extends Fragment {
     //private FloatingActionButton fab_line;
     private FrameLayout wheel;
     private RecyclerView recyclerView;
+    private SnackBar mSnackBar;
+    private Handler handler = new Handler();
+    private boolean isRefreshing;
+    private TextView no_connection_message;
+
+    private static HomeFragment mInst;
 
     public HomeFragment() { }
 
@@ -71,11 +81,17 @@ public class HomeFragment extends Fragment {
         toolbar = t;
     }
 
+    public static HomeFragment instance() {
+        return mInst;
+    }
+
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        ((MainActivity) activity).setDrawerSelection(MainActivity.HOME_ID);
+        mSnackBar = new SnackBar(activity);
+
+        no_connection_message = (TextView) getActivity().findViewById(R.id.no_connection_message);
 
         LA = new ListaAnnunci();
 
@@ -92,7 +108,6 @@ public class HomeFragment extends Fragment {
         recyclerView.setAdapter(adapter);
 
         fab_menu = (FloatingActionMenu) activity.findViewById(R.id.fab_menu);
-        fab_menu.close(false);
         fab_menu.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -181,7 +196,7 @@ public class HomeFragment extends Fragment {
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                refreshContent();
+                refreshing.run();
             }
         });
 
@@ -193,14 +208,33 @@ public class HomeFragment extends Fragment {
         recyclerView.setHasFixedSize(true);
 
         //TODO Questo if va inserito in qualche altro metodo
-        if(Utilities.checkConnection(activity)) {
-            getActivity().findViewById(R.id.no_connection_message).setVisibility(View.INVISIBLE);
+        if(NetworkUtilities.checkConnection(activity)) {
+            no_connection_message.setVisibility(View.INVISIBLE);
             downloadAnnunci(false);
         } else {
-            getActivity().findViewById(R.id.no_connection_message).setVisibility(View.VISIBLE);
+            no_connection_message.setVisibility(View.VISIBLE);
             noConnection = true;
         }
     }
+
+    private final Runnable refreshing = new Runnable(){
+        public void run(){
+            try {
+                if(isRefreshing()){
+                    // re run the verification after 1 second
+                    no_connection_message.setVisibility(View.INVISIBLE);
+                    handler.postDelayed(this, 1000);
+                }else{
+                    // stop the animation after the data is fully loaded
+                    mSwipeRefreshLayout.setRefreshing(false);
+                    adapter.notifyDataSetChanged();
+                }
+            }
+            catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    };
 
     private void setFABListener(final FloatingActionButton... fab_form) {
         int len = fab_form.length;
@@ -212,6 +246,7 @@ public class HomeFragment extends Fragment {
             tmp.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    fab_menu.close(true);
 
                     if (Utilities.isUserAuthenticated()) {
                         Intent intent = new Intent(activity, PubblicaAnnuncioActivity.class);
@@ -246,23 +281,41 @@ public class HomeFragment extends Fragment {
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                if(Utilities.checkConnection(activity)) {
-                    downloadAnnunci(true);
-                    mSwipeRefreshLayout.setRefreshing(false);
-                    if(noConnection)
-                        activity.findViewById(R.id.no_connection_message).setVisibility(View.INVISIBLE);
-                } else {
-                    Toast.makeText(activity,
-                            "Attivare la connessione per scaricare la lista degli annunci",
-                            Toast.LENGTH_SHORT).show();
-                }
+                downloadAnnunci(true);
+                mSwipeRefreshLayout.setRefreshing(false);
             }
         }, 5000);
     }
 
-    private void downloadAnnunci(boolean isRefreshing) {
+    public void downloadAnnunci(boolean isRefreshing) {
+        if(!NetworkUtilities.checkConnection(activity)) {
+            no_connection_message.setVisibility(View.VISIBLE);
+
+            mSwipeRefreshLayout.setRefreshing(false);
+            mSnackBar.text(R.string.activate_connection)
+                    .applyStyle(R.style.SnackBarMultiLine)
+                    .actionText("HO CAPITO")
+                    .actionClickListener(new SnackBar.OnActionClickListener() {
+                        @Override
+                        public void onActionClick(SnackBar snackBar, int i) {
+                            mSnackBar.dismiss();
+                        }
+                    });
+            ViewGroup view = (ViewGroup) activity.findViewById(android.R.id.content);
+            mSnackBar.show(view);
+
+            return;
+        }
+        //activity.unregisterReceiver(receiver);
+        setRefreshing(true);
+
+        no_connection_message.setVisibility(View.INVISIBLE);
+
         final boolean refresh = isRefreshing;
         final ParseQuery<ParseObject> query = ParseQuery.getQuery("Libri");
+        query.whereLessThan("stato_transazione", Annuncio.TRANSAZIONE_ACQUISTO_CONCORDATO);
+        //TODO da decommentare
+        //query.orderByDescending("createdAt");
         query.orderByDescending("updatedAt");
 
         query.countInBackground(new CountCallback() {
@@ -322,10 +375,10 @@ public class HomeFragment extends Fragment {
                     query.findInBackground(new FindCallback<ParseObject>() {
                         public void done(List<ParseObject> scoreList, ParseException e) {
                             if (e == null) {
-                                if(scoreList.size() > 0) {
+                                if (scoreList.size() > 0) {
                                     LA.addAnnunci(scoreList, true);
-                                    adapter.notifyDataSetChanged();
                                     queryCnt += scoreList.size();
+                                    setRefreshing(false);
                                 }
 
                                 Log.d("Libri-refresh", "Trovati " + scoreList.size() + " libri" +
@@ -389,6 +442,13 @@ public class HomeFragment extends Fragment {
     }
 
     @Override
+    public void onStart() {
+        super.onStart();
+
+        mInst = this;
+    }
+
+    @Override
     public void onResume() {
         super.onResume();
 
@@ -397,10 +457,13 @@ public class HomeFragment extends Fragment {
             return;
         }
 
-        fab_menu.close(true);
+        Utilities.setClicked(false);
+        //refreshContent();
+    }
 
-        setClicked(false);
-        refreshContent();
+    @Override
+    public void onPause() {
+        super.onPause();
     }
 
     @Override
@@ -419,15 +482,6 @@ public class HomeFragment extends Fragment {
         this.supportActionBar = supportActionBar;
     }
 
-    //TODO Metodi da inserire in una classe di utlities
-    public static boolean isClicked() {
-        return clicked;
-    }
-
-    public static void setClicked(boolean isClicked) {
-        clicked = isClicked;
-    }
-
     public boolean isFABMenuOpened() {
         return fab_menu.isOpened();
     }
@@ -435,4 +489,17 @@ public class HomeFragment extends Fragment {
     public void closeFABMenu(boolean animated) {
         fab_menu.close(animated);
     }
+
+    public void setRefreshing(boolean isRefreshing) {
+        this.isRefreshing = isRefreshing;
+    }
+
+    private boolean isRefreshing() {
+        if(isRefreshing) {
+            isRefreshing = false;
+            return true;
+        } else
+            return false;
+    }
+
 }

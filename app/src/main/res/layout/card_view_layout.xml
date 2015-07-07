@@ -40,7 +40,7 @@
                 <ImageView
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:id="@+id/book_image"
+                    android:id="@+id/take_book_photo"
                     android:padding="8dp"
                     android:layout_alignParentLeft="true"
                     android:layout_centerInParent="true"/>

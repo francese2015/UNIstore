@@ -4,7 +4,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -17,6 +17,7 @@ import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.unisa.unistore.adapter.RVAdapter;
 import com.unisa.unistore.model.ListaAnnunci;
+import com.unisa.unistore.utilities.Utilities;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,7 +27,7 @@ import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 /**
  * Created by utente pc on 17/06/2015.
  */
-public class SearchResultActivity extends ActionBarActivity {
+public class SearchResultActivity extends AppCompatActivity {
 
     private LinearLayoutManager mLayoutManager;
     private SwipeRefreshLayout mSwipeRefreshLayout;
@@ -103,6 +104,13 @@ public class SearchResultActivity extends ActionBarActivity {
                 return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        Utilities.setClicked(false);
     }
 
     @Override

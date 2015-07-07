@@ -27,13 +27,20 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.parse.ParseException;
+import com.parse.ParseInstallation;
+import com.parse.ParsePush;
 import com.parse.ParseUser;
+import com.parse.SaveCallback;
 import com.parse.ui.ParseLoginBuilder;
+
+import java.util.ArrayList;
 
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
@@ -122,6 +129,28 @@ public class LoginActivity extends Activity {
             // Make sure the request was successful
             if (resultCode == RESULT_OK) {
                 currentUser = ParseUser.getCurrentUser();
+
+                // Associate the device with a user
+                ParseInstallation installation = ParseInstallation.getCurrentInstallation();
+                if(installation.get("user") == null || !installation.get("user").equals(currentUser.getObjectId())) {
+                    installation.put("user", currentUser.getObjectId());
+                    installation.saveInBackground();
+                }
+
+                if(installation.get("channels") == null ||
+                        !((ArrayList) installation.get("channels")).contains("")) {
+                    ParsePush.subscribeInBackground("", new SaveCallback() {
+                        @Override
+                        public void done(ParseException e) {
+                            if (e == null) {
+                                Log.d("com.parse.push", "successfully subscribed to the broadcast channel.");
+                            } else {
+                                Log.e("com.parse.push", "failed to subscribe for push", e);
+                            }
+                        }
+                    });
+                }
+
                 if(userAuthenticated())
                     launchMainActivity();
                 else

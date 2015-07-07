@@ -31,6 +31,7 @@ import com.parse.ParseQuery;
 import com.parse.ParseUser;
 import com.unisa.unistore.adapter.RVAdapter;
 import com.unisa.unistore.model.ListaAnnunci;
+import com.unisa.unistore.utilities.NetworkUtilities;
 import com.unisa.unistore.utilities.Utilities;
 
 import java.util.List;
@@ -76,8 +77,6 @@ public class PersonalNoticeFragment extends Fragment {
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-
-        ((MainActivity) activity).setDrawerSelection(MainActivity.PERSONAL_NOTICE_ID);
 
         LA = new ListaAnnunci();
 
@@ -172,7 +171,7 @@ public class PersonalNoticeFragment extends Fragment {
 
         recyclerView.setHasFixedSize(true);
 
-        if(Utilities.checkConnection(activity)) {
+        if(NetworkUtilities.checkConnection(activity)) {
             getActivity().findViewById(R.id.no_connection_message).setVisibility(View.INVISIBLE);
             downloadAnnunci(false);
         } else {
@@ -225,7 +224,7 @@ public class PersonalNoticeFragment extends Fragment {
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                if(Utilities.checkConnection(activity)) {
+                if(NetworkUtilities.checkConnection(activity)) {
                     downloadAnnunci(true);
                     mSwipeRefreshLayout.setRefreshing(false);
                     if(noConnection)
@@ -245,7 +244,7 @@ public class PersonalNoticeFragment extends Fragment {
         if(ParseUser.getCurrentUser() == null)
             return;
         query.whereEqualTo("autore_annuncio", ParseUser.getCurrentUser().getObjectId());
-        query.orderByDescending("updatedAt");
+        query.orderByDescending("createdAt");
 
         query.countInBackground(new CountCallback() {
             @Override
@@ -374,14 +373,9 @@ public class PersonalNoticeFragment extends Fragment {
     public void onResume() {
         super.onResume();
 
-        if(firstLaunch) {
-            firstLaunch = false;
-            return;
-        }
-
         fab_menu.close(true);
 
-        setClicked(false);
+        Utilities.setClicked(false);
         refreshContent();
     }
 
@@ -401,20 +395,4 @@ public class PersonalNoticeFragment extends Fragment {
         this.supportActionBar = supportActionBar;
     }
 
-    //TODO Metodi da inserire in una classe di utlities
-    public static boolean isClicked() {
-        return clicked;
-    }
-
-    public static void setClicked(boolean isClicked) {
-        clicked = isClicked;
-    }
-
-    public boolean isFABMenuOpened() {
-        return fab_menu.isOpened();
-    }
-
-    public void closeFABMenu(boolean animated) {
-        fab_menu.close(animated);
-    }
 }

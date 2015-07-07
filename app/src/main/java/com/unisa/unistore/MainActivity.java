@@ -4,9 +4,10 @@ import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
@@ -40,11 +41,13 @@ import java.util.Stack;
 
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
-public class MainActivity extends ActionBarActivity implements View.OnClickListener,
+public class MainActivity extends AppCompatActivity implements View.OnClickListener,
         ParseOnLoginSuccessListener {
     public static final int HOME_ID = 0;
     public static final int PERSONAL_NOTICE_ID = 1;
-    public static final int ENTER_WITH_AN_ACCOUNT_ID = 9;
+    public static final int PURCHASE_AGREEMENT_ID = 2;
+    private static final int CONCLUDE_TRANSACTION_ID = 5;
+    public static final int ENTER_WITH_AN_ACCOUNT_ID = 8;
     private static final int LOGOUT_ID = 10;
     private static final int SETTINGS_ID = 11;
     private static final int PROFILE_SETTING = 12;
@@ -52,11 +55,15 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
     private static final String HOME_FRAGMENT_TAG = "HomeFragmentTag";
     private static final String PERSONAL_NOTICE_TAG = "PersonalNoticeFragmentTag";
     private static final String SETTINGS_FRAGMENT_TAG = "SettingsFragmentTag";
+    private static final String PURCHASE_AGREEMENT_TAG = "PurchaseAgreementFragmentTag";
+    private static final String CONCLUDE_TRANSACTION_TAG = "ConcludeTransactionTag";
 
     private static final String VISITOR_TAG = "visitatore";
     private static final String USER_OBJECT_NAME_FIELD = "name";
     private static final int MANAGE_ACCOUNT_CALL = 1;
+
     public static final String QUERY_TAG = "annunci";
+    private static final String MAIN_ACTIVITY_TAG = "MainActivityIntent";
 
     private Fragment fragment;
 
@@ -76,6 +83,10 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
 
     private Stack<String> fragmentStack = new Stack();
 
+    private static final String INTENT_ACTION = "com.unisa.unistore.HomeFragment";
+
+    private IntentFilter filter = new IntentFilter(INTENT_ACTION);
+    private ConnectivityChangeReceiver receiver = new ConnectivityChangeReceiver();
 
     private ListaAnnunci LA;
 
@@ -116,10 +127,6 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
 
         creteDrawer(false, savedInstanceState);
 
-        if (savedInstanceState == null) {
-            // on first time display view for first nav item
-            displayView(HOME_ID);
-        }
 
     }
 
@@ -133,11 +140,9 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
         enterWithAnAccountItem = new PrimaryDrawerItem().withName(getString(R.string.enter_with_an_account)).withIcon(FontAwesome.Icon.faw_sign_in).withIdentifier(ENTER_WITH_AN_ACCOUNT_ID);
 
         PrimaryDrawerItem home = new PrimaryDrawerItem()
-                .withName(R.string.home).withIcon(FontAwesome.Icon.faw_home);
-        home.setIdentifier(HOME_ID);
+                .withName(R.string.home).withIcon(FontAwesome.Icon.faw_home).withIdentifier(HOME_ID);
         PrimaryDrawerItem personalNotice = new PrimaryDrawerItem()
-                .withName(R.string.personal_notice).withIcon(FontAwesome.Icon.faw_archive);
-        personalNotice.setIdentifier(PERSONAL_NOTICE_ID);
+                .withName(R.string.personal_notice).withIcon(FontAwesome.Icon.faw_archive).withIdentifier(PERSONAL_NOTICE_ID);
 
         DividerDrawerItem divider = new DividerDrawerItem();
 
@@ -156,25 +161,31 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
                         switch(identifier) {
                             case HOME_ID:
                                 displayView(HOME_ID);
-                                return true;
+                                break;
                             case PERSONAL_NOTICE_ID:
                                 displayView(PERSONAL_NOTICE_ID);
-                                return true;
+                                break;
+                            case PURCHASE_AGREEMENT_ID:
+                                displayView(PURCHASE_AGREEMENT_ID);
+                                //result.getActionBarDrawerToggle().setDrawerIndicatorEnabled(true);
+                                break;
                             case ENTER_WITH_AN_ACCOUNT_ID:
                                 Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+                                //TODO probabilmente da aggiustare
                                 startActivity(intent);
                                 finish();
-                                return true;
+                                break;
                             case SETTINGS_ID:
                                 //displayView(SETTINGS_ID);
-                                intent = new Intent(MainActivity.this, ViewPagerWithTabsExpandedActivity.class);
+                                intent = new Intent(MainActivity.this, AddNoticeViewPagerActivity.class);
                                 startActivity(intent);
                                 finish();
-                                return true;
+                                break;
                             default:
                                 //Toast.makeText(MainActivity.this, R.string.message_error, Toast.LENGTH_SHORT).show();
                                 return false;
                         }
+                        return true;
                     }
                 })
                 .withOnDrawerNavigationListener(new Drawer.OnDrawerNavigationListener() {
@@ -195,10 +206,10 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
 
         if(!Utilities.isUserAuthenticated()) {
             drawerBuilder.addDrawerItems(
-                    enterWithAnAccountItem,
-                    divider,
-                    home
-            );
+                    home,
+            divider,
+                    enterWithAnAccountItem
+                    );
         } else {
             // Create the AccountHeader
             buildHeader(compact, savedInstanceState);
@@ -206,7 +217,9 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
             drawerBuilder.withAccountHeader(headerResult)
                     .addDrawerItems(
                             home,
-                            personalNotice
+                            personalNotice,
+                            new PrimaryDrawerItem()
+                                    .withName(R.string.purchased).withIcon(FontAwesome.Icon.faw_hacker_news).withIdentifier(PURCHASE_AGREEMENT_ID)
                     );
         }
 
@@ -373,6 +386,13 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
     @Override
     public void onResume(){
         super.onResume();
+
+        registerReceiver(receiver, filter);
+
+        if(fragmentStack.empty()) {
+            return;
+        }
+
         //TODO da eliminare quasi sicuramente
         String selection = fragmentStack.lastElement();
 
@@ -390,6 +410,13 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
                     break;
             }
         }
+    }
+
+    @Override
+    public void onPause() {
+        // Unregister the receiver
+        unregisterReceiver(receiver);
+        super.onPause();
     }
 
     @Override
@@ -437,37 +464,27 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
      * */
     private void displayView(int position) {
         Intent intent = null;
-        int fragmentTopPosition = fragmentStack.size() - 1;
 
         // update the main content by replacing fragments
         fragment = null;
         switch (position) {
             case HOME_ID:
-                if(fragmentTopPosition >= 0) {
-                    if(fragmentStack.get(fragmentTopPosition).equals(HOME_FRAGMENT_TAG))
-                        return;
-                }
-
                 fragment = new HomeFragment();
-                fragmentStack.push(HOME_FRAGMENT_TAG);
+                pushFragment(fragment, HOME_FRAGMENT_TAG);
                 //((HomeFragment)fragment).setToolbar(toolbar);
                 ((HomeFragment)fragment).setToolbar(supportActionBar);
-                result.getActionBarDrawerToggle().setDrawerIndicatorEnabled(true);
                 break;
             case PERSONAL_NOTICE_ID:
-                if(fragmentTopPosition >= 0) {
-                    if(fragmentStack.get(fragmentTopPosition).equals(PERSONAL_NOTICE_TAG))
-                        return;
-                }
-
                 fragment = new PersonalNoticeFragment();
-                fragmentStack.push(PERSONAL_NOTICE_TAG);
+                pushFragment(fragment, PERSONAL_NOTICE_TAG);
 
                 ((PersonalNoticeFragment)fragment).setToolbar(supportActionBar);
-                result.getActionBarDrawerToggle().setDrawerIndicatorEnabled(true);
                 break;
-            case 3:
-                fragment = new AgendaFragment();
+            case PURCHASE_AGREEMENT_ID:
+                fragment = new PurchaseAgreementFragment();
+                pushFragment(fragment, PURCHASE_AGREEMENT_TAG);
+
+                ((PurchaseAgreementFragment)fragment).setToolbar(supportActionBar);
                 break;
             case ENTER_WITH_AN_ACCOUNT_ID:
                 if(Utilities.isUserAuthenticated()) {
@@ -507,6 +524,18 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
         }
     }
 
+    private int pushFragment(Fragment fragment, String tag) {
+        int fragmentTopPosition = fragmentStack.size() - 1;
+
+        if(fragmentTopPosition >= 0) {
+            if(fragmentStack.get(fragmentTopPosition).equals(tag))
+                return -1;
+        }
+        fragmentStack.push(tag);
+
+        return 0;
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.options_menu, menu);
@@ -544,7 +573,10 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
             result.closeDrawer();
         } else if(getFragmentManager().getBackStackEntryCount() > 1) {
             getFragmentManager().popBackStack();
-            fragmentStack.pop();
+            if(fragmentStack.empty())
+                return;
+            else
+                fragmentStack.pop();
         } else {
             super.onBackPressed();
         }

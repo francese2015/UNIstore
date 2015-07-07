@@ -12,7 +12,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.transition.Explode;
 import android.transition.Transition;
@@ -26,9 +26,12 @@ import android.view.animation.AccelerateInterpolator;
 import android.view.animation.Animation;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.ScaleAnimation;
+import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.parse.FindCallback;
@@ -36,14 +39,17 @@ import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
+import com.parse.SaveCallback;
 import com.unisa.unistore.adapter.RVAdapter;
+import com.unisa.unistore.model.Annuncio;
 import com.unisa.unistore.utilities.ImageUtilities;
+import com.unisa.unistore.utilities.ParseUtilities;
 
 import java.util.List;
 
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
-public class NoticeDetailActivity extends ActionBarActivity implements View.OnClickListener {
+public class NoticeDetailActivity extends AppCompatActivity implements View.OnClickListener {
     private static final long ANIM_DURATION = 1500;
     private static final long LOLLIPOP_ANIM_DURATION = 1000;
     private static final TimeInterpolator sDecelerator = new DecelerateInterpolator();
@@ -53,9 +59,13 @@ public class NoticeDetailActivity extends ActionBarActivity implements View.OnCl
     private static final int WIDTH = 525;
     private static final String PACKAGE_NAME = "com.unisa.unistore.adapter";
     public static final String NOTICE_AUTHOR_ID_TAG = "notice author";
-    public static final String BOOK_TITLE_TAG = "notice author";
+    public static final String BOOK_ID = "book id";
+    public static final String IS_NOTICE_AUTHOR = "is notice author?";
 
     static float sAnimatorScale = 2;
+
+    private Button contactAuthorButton;
+    private Button buyButton;
 
     private View backgroundFotoLibro;
     private View bgBookDescription;
@@ -69,6 +79,8 @@ public class NoticeDetailActivity extends ActionBarActivity implements View.OnCl
     private TextView linguaLibro;
     private TextView ISBNLibro;
     private TextView autoreAnnuncio;
+    private TextView statoTransazione;
+    private int idStatoTransazione = -1;
     private ImageView fotoLibro;
 
     private com.nostra13.universalimageloader.core.ImageLoader imageLoader;
@@ -79,6 +91,9 @@ public class NoticeDetailActivity extends ActionBarActivity implements View.OnCl
     private float mHeightScale;
     private ColorDrawable mBackground;
     private FrameLayout mTopLevelLayout;
+    private String objectIdAutoreAnnuncio = "";
+
+    private ParseObject parseObject = null;
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     @Override
@@ -103,7 +118,10 @@ public class NoticeDetailActivity extends ActionBarActivity implements View.OnCl
             supportActionBar.setDisplayHomeAsUpEnabled(true);
         }
 
-        findViewById(R.id.contact_the_author_button).setOnClickListener(this);
+        contactAuthorButton = (Button) findViewById(R.id.contact_the_author_button);
+        contactAuthorButton.setOnClickListener(this);
+        buyButton = (Button) findViewById(R.id.buy_button);
+        buyButton.setOnClickListener(this);
 
         setupLayout();
 
@@ -189,10 +207,64 @@ public class NoticeDetailActivity extends ActionBarActivity implements View.OnCl
             public void done(List<ParseObject> scoreList, ParseException e) {
                 if (e == null) {
                     if (scoreList.size() > 0) {
-                        String tmp = scoreList.get(0).getString("autore_annuncio");
-                        if (tmp != null && tmp.length() == 10) {
+                        parseObject = scoreList.get(0);
+                        String objectIdAcquirente = parseObject.getString("id_acquirente");
+                        objectIdAutoreAnnuncio = parseObject.getString("autore_annuncio");
+                        boolean isAcquirente = objectIdAcquirente != null ? objectIdAcquirente.equals(ParseUser.getCurrentUser().getObjectId()) : false;
+                        boolean isAutoreAnnuncio = objectIdAutoreAnnuncio.equals(ParseUser.getCurrentUser().getObjectId());
+                        statoTransazione = (TextView) findViewById(R.id.transaction_state_detail);
+                        idStatoTransazione = parseObject.getNumber("stato_transazione") != null ? parseObject.getNumber("stato_transazione").intValue() : -1;
+
+                        if(idStatoTransazione == Annuncio.TRANSAZIONE_INIZIO && isAutoreAnnuncio) {
+                            buyButton.setVisibility(View.GONE);
+                            contactAuthorButton.setVisibility(View.GONE);
+
+                            statoTransazione.setVisibility(View.VISIBLE);
+                            findViewById(R.id.transaction_state_detail_description).setVisibility(View.VISIBLE);
+                            findViewById(R.id.transaction_state_detail_divider).setVisibility(View.VISIBLE);
+                            statoTransazione.setText(R.string.notice_author_start_transaction);
+                        } else if(idStatoTransazione == Annuncio.TRANSAZIONE_IN_TRATTATIVA) {
+                            statoTransazione.setVisibility(View.VISIBLE);
+                            findViewById(R.id.transaction_state_detail_description).setVisibility(View.VISIBLE);
+                            findViewById(R.id.transaction_state_detail_divider).setVisibility(View.VISIBLE);
+
+                            if(isAutoreAnnuncio) {
+                                buyButton.setText(R.string.decide);
+                                statoTransazione.setText(R.string.notice_author_in_negotiation_transaction);
+                            } else if(isAcquirente) {
+                                buyButton.setEnabled(false);
+                                statoTransazione.setText(R.string.buyer_in_negotiation_transaction);
+                            }
+
+                        } else if(idStatoTransazione == Annuncio.TRANSAZIONE_ACQUISTO_CONCORDATO) {
+                            buyButton.setEnabled(true);
+                            buyButton.setText(R.string.conclude_transaction);
+
+                            statoTransazione.setVisibility(View.VISIBLE);
+                            findViewById(R.id.transaction_state_detail_description).setVisibility(View.VISIBLE);
+                            findViewById(R.id.transaction_state_detail_divider).setVisibility(View.VISIBLE);
+                            if(isAutoreAnnuncio) {
+                                statoTransazione.setText(R.string.notice_author_accepted_purchase);
+                            } else if(isAcquirente) {
+                                statoTransazione.setText(R.string.buyer_accepted_purchase);
+                            }
+                        } else if(idStatoTransazione == Annuncio.TRANSAZIONE_FINE) {
+                            buyButton.setVisibility(View.GONE);
+                            LinearLayout.LayoutParams param = new LinearLayout.LayoutParams(
+                                    LinearLayout.LayoutParams.MATCH_PARENT,
+                                    LinearLayout.LayoutParams.MATCH_PARENT, 2.0f);
+                            contactAuthorButton.setLayoutParams(param);
+                            statoTransazione.setVisibility(View.VISIBLE);
+                            findViewById(R.id.transaction_state_detail_description).setVisibility(View.VISIBLE);
+                            findViewById(R.id.transaction_state_detail_divider).setVisibility(View.VISIBLE);
+                            statoTransazione.setText(R.string.transaction_concluded);
+                        } else if(idStatoTransazione == -1) {
+                            //ancora nessuno vuole acquistare il libro
+                        }
+
+                        if (parseObject != null && objectIdAutoreAnnuncio.length() == 10) {
                             try {
-                                List<ParseUser> user = ParseUser.getQuery().whereEqualTo("objectId", tmp).find();
+                                List<ParseUser> user = ParseUser.getQuery().whereEqualTo("objectId", objectIdAutoreAnnuncio).find();
                                 if(user.size() > 0)
                                     autoreAnnuncio.setText(user.get(0).getString("name"));
                                 else
@@ -202,43 +274,39 @@ public class NoticeDetailActivity extends ActionBarActivity implements View.OnCl
                             }
                         } else
                             autoreAnnuncio.setText(R.string.not_found);
-                    }
 
-                    String tmp = scoreList.get(0).getString("descrizione");
-                    if (tmp != null && tmp.length() > 18) {
-                        descrizioneLibro.setText(tmp);
-                        descrizioneLibro.setVisibility(View.VISIBLE);
-                        findViewById(R.id.book_description_detail_description).setVisibility(View.VISIBLE);
-                        findViewById(R.id.book_description_detail_divider).setVisibility(View.VISIBLE);
-                    }
+                        if (parseObject != null && parseObject.getString("descrizione").length() > 18) {
+                            descrizioneLibro.setText(parseObject.getString("descrizione"));
+                            descrizioneLibro.setVisibility(View.VISIBLE);
+                            findViewById(R.id.book_description_detail_description).setVisibility(View.VISIBLE);
+                            findViewById(R.id.book_description_detail_divider).setVisibility(View.VISIBLE);
+                        }
 
-                    tmp = scoreList.get(0).getString("stato");
-                    if (tmp != null) {
-                        statoLibro.setText(tmp);
-                        statoLibro.setVisibility(View.VISIBLE);
-                        findViewById(R.id.book_state_detail_description).setVisibility(View.VISIBLE);
-                        findViewById(R.id.book_state_detail_divider).setVisibility(View.VISIBLE);
-                    }
+                        if (parseObject != null && parseObject.getString("stato") != null) {
+                            statoLibro.setText(parseObject.getString("stato"));
+                            statoLibro.setVisibility(View.VISIBLE);
+                            findViewById(R.id.book_state_detail_description).setVisibility(View.VISIBLE);
+                            findViewById(R.id.book_state_detail_divider).setVisibility(View.VISIBLE);
+                        }
 
-                    tmp = scoreList.get(0).getString("lingua");
-                    if (tmp != null) {
-                        linguaLibro.setText(tmp);
-                        linguaLibro.setVisibility(View.VISIBLE);
-                        findViewById(R.id.book_language_detail_description).setVisibility(View.VISIBLE);
-                        findViewById(R.id.book_language_detail_divider).setVisibility(View.VISIBLE);
-                    }
+                        if (parseObject != null && parseObject.getString("lingua") != null) {
+                            linguaLibro.setText(parseObject.getString("lingua"));
+                            linguaLibro.setVisibility(View.VISIBLE);
+                            findViewById(R.id.book_language_detail_description).setVisibility(View.VISIBLE);
+                            findViewById(R.id.book_language_detail_divider).setVisibility(View.VISIBLE);
+                        }
 
-                    tmp = scoreList.get(0).getString("isbn");
-                    if (tmp != null && tmp.length() > 13) {
-                        ISBNLibro.setText(tmp);
-                        ISBNLibro.setVisibility(View.VISIBLE);
-                        findViewById(R.id.book_isbn_detail_description).setVisibility(View.VISIBLE);
-                        findViewById(R.id.book_isbn_detail_divider).setVisibility(View.VISIBLE);
-                    }
+                        if (parseObject != null && parseObject.getString("isbn") != null && parseObject.getString("isbn").length() > 10) {
+                            ISBNLibro.setText(parseObject.getString("isbn"));
+                            ISBNLibro.setVisibility(View.VISIBLE);
+                            findViewById(R.id.book_isbn_detail_description).setVisibility(View.VISIBLE);
+                            findViewById(R.id.book_isbn_detail_divider).setVisibility(View.VISIBLE);
+                        }
 
-                    Log.d("Annunci", "Trovati " + scoreList.size() + " annunci");
-                } else {
-                    Log.d("Annunci", "Errore: " + e.getMessage());
+                        Log.d("Annunci", "Trovati " + scoreList.size() + " annunci");
+                    } else {
+                        Log.d("Annunci", "Errore: " + e.getMessage());
+                    }
                 }
             }
         });
@@ -426,14 +494,100 @@ public class NoticeDetailActivity extends ActionBarActivity implements View.OnCl
     public void onClick(View v) {
         if(v.getId() == R.id.contact_the_author_button) {
             Intent intent = new Intent(this, ChatActivity.class);
-            String authorId = "";
-            try {
-                authorId = ParseUser.getQuery().whereEqualTo("name", autoreAnnuncio.getText().toString()).find().get(0).getObjectId();
-            } catch (ParseException e) {
-                e.printStackTrace();
-            }
+            intent.putExtra(NOTICE_AUTHOR_ID_TAG, objectIdAutoreAnnuncio);
+            startActivity(intent);
+        } else if(v.getId() == R.id.buy_button) {
+            //Intent intent = new Intent(this, ChatActivity.class);
+            ParseQuery<ParseObject> query = ParseQuery.getQuery("Libri");
+            query.whereEqualTo("objectId", idLibro);
+
+            query.findInBackground(new FindCallback<ParseObject>() {
+                public void done(List<ParseObject> scoreList, ParseException e) {
+                    if (e == null) {
+                        if (scoreList.size() > 0) {
+                            parseObject = scoreList.get(0);
+                            if (parseObject != null) {
+                                try {
+                                    if(idStatoTransazione == Annuncio.TRANSAZIONE_INIZIO) {
+                                        final ParseUser autore = ParseUser.getQuery().whereEqualTo("objectId", parseObject.get("autore_annuncio")).find().get(0);
+                                        parseObject.put("stato_transazione", Annuncio.TRANSAZIONE_IN_TRATTATIVA);
+                                        parseObject.put("id_acquirente", ParseUser.getCurrentUser().getObjectId());
+
+                                        parseObject.saveInBackground(new SaveCallback() {
+                                            @Override
+                                            public void done(ParseException e) {
+                                                if (e == null) {
+                                                    ParseUtilities.sendNotificationToNoticeAuthor(
+                                                            autore, ParseUser.getCurrentUser().get("name") + " " +
+                                                                    getString(R.string.request_for_purchase_without_name));
+                                                    buyButton.setEnabled(false);
+
+                                                    statoTransazione.setVisibility(View.VISIBLE);
+                                                    findViewById(R.id.transaction_state_detail_description).setVisibility(View.VISIBLE);
+                                                    findViewById(R.id.transaction_state_detail_divider).setVisibility(View.VISIBLE);
+                                                    statoTransazione.setText(R.string.buyer_in_negotiation_transaction);
+
+                                                    Toast.makeText(NoticeDetailActivity.this, R.string.done, Toast.LENGTH_SHORT).show();
+                                                } else {
+                                                    Log.e("NoticeDetailActivity", e.getMessage());
+                                                    Toast.makeText(NoticeDetailActivity.this, R.string.contact_administrator, Toast.LENGTH_SHORT).show();
+                                                }
+                                            }
+                                        });
+                                    } else if(idStatoTransazione == Annuncio.TRANSAZIONE_IN_TRATTATIVA) {
+                                        final ParseUser acquirente = ParseUser.getQuery().whereEqualTo("objectId", parseObject.get("id_acquirente")).find().get(0);
+                                        parseObject.put("stato_transazione", Annuncio.TRANSAZIONE_ACQUISTO_CONCORDATO);
+
+                                        parseObject.saveInBackground(new SaveCallback() {
+                                            @Override
+                                            public void done(ParseException e) {
+                                                if (e == null) {
+                                                    ParseUtilities.sendNotificationToNoticeAuthor(acquirente,
+                                                            getString(R.string.accepted_purchase));
+                                                    buyButton.setText(R.string.conclude_transaction);
+
+                                                    statoTransazione.setVisibility(View.VISIBLE);
+                                                    findViewById(R.id.transaction_state_detail_description).setVisibility(View.VISIBLE);
+                                                    findViewById(R.id.transaction_state_detail_divider).setVisibility(View.VISIBLE);
+                                                    statoTransazione.setText(getString(R.string.notice_author_purchase_agreement_transaction) + " " + acquirente.get("name"));
+
+                                                    Toast.makeText(NoticeDetailActivity.this, R.string.done, Toast.LENGTH_SHORT).show();
+                                                } else {
+                                                    Log.e("NoticeDetailActivity", e.getMessage());
+                                                    Toast.makeText(NoticeDetailActivity.this, R.string.contact_administrator, Toast.LENGTH_SHORT).show();
+                                                }
+                                            }
+                                        });
+                                    } else if(idStatoTransazione == Annuncio.TRANSAZIONE_ACQUISTO_CONCORDATO) {
+                                        Intent intent = new Intent(NoticeDetailActivity.this, ConcludeTransactionActivity.class);
+
+                                        boolean isAutoreAnnuncio = objectIdAutoreAnnuncio.equals(ParseUser.getCurrentUser().getObjectId());
+                                        if(isAutoreAnnuncio)
+                                            intent.putExtra(NoticeDetailActivity.IS_NOTICE_AUTHOR, true);
+                                        else
+                                            intent.putExtra(NoticeDetailActivity.IS_NOTICE_AUTHOR, false);
+
+                                        intent.putExtra(NoticeDetailActivity.BOOK_ID, parseObject.getObjectId());
+
+                                        startActivity(intent);
+                                    }
+                                } catch (ParseException e1) {
+                                    e1.printStackTrace();
+                                }
+                                finish();
+                            } else {
+                                Log.e("NoticeDetailActivity", "parseObject è null");
+                                Toast.makeText(NoticeDetailActivity.this, R.string.contact_administrator, Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                    }
+                }
+            /*
             intent.putExtra(NOTICE_AUTHOR_ID_TAG, authorId);
             startActivity(intent);
+            */
+            });
         }
     }
+
 }

@@ -7,7 +7,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.StrictMode;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.InputType;
 import android.util.Log;
@@ -50,7 +50,7 @@ import java.util.Calendar;
 
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
-public class PubblicaAnnuncioActivity extends ActionBarActivity
+public class PubblicaAnnuncioActivity extends AppCompatActivity
         implements View.OnClickListener, NumberPicker.OnValueChangeListener {
     private static final int MIN_YEAR = 1900;
     private static final int MAX_YEAR = Calendar.getInstance().get(Calendar.YEAR);
@@ -122,7 +122,7 @@ public class PubblicaAnnuncioActivity extends ActionBarActivity
         languageSpinner = (Spinner) findViewById(R.id.book_language_spinner);
         stateGroup = (RadioGroup) findViewById(R.id.book_state);
         priceText = (TextView) findViewById(R.id.book_price);
-        thumbView = (ImageView) findViewById(R.id.book_image);
+        thumbView = (ImageView) findViewById(R.id.take_book_photo);
 
         rb_new_state = (RadioButton) findViewById(R.id.new_state);
         rb_like_new_state = (RadioButton) findViewById(R.id.like_new_state);
@@ -257,10 +257,13 @@ public class PubblicaAnnuncioActivity extends ActionBarActivity
                                 return;
                             }
                             bookParseObject.put("prezzo_annuncio", Double.parseDouble(priceText.getText().toString()));
+                            bookParseObject.put("stato_transazione", 0);
 
                             ParseACL groupACL = new ParseACL();
                             groupACL.setPublicReadAccess(true);
-                            groupACL.setPublicWriteAccess(false);
+                            groupACL.setPublicWriteAccess(true);
+                            //groupACL.setPublicWriteAccess(false);
+                            //groupACL.setWriteAccess(ParseUser.getCurrentUser(), true);
 
                             bookParseObject.setACL(groupACL);
                             bookParseObject.saveInBackground(new SaveCallback() {
