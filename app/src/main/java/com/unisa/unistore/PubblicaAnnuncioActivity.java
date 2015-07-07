@@ -174,10 +174,10 @@ public class PubblicaAnnuncioActivity extends AppCompatActivity
         final Dialog dialog = new Dialog(PubblicaAnnuncioActivity.this);
         dialog.setTitle(getString(R.string.choose_published_year_hint));
         dialog.setContentView(R.layout.dialog);
-        Button ok = (Button) dialog.findViewById(R.id.button1);
-        Button cancel = (Button) dialog.findViewById(R.id.button2);
+        Button ok = (Button) dialog.findViewById(R.id.ok_button);
+        Button cancel = (Button) dialog.findViewById(R.id.cancel_button);
 
-        final NumberPicker numberPicker = (NumberPicker) dialog.findViewById(R.id.numberPicker1);
+        final NumberPicker numberPicker = (NumberPicker) dialog.findViewById(R.id.year_numberPicker);
         numberPicker.setMaxValue(year);
         numberPicker.setMinValue(1900);
         numberPicker.setWrapSelectorWheel(false);
