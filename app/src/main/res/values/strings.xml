@@ -126,6 +126,23 @@
     <string name="send">Invia</string>
     <string name="profile_other">Ricevente</string>
     <string name="profile_me">Io</string>
+    <string name="conclude_transaction">Concludi transazione</string>
+    <string name="nfc_instruction">Avvicinare il retro dei due dispositivi e toccare lo schermo, non appena sar&#224; richiesto.</string>
+    <string name="notice_author_in_negotiation_transaction">C\'è un acquirente in attesa. Controlla la richiesta e, quindi, rispondi con l\'apposito tasto</string>
+    <string name="buyer_in_negotiation_transaction">In attesa di risposta da parte del venditore</string>
+    <string name="decide">Decidi</string>
+    <string name="notice_author_start_transaction">Non ci sono ancora richieste di acquisto</string>
+    <string name="done">Fatto</string>
+    <string name="notice_author_purchase_agreement_transaction">Il libro è stato venduto a</string>
+    <string name="purchased">Acquistati</string>
+    <string name="request_for_purchase_without_name">vuole comprare il libro</string>
+    <string name="accepted_purchase">L\'autore dell\'annuncio ha accettato la tua richiesta di acquisto</string>
+    <string name="nfc_error">Uso non corretto del nfc. Riprovare</string>
+    <string name="buyer_accepted_purchase">L\'autore dell\'annuncio ha accettato la richiesta d\'acquisto. Terminare l\'acquisto tramite l\'apposita funzione</string>
+    <string name="notice_author_accepted_purchase">In attesa dello scambio. Terminare l\'acquisto tramite l\'apposita funzione</string>
+    <string name="transaction_concluded">Compravendita conclusa</string>
+    <string name="wait">Un attimo di pazienza...</string>
+    <string name="activate_connection">Attivare la connessione per scaricare la lista degli annunci</string>
     <string-array name="language_array">
         <item>Italiano</item>
         <item>Inglese</item>

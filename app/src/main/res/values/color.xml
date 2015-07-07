@@ -76,4 +76,7 @@
     <color name="buy_button">@color/primary</color>
     <color name="buy_button_push">@color/primary_dark</color>
     <color name="buy_button_focus">@color/primary_dark</color>
+
+    <color name="white">#FFFFFF</color>
+    <color name="white_pressed">#f1f1f1</color>
 </resources>
