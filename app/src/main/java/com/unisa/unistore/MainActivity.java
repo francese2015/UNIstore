@@ -177,9 +177,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                 break;
                             case SETTINGS_ID:
                                 //displayView(SETTINGS_ID);
-                                intent = new Intent(MainActivity.this, AddNoticeViewPagerActivity.class);
-                                startActivity(intent);
-                                finish();
+                                //intent = new Intent(MainActivity.this, AddNoticeViewPagerActivity.class);
+                                //startActivity(intent);
+                                //finish();
                                 break;
                             default:
                                 //Toast.makeText(MainActivity.this, R.string.message_error, Toast.LENGTH_SHORT).show();
