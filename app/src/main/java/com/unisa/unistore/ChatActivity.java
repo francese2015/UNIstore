@@ -1,9 +1,9 @@
 package com.unisa.unistore;
 
-import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -28,7 +28,7 @@ import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 /**
  * Created by Daniele on 28/06/2015.
  */
-public class ChatActivity extends Activity {
+public class ChatActivity extends AppCompatActivity {
     private static final String TAG = ChatActivity.class.getName();
     private static final int MAX_CHAT_MESSAGES_TO_SHOW = 50;
 
@@ -97,7 +97,7 @@ public class ChatActivity extends Activity {
 
         //TODO da gestire meglio
         groupACL = new ParseACL();
-        groupACL.setPublicReadAccess(false);
+        groupACL.setPublicReadAccess(true);
         groupACL.setPublicWriteAccess(false);
         groupACL.setReadAccess(getIntent().getStringExtra(NoticeDetailActivity.NOTICE_AUTHOR_ID_TAG), true);
         groupACL.setReadAccess(sUserId, true);

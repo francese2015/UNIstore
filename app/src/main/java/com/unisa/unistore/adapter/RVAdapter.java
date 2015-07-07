@@ -15,11 +15,11 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
-import com.unisa.unistore.HomeFragment;
 import com.unisa.unistore.NoticeDetailActivity;
 import com.unisa.unistore.R;
 import com.unisa.unistore.model.ListaAnnunci;
 import com.unisa.unistore.utilities.ImageUtilities;
+import com.unisa.unistore.utilities.Utilities;
 
 import java.util.ArrayList;
 
@@ -117,7 +117,7 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.AnnuncioViewHolder
             this.titoloLibro = (TextView) itemView.findViewById(R.id.book_title);
             this.autoriLibro = (TextView) itemView.findViewById(R.id.book_authors);
             this.prezzoLibro = (TextView) itemView.findViewById(R.id.book_price);
-            this.fotoLibro = (ImageView) itemView.findViewById(R.id.book_image);
+            this.fotoLibro = (ImageView) itemView.findViewById(R.id.take_book_photo);
             //this.descrizioneLibro = (TextView) itemView.findViewById(R.id.book_description);
 
             cardView = (CardView)itemView.findViewById(R.id.expandable_card_view);
@@ -129,10 +129,10 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.AnnuncioViewHolder
 
                 @Override
                 public void onClick(View v) {
-                    if(HomeFragment.isClicked())
+                    if(Utilities.isClicked())
                         return;
 
-                    HomeFragment.setClicked(true);
+                    Utilities.setClicked(true);
                     Intent i = new Intent(activity, NoticeDetailActivity.class);
 
                     String id = idLibro.getText().toString();

@@ -9,6 +9,22 @@ import java.util.Date;
  * Created by Daniele on 15/05/2015.
  */
 public class Annuncio {
+    /**
+     * Nessun potenziale acquirente ha segnalato l'intenzione di acquistare il libro
+     */
+    public static final int TRANSAZIONE_INIZIO = 0;
+    /**
+     * Un potenziale acquirente ha espresso l'intenzione di acquistare il libro
+     */
+    public static final int TRANSAZIONE_IN_TRATTATIVA = 1;
+    /**
+     * L'acquisto e' stato concordato, quindi il libro deve essere rimosso dagli annunci (puo' essere mantenuto sul cloud fino alla fine della transazione)
+     */
+    public static final int TRANSAZIONE_ACQUISTO_CONCORDATO = 2;
+    /**
+     * La transazione e' terminata con successo (se ancora presente sul cloud, l'annuncio deve essere rimosso completamente)
+     */
+    public static final int TRANSAZIONE_FINE = 3;
     private ParseObject autore;
     private Date data_pubblicazione;
     private Libro libro;

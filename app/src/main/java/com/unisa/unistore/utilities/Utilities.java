@@ -20,6 +20,8 @@ import java.io.InputStream;
  */
 public class Utilities {
 
+    private static boolean clicked = false;
+
     public void scaleImage(ImageView imageView) {
         if(imageView != null) {
             // Get the ImageView and its bitmap
@@ -84,5 +86,13 @@ public class Utilities {
         view.startAnimation(AnimationUtils.loadAnimation(context,
                 R.anim.slide_down));
         view.setVisibility(View.GONE);
+    }
+
+    public static boolean isClicked() {
+        return clicked;
+    }
+
+    public static void setClicked(boolean isClicked) {
+        clicked = isClicked;
     }
 }

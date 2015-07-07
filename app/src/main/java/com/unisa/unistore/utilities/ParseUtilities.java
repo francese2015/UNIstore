@@ -2,8 +2,11 @@ package com.unisa.unistore.utilities;
 
 import com.parse.GetCallback;
 import com.parse.ParseException;
+import com.parse.ParseInstallation;
 import com.parse.ParseObject;
+import com.parse.ParsePush;
 import com.parse.ParseQuery;
+import com.parse.ParseUser;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -15,6 +18,15 @@ import bolts.Task;
  * Created by Daniele on 17/05/2015.
  */
 public class ParseUtilities {
+    public static void sendNotificationToNoticeAuthor(ParseUser destinatario, String messaggio) {
+        ParseQuery query = ParseInstallation.getQuery();
+        query.whereEqualTo("user", destinatario.getObjectId());
+
+        ParsePush push = new ParsePush();
+        push.setQuery(query);
+        push.setMessage(messaggio);
+        push.sendInBackground();
+    }
 
     public boolean salvaSulCloud(String nomeOggetto, String id, Map<String, Object> key_value) {
         String key = "";
