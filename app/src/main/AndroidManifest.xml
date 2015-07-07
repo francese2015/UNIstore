@@ -13,7 +13,11 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
     <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
-
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-feature android:name="android.hardware.camera"
+        android:required="true" />
+    <uses-permission android:name="android.permission.NFC" />
+    <uses-feature android:name="android.hardware.nfc" android:required="false" />
     <!--
       IMPORTANT: Change "com.parse.starter.permission.C2D_MESSAGE" in the lines below
       to match your app's package name + ".permission.C2D_MESSAGE".
@@ -21,6 +25,8 @@
     <permission android:protectionLevel="signature"
         android:name="com.unisa.unistore.permission.C2D_MESSAGE" />
     <uses-permission android:name="com.unisa.unistore.permission.C2D_MESSAGE" />
+
+    <meta-data android:name="com.parse.push.notification_icon" android:resource="@mipmap/ic_launcher"/>
 
     <application
         android:name=".MainApplication"
@@ -35,6 +41,14 @@
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
                 <action android:name="android.intent.action.USER_PRESENT" />
+            </intent-filter>
+        </receiver>
+
+        <receiver
+            android:name="com.unisa.unistore.ConnectivityChangeReceiver"
+            android:label="ConnectivityChangeReceiver" >
+            <intent-filter>
+                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
             </intent-filter>
         </receiver>
 
@@ -115,7 +129,7 @@
 
         </activity>
         <activity
-            android:name="com.unisa.unistore.PersonalNoticeActivity"
+            android:name=".bozze.PersonalNoticeActivity"
             android:label="@string/app_name"
             android:screenOrientation="portrait"
             android:parentActivityName="com.unisa.unistore.MainActivity" >
@@ -123,6 +137,22 @@
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.unisa.unistore.MainActivity" />
+        </activity>
+        <activity
+            android:name="com.unisa.unistore.ConcludeTransactionActivity"
+            android:label="@string/app_name"
+            android:screenOrientation="portrait"
+            android:parentActivityName="com.unisa.unistore.MainActivity" >
+            <!-- Parent activity meta-data to support 4.0 and lower -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.unisa.unistore.MainActivity" />
+
+            <intent-filter>
+                <action android:name="android.nfc.action.NDEF_DISCOVERED"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <data android:mimeType="application/vnd.com.example.android.beam"/>
+            </intent-filter>
         </activity>
         <activity
             android:name="com.unisa.unistore.PubblicaAnnuncioActivity"
@@ -136,11 +166,21 @@
                 android:value="com.unisa.unistore.MainActivity" />
         </activity>
         <activity
-            android:name=".ViewPagerWithTabsExpandedActivity"
+            android:name=".AddNoticeViewPagerActivity"
+            android:label="@string/app_name"
+            android:screenOrientation="portrait"
+            android:parentActivityName="com.unisa.unistore.MainActivity" >
+            <!-- Parent activity meta-data to support 4.0 and lower -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.unisa.unistore.MainActivity" />
+        </activity>
+        <activity
+            android:name=".ChatActivity"
             android:label="@string/app_name"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustResize"
-            android:parentActivityName="com.unisa.unistore.MainActivity" >
+            android:parentActivityName="com.unisa.unistore.NoticeDetailActivity" >
             <!-- Parent activity meta-data to support 4.0 and lower -->
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
