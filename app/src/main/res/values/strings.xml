@@ -143,6 +143,7 @@
     <string name="transaction_concluded">Compravendita conclusa</string>
     <string name="wait">Un attimo di pazienza...</string>
     <string name="activate_connection">Attivare la connessione per scaricare la lista degli annunci</string>
+    <string name="delete_notice">Cancella annuncio</string>
     <string-array name="language_array">
         <item>Italiano</item>
         <item>Inglese</item>

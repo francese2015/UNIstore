@@ -51,8 +51,6 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="15"
-                android:layout_marginTop="6dp"
-                android:layout_marginRight="6dp"
                 android:layout_toRightOf="@+id/book_photo_layout"
                 >
 
@@ -64,6 +62,8 @@
                     android:textColor="@color/primary_text"
                     android:text="Titolo"
                     android:textSize="18dp"
+                    android:layout_marginTop="6dp"
+                    android:layout_marginRight="42dp"
                     android:layout_alignParentTop="true" />
 
                 <TextView
@@ -72,8 +72,9 @@
                     android:layout_height="wrap_content"
                     android:textColor="@color/primary_text"
                     android:text="Autori"
-                    android:layout_marginTop="8dp"
                     android:textSize="18dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginRight="42dp"
                     android:layout_below="@+id/book_title"
                     android:layout_alignLeft="@+id/book_title" />
 
@@ -85,13 +86,24 @@
                     android:background="@color/price_cardview_background"
                     android:padding="8dp"
                     android:text="999.99€"
-                    android:layout_marginTop="@dimen/activity_vertical_margin"
                     android:textSize="18dp"
                     android:layout_alignParentBottom="true"
                     android:layout_alignParentRight="true"
                     android:layout_alignParentEnd="true"
                     android:elevation="5dp"
                     />
+
+                <ImageButton
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:id="@+id/delete_button"
+                    android:title="@string/delete_notice"
+                    android:visibility="gone"
+                    android:layout_alignParentRight="true"
+                    android:contentDescription="Cancella annuncio"
+                    android:background="@anim/ripple"
+                    android:src="@drawable/ic_delete_black_24dp"/>
+
             </RelativeLayout>
 
         </LinearLayout>

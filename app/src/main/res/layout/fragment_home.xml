@@ -82,44 +82,46 @@
             app:pv_progressMode="indeterminate"/>
 
     </FrameLayout>
-    <!--
 
     <com.getbase.floatingactionbutton.FloatingActionsMenu
         android:id="@+id/fab_menu"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true"
+        android:background="@color/transparent_fab_background"
         fab:fab_addButtonColorNormal="@color/primary"
         fab:fab_addButtonColorPressed="@color/primary_dark"
         fab:fab_addButtonPlusIconColor="@color/white"
         fab:fab_labelStyle="@style/menu_labels_style"
-        android:layout_marginBottom="16dp"
-        android:layout_marginRight="16dp"
-        android:layout_marginEnd="16dp">
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentBottom="true">
 
         <com.getbase.floatingactionbutton.FloatingActionButton
             android:id="@+id/fab_camera"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            fab:fab_addButtonSize="mini"
+            fab:fab_size="mini"
             fab:fab_colorNormal="@color/white"
-            fab:fab_title="Action A"
-            fab:fab_colorPressed="@color/white_pressed"/>
+            fab:fab_icon="@drawable/ic_barcode_black_24dp"
+            fab:fab_title="Codice ISBN"
+            fab:fab_colorPressed="#f44336"/>
 
         <com.getbase.floatingactionbutton.FloatingActionButton
             android:id="@+id/fab_form"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            fab:fab_addButtonSize="mini"
+            fab:fab_size="mini"
             fab:fab_colorNormal="@color/white"
-            fab:fab_title="Action with a very long name that won\'t fit on the screen"
-            fab:fab_colorPressed="@color/white_pressed"/>
+            fab:fab_icon="@drawable/ic_format_list_bulleted_black_24dp"
+            fab:fab_title="Compila form"
+            fab:fab_colorPressed="#f44336"/>
 
     </com.getbase.floatingactionbutton.FloatingActionsMenu>
--->
 
+    <!--
     <com.github.clans.fab.FloatingActionMenu
         android:id="@+id/fab_menu"
         android:layout_width="match_parent"
@@ -157,7 +159,6 @@
 
     </com.github.clans.fab.FloatingActionMenu>
 
-    <!--
     <com.rey.material.widget.FloatingActionButton
         xmlns:app="http://schemas.android.com/apk/res-auto"
         app:fab_iconLineMorphing="@style/FloatingActionButtonIcon"
