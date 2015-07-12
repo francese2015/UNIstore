@@ -21,6 +21,7 @@
     <color name="book_detail_background">#CFD8DC</color>
     <color name="gray_background">#ececec</color>
     <color name="material_grey">#e0e0e0</color>
+    <color name="cardview_background">#fbfbfb</color>
     <color name="book_cardview_background">#ececec</color>
     <color name="price_cardview_background">@color/md_red_300</color>
 
@@ -79,4 +80,7 @@
 
     <color name="white">#FFFFFF</color>
     <color name="white_pressed">#f1f1f1</color>
+
+    <color name="transparent_fab_background">#00FFFFFF</color>
+    <color name="fab_background">#aaE1E1E1</color>
 </resources>
