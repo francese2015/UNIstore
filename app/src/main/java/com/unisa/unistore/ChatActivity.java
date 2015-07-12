@@ -6,8 +6,8 @@ import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -31,6 +31,7 @@ import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 public class ChatActivity extends AppCompatActivity {
     private static final String TAG = ChatActivity.class.getName();
     private static final int MAX_CHAT_MESSAGES_TO_SHOW = 50;
+    private static final long REFRESH_TIMEOUT = 2000;
 
     // Create a handler which can run code periodically
     private Handler handler = new Handler();
@@ -40,7 +41,7 @@ public class ChatActivity extends AppCompatActivity {
     public static final String USER_ID_KEY = "userId";
 
     private EditText etMessage;
-    private Button btSend;
+    private ImageButton btSend;
 
     private ListView lvChat;
     private ArrayList<Message> mMessages;
@@ -73,7 +74,7 @@ public class ChatActivity extends AppCompatActivity {
         @Override
         public void run() {
             refreshMessages();
-            handler.postDelayed(this, 100);
+            handler.postDelayed(this, REFRESH_TIMEOUT);
         }
     };
 
@@ -89,7 +90,7 @@ public class ChatActivity extends AppCompatActivity {
     // Setup button event handler which posts the entered message to Parse
     private void setupMessagePosting() {
         etMessage = (EditText) findViewById(R.id.etMessage);
-        btSend = (Button) findViewById(R.id.btSend);
+        btSend = (ImageButton) findViewById(R.id.btSend);
         lvChat = (ListView) findViewById(R.id.lvChat);
         mMessages = new ArrayList<Message>();
         mAdapter = new ChatListAdapter(ChatActivity.this, sUserId, mMessages);
