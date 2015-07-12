@@ -32,11 +32,16 @@ import com.mikepenz.materialdrawer.model.ProfileSettingDrawerItem;
 import com.mikepenz.materialdrawer.model.SecondaryDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.IProfile;
+import com.parse.ParseException;
+import com.parse.ParseObject;
+import com.parse.ParseQuery;
 import com.parse.ParseUser;
 import com.parse.ui.ParseOnLoginSuccessListener;
 import com.unisa.unistore.model.ListaAnnunci;
+import com.unisa.unistore.utilities.ParseUtilities;
 import com.unisa.unistore.utilities.Utilities;
 
+import java.util.List;
 import java.util.Stack;
 
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
@@ -60,10 +65,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private static final String VISITOR_TAG = "visitatore";
     private static final String USER_OBJECT_NAME_FIELD = "name";
+
     private static final int MANAGE_ACCOUNT_CALL = 1;
+    public static final int PUBBLICA_ANNUNCIO_CALL = 2;
 
     public static final String QUERY_TAG = "annunci";
-    private static final String MAIN_ACTIVITY_TAG = "MainActivityIntent";
+    private static final String TAG = "MainActivity";
 
     private Fragment fragment;
 
@@ -108,6 +115,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if(Utilities.isUserAuthenticated())
             currentUser = ParseUser.getCurrentUser();
 
+        ParseUtilities.connectUser(currentUser);
+
         mRootView = (ViewGroup) findViewById(R.id.layout_root_view);
 
         toolbar = (Toolbar) findViewById(R.id.fragment_toolbar);
@@ -127,7 +136,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         creteDrawer(false, savedInstanceState);
 
-
+        if (savedInstanceState == null) {
+            // on first time display view for first nav item
+            displayView(HOME_ID);
+        }
     }
 
     private void creteDrawer(boolean compact, Bundle savedInstanceState) {
@@ -177,9 +189,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                 break;
                             case SETTINGS_ID:
                                 //displayView(SETTINGS_ID);
-                                //intent = new Intent(MainActivity.this, AddNoticeViewPagerActivity.class);
-                                //startActivity(intent);
-                                //finish();
+                                intent = new Intent(MainActivity.this, AddNoticeViewPagerActivity.class);
+                                startActivity(intent);
+                                finish();
                                 break;
                             default:
                                 //Toast.makeText(MainActivity.this, R.string.message_error, Toast.LENGTH_SHORT).show();
@@ -207,9 +219,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if(!Utilities.isUserAuthenticated()) {
             drawerBuilder.addDrawerItems(
                     home,
-            divider,
+                    divider,
                     enterWithAnAccountItem
-                    );
+            );
         } else {
             // Create the AccountHeader
             buildHeader(compact, savedInstanceState);
@@ -219,7 +231,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             home,
                             personalNotice,
                             new PrimaryDrawerItem()
-                                    .withName(R.string.purchased).withIcon(FontAwesome.Icon.faw_hacker_news).withIdentifier(PURCHASE_AGREEMENT_ID)
+                                    .withName(R.string.purchased).withIcon(FontAwesome.Icon.faw_shopping_cart).withIdentifier(PURCHASE_AGREEMENT_ID)
                     );
         }
 
@@ -338,6 +350,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             if (resultCode == RESULT_OK && result != null) {
                 creteDrawer(false, null); //non deve essere creato l'header
             }
+        } else if (requestCode == PUBBLICA_ANNUNCIO_CALL) {
+            refresh();
         }
     }
 
@@ -389,34 +403,40 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         registerReceiver(receiver, filter);
 
+        if(Utilities.isUserAuthenticated()) {
+            ParseQuery<ParseObject> query = ParseQuery.getQuery("Users_Online");
+            try {
+                List<ParseObject> users_online = query.whereEqualTo("userId", currentUser.getObjectId().toString()).find();
+                if (!users_online.isEmpty()) {
+                    users_online.get(0).put("online", true);
+                    users_online.get(0).saveEventually();
+                }
+            } catch (ParseException e) {
+                Log.d(TAG, "onPause()/Si è verificato un'errore: " + e.getMessage());
+                e.printStackTrace();
+            }
+        }
+
         if(fragmentStack.empty()) {
             return;
         }
 
-        //TODO da eliminare quasi sicuramente
-        String selection = fragmentStack.lastElement();
-
-        if(selection.length() > 0) {
-            switch(selection) {
-                case HOME_FRAGMENT_TAG:
-                    result.setSelection(HOME_ID);
-                    break;
-                case PERSONAL_NOTICE_TAG:
-                    result.setSelection(PERSONAL_NOTICE_ID);
-                    break;
-                case SETTINGS_FRAGMENT_TAG:
-                    break;
-                default:
-                    break;
-            }
-        }
     }
 
     @Override
     public void onPause() {
         // Unregister the receiver
         unregisterReceiver(receiver);
+
+        ParseUtilities.disconnectUser(this);
+
         super.onPause();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+
     }
 
     @Override
@@ -465,22 +485,34 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private void displayView(int position) {
         Intent intent = null;
 
-        // update the main content by replacing fragments
-        fragment = null;
+        //TODO da eliminare quasi sicuramente
+        String selection = null;
+        if(!fragmentStack.empty())
+            selection = fragmentStack.lastElement();
+
         switch (position) {
             case HOME_ID:
+                if(selection != null && selection.equals(HOME_FRAGMENT_TAG))
+                    return;
+                // update the main content by replacing fragments
                 fragment = new HomeFragment();
                 pushFragment(fragment, HOME_FRAGMENT_TAG);
                 //((HomeFragment)fragment).setToolbar(toolbar);
                 ((HomeFragment)fragment).setToolbar(supportActionBar);
                 break;
             case PERSONAL_NOTICE_ID:
+                if(selection != null && selection.equals(PERSONAL_NOTICE_TAG))
+                    return;
+
                 fragment = new PersonalNoticeFragment();
                 pushFragment(fragment, PERSONAL_NOTICE_TAG);
 
                 ((PersonalNoticeFragment)fragment).setToolbar(supportActionBar);
                 break;
             case PURCHASE_AGREEMENT_ID:
+                if(selection != null && selection.equals(PURCHASE_AGREEMENT_TAG))
+                    return;
+
                 fragment = new PurchaseAgreementFragment();
                 pushFragment(fragment, PURCHASE_AGREEMENT_TAG);
 
@@ -537,6 +569,56 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     @Override
+    public void onBackPressed() {
+        if(fragment instanceof NoticeFragment) {
+            final NoticeFragment noticeFragment = (NoticeFragment) fragment;
+            //Controlla se il menu del fabButton sia aperto: in tal caso questo viene chiuso.
+            if(noticeFragment.isFABMenuOpened()) {
+                noticeFragment.closeFABMenu();
+                return;
+            }
+        }
+
+        if(result != null && result.isDrawerOpen()) {
+            result.closeDrawer();
+        } else if(getFragmentManager().getBackStackEntryCount() > 1) {
+            getFragmentManager().popBackStack();
+            if(fragmentStack.empty()) {
+                return;
+            } else {
+                //Tolgo l'ultimo fragment dallo stack per ottenere il fragment precedente
+                //(che corrisponde a quello per cui deve essere selezionata la corrispondente voce
+                //nel drawer)
+                String lastFragment = fragmentStack.pop();
+                //TODO da eliminare quasi sicuramente
+                String selection = null;
+                if (!fragmentStack.empty())
+                    selection = fragmentStack.lastElement();
+
+                if (selection != null) {
+                    switch (selection) {
+                        case HOME_FRAGMENT_TAG:
+                            result.setSelection(HOME_ID, false);
+                            break;
+                        case PERSONAL_NOTICE_TAG:
+                            result.setSelection(PERSONAL_NOTICE_ID, false);
+                            break;
+                        case PURCHASE_AGREEMENT_TAG:
+                            result.setSelection(PURCHASE_AGREEMENT_ID, false);
+                            break;
+                        case SETTINGS_FRAGMENT_TAG:
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
+        } else {
+            super.onBackPressed();
+        }
+    }
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.options_menu, menu);
         return super.onCreateOptionsMenu(menu) | true;
@@ -563,26 +645,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     @Override
-    public void onBackPressed() {
-        //Controlla se il menu del fabButton sia aperto: in tal caso questo viene chiuso.
-        if(fragment instanceof HomeFragment && ((HomeFragment) fragment).isFABMenuOpened()) {
-            ((HomeFragment) fragment).closeFABMenu(true);
-            return;
-        }
-        if(result != null && result.isDrawerOpen()) {
-            result.closeDrawer();
-        } else if(getFragmentManager().getBackStackEntryCount() > 1) {
-            getFragmentManager().popBackStack();
-            if(fragmentStack.empty())
-                return;
-            else
-                fragmentStack.pop();
-        } else {
-            super.onBackPressed();
-        }
-    }
-
-    @Override
     protected void attachBaseContext(Context newBase) {
         super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));
     }
@@ -590,5 +652,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onLoginSuccess() {
 
+    }
+
+    public void refresh() {
+        ((NoticeFragment) fragment).refresh();
     }
 }
