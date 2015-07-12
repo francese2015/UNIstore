@@ -10,6 +10,8 @@
 
     <string name="action_settings">Impostazioni</string>
 
+    <string name="title_activity_maps">Map</string>
+
     <string name="greeting">Ciao Anonimo</string>
 
     <string name="icon_heart">&#xf004;</string>

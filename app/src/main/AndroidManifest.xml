@@ -48,8 +48,8 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
-    <android:uses-permission android:name="android.permission.READ_PHONE_STATE" />
-    <android:uses-permission
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission
         android:name="android.permission.READ_EXTERNAL_STORAGE"
         android:maxSdkVersion="18" />
 
@@ -238,7 +238,7 @@
                 <action android:name="com.google.android.c2dm.intent.RECEIVE" />
                 <action android:name="com.google.android.c2dm.intent.REGISTRATION" />
 
-<!--                   IMPORTANT: Change "com.parse.starter" to match your app's package name. -->
+                <!--                   IMPORTANT: Change "com.parse.starter" to match your app's package name. -->
                 <category android:name="com.unisa.unistore" />
             </intent-filter>
         </receiver>
@@ -246,6 +246,7 @@
         <meta-data
             android:name="io.fabric.ApiKey"
             android:value="92f20d3b97e2bdcb51f68ca1c309ed5bbbfa270f" />
+
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
@@ -255,8 +256,7 @@
 
         <activity
             android:name=".MapsActivity"
-            android:label="@string/title_activity_maps" >
+             >
         </activity>
     </application>
-
 </manifest>
