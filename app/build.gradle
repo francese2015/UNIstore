@@ -30,12 +30,18 @@ android {
 
     compileOptions.encoding = 'windows-1251'
 
+    dexOptions {
+        javaMaxHeapSize "4g"
+    }
+
     defaultConfig {
         applicationId "com.unisa.unistore"
         minSdkVersion 15
         targetSdkVersion 22
         versionCode 1
         versionName "1.0"
+
+        multiDexEnabled true
     }
     buildTypes {
         release {
@@ -46,6 +52,8 @@ android {
 }
 
 dependencies {
+    compile 'com.android.support:multidex:1.0.0'
+
     // Module dependency on ParseLoginUI library sources
     compile project(':calligraphy-2.1.0')
 
@@ -95,8 +103,8 @@ dependencies {
     compile 'com.getbase:floatingactionbutton:1.9.1'
 
     compile 'com.android.support:appcompat-v7:22.2.0+'
-    compile 'com.android.support:cardview-v7:21.+'
-    compile 'com.android.support:recyclerview-v7:21.0.+'
+    compile 'com.android.support:cardview-v7:22.2.0'
+    compile 'com.android.support:recyclerview-v7:22.0.0'
     compile 'com.android.support:design:22.2.0'
 
     compile 'com.google.android.gms:play-services:7.5.0'
