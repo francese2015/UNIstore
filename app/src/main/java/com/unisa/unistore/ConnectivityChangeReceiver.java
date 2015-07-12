@@ -28,7 +28,7 @@ public class ConnectivityChangeReceiver extends BroadcastReceiver {
         int status = NetworkUtilities.getConnectivityStatus(context);
 
         if (status == NetworkUtilities.TYPE_MOBILE || status == NetworkUtilities.TYPE_WIFI) {
-            HomeFragment inst = HomeFragment.instance();
+            NoticeFragment inst = NoticeFragment.instance();
             if(inst != null)  {
                 Log.d(TAG, "Inizio a scaricare gli annunci");
                 inst.downloadAnnunci(false);
