@@ -1,6 +1,5 @@
 package com.unisa.unistore.utilities;
 
-import android.app.Activity;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -43,8 +42,8 @@ public class NetworkUtilities {
         return status;
     }
 
-    public static boolean checkConnection(Activity activity) {
-        int conn = NetworkUtilities.getConnectivityStatus(activity);
+    public static boolean checkConnection(Context context) {
+        int conn = NetworkUtilities.getConnectivityStatus(context);
         boolean status = false;
         if (conn == NetworkUtilities.TYPE_WIFI) {
             status = true;
