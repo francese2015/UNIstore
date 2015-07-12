@@ -26,6 +26,7 @@ import android.widget.Toast;
 import com.parse.ParseACL;
 import com.parse.ParseException;
 import com.parse.ParseObject;
+import com.parse.ParseQuery;
 import com.parse.ParseUser;
 import com.parse.SaveCallback;
 import com.rey.material.widget.RadioButton;
@@ -45,8 +46,8 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
@@ -54,6 +55,7 @@ public class PubblicaAnnuncioActivity extends AppCompatActivity
         implements View.OnClickListener, NumberPicker.OnValueChangeListener {
     private static final int MIN_YEAR = 1900;
     private static final int MAX_YEAR = Calendar.getInstance().get(Calendar.YEAR);
+    private static final String TAG = "PubblicaAnnuncioActivity";
 
     private Button scanBtn, saveCloudBtn;
 
@@ -230,72 +232,7 @@ public class PubblicaAnnuncioActivity extends AppCompatActivity
                 scanBtn.setVisibility(View.INVISIBLE);
 
                 saveCloudBtn = (Button) findViewById(R.id.save_on_cloud_button);
-                saveCloudBtn.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View arg0) {
-                        if (ParseUser.getCurrentUser() != null) {
-                            bookParseObject = new ParseObject("Libri");
 
-                            bookParseObject.put("titolo", title);
-                            bookParseObject.put("autori", authors);
-                            bookParseObject.put("data_pubblicazione", publishedDate);
-                            bookParseObject.put("descrizione", description);
-                            bookParseObject.put("url_immagine_copertina", thumbnailURL);
-                            bookParseObject.put("isbn", ISBNText.getText().toString());
-                            bookParseObject.put("lingua", languageSpinner.getSelectedItem().toString());
-                            bookParseObject.put("autore_annuncio", ParseUser.getCurrentUser().getObjectId());
-                            String bookState = "Nuovo";
-                            if(((RadioButton)findViewById(stateGroup.getCheckedRadioButtonId())) != null) {
-                                ((RadioButton)findViewById(stateGroup.getCheckedRadioButtonId())).getText().toString();
-                            }
-                            bookParseObject.put("stato", bookState);
-                            if(priceText.getText().toString().length() <= 0) {
-                                Toast toast = Toast.makeText(getApplicationContext(),
-                                        "Inserire un prezzo di vendita", Toast.LENGTH_SHORT);
-                                toast.show();
-
-                                return;
-                            }
-                            bookParseObject.put("prezzo_annuncio", Double.parseDouble(priceText.getText().toString()));
-                            bookParseObject.put("stato_transazione", 0);
-
-                            ParseACL groupACL = new ParseACL();
-                            groupACL.setPublicReadAccess(true);
-                            groupACL.setPublicWriteAccess(true);
-                            //groupACL.setPublicWriteAccess(false);
-                            //groupACL.setWriteAccess(ParseUser.getCurrentUser(), true);
-
-                            bookParseObject.setACL(groupACL);
-                            bookParseObject.saveInBackground(new SaveCallback() {
-                                @Override
-                                public void done(ParseException e) {
-                                    if (e == null) {
-                                        Log.d("AnnuncioParse", "Salvataggio dell'annuncio sul cloud avvenuto con successo!");
-                                        Toast toast = Toast.makeText(getApplicationContext(),
-                                                "Annuncio salvato", Toast.LENGTH_SHORT);
-                                        toast.show();
-                                    } else {
-                                        Log.d("AnnuncioParse", "Problemi durante il salvataggio dell'annuncio sul cloud.");
-                                        e.getStackTrace();
-                                        Toast toast = Toast.makeText(getApplicationContext(),
-                                                "Errore durante il salvataggio dell'annuncio", Toast.LENGTH_SHORT);
-                                        toast.show();
-                                    }
-
-                                }
-                            });
-
-                            finish();
-                        } else {
-                            Context context = getApplicationContext();
-                            CharSequence text = getString(R.string.profile_title_logged_out);
-                            int duration = Toast.LENGTH_LONG;
-
-                            Toast toast = Toast.makeText(context, text, duration);
-                            toast.show();
-                        }
-                    }
-                });
                 new GetBookInfo().execute(bookSearchString);
                 saveCloudBtn.setVisibility(View.VISIBLE);
                 saveCloudBtn.setClickable(false);
@@ -321,77 +258,78 @@ public class PubblicaAnnuncioActivity extends AppCompatActivity
             IntentIntegrator scanIntegrator = new IntentIntegrator(this);
             scanIntegrator.initiateScan();
         } else if(v.getId() == R.id.save_on_cloud_button) {
-            if (ParseUser.getCurrentUser() != null) {
-                noticeParseObject = new ParseObject("Annunci");
+            if(ParseUser.getCurrentUser() != null) {
                 bookParseObject = new ParseObject("Libri");
 
-                ArrayList<String> lista_autori = new ArrayList<>();
-                lista_autori.add(authorsText.getText().toString());
-                /*
-                Libro libro = new Libro(titleText.getText().toString(), lista_autori, "http://bks2.books.google.it/books/content?id=eZVvPgAACAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api",
-                        descriptionText.getText().toString(), publishedDateText.getText().toString());
-                bookParseObject.put("libro", libro);
-                */
-                bookParseObject.put("titolo", titleText.getText().toString());
-                bookParseObject.put("autori", authorsText.getText().toString());
-                bookParseObject.put("data_pubblicazione", publishedDateText.getText().toString());
-                bookParseObject.put("descrizione", descriptionText.getText().toString());
+                bookParseObject.put("titolo", title);
+                bookParseObject.put("autori", authors);
+                bookParseObject.put("data_pubblicazione", publishedDate);
+                bookParseObject.put("descrizione", description);
+                bookParseObject.put("url_immagine_copertina", thumbnailURL);
                 bookParseObject.put("isbn", ISBNText.getText().toString());
                 bookParseObject.put("lingua", languageSpinner.getSelectedItem().toString());
-                bookParseObject.put("autore_annuncio", ParseUser.getCurrentUser());
+                bookParseObject.put("autore_annuncio", ParseUser.getCurrentUser().getObjectId());
                 String bookState = "Nuovo";
                 if(((RadioButton)findViewById(stateGroup.getCheckedRadioButtonId())) != null) {
                     ((RadioButton)findViewById(stateGroup.getCheckedRadioButtonId())).getText().toString();
                 }
                 bookParseObject.put("stato", bookState);
+                if(priceText.getText().toString().length() <= 0) {
+                    Toast toast = Toast.makeText(getApplicationContext(),
+                            "Inserire un prezzo di vendita", Toast.LENGTH_SHORT);
+                    toast.show();
+
+                    return;
+                }
                 bookParseObject.put("prezzo_annuncio", Double.parseDouble(priceText.getText().toString()));
-                bookParseObject.put("url_immagine_copertina", "http://bks2.books.google.it/books/content?id=eZVvPgAACAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api");
+                bookParseObject.put("stato_transazione", 0);
+
 
                 ParseACL groupACL = new ParseACL();
                 groupACL.setPublicReadAccess(true);
-                groupACL.setPublicWriteAccess(false);
+                groupACL.setPublicWriteAccess(true);
+                //groupACL.setPublicWriteAccess(false);
+                //groupACL.setWriteAccess(ParseUser.getCurrentUser(), true);
 
                 bookParseObject.setACL(groupACL);
-                bookParseObject.saveInBackground(new SaveCallback() {
+                bookParseObject.saveEventually(new SaveCallback() {
                     @Override
                     public void done(ParseException e) {
                         if (e == null) {
-                            Log.d("AnnuncioParse", "Salvataggio del libro sul cloud avvenuto con successo!");
-                            Toast toast = Toast.makeText(getApplicationContext(),
-                                    "Libro salvato", Toast.LENGTH_SHORT);
-                            //toast.show();
-                        } else {
-                            Log.d("AnnuncioParse", "Problemi durante il salvataggio del libro sul cloud.");
-                            e.getStackTrace();
-                            Toast toast = Toast.makeText(getApplicationContext(),
-                                    "Errore durante il salvataggio del libro", Toast.LENGTH_SHORT);
-                            //toast.show();
-                        }
+                            List<ParseObject> users_online = null;
+                            try {
+                                users_online = ParseQuery.getQuery("Users_Online").find();
+                                for(ParseObject user_online : users_online) {
+                                    user_online.increment("contatore_nuovi_annunci");
+                                    if(user_online.getObjectId().equals(ParseUser.getCurrentUser().getObjectId()))
+                                        user_online.save();
+                                    else
+                                        user_online.saveEventually();
+                                }
+                            } catch (ParseException e1) {
+                                Log.d(TAG, "bookParseObject.saveInBackground()/Si è verificato un'errore: " + e.getMessage());
+                                e1.printStackTrace();
+                            }
 
-                    }
-                });
 
-                noticeParseObject.setACL(groupACL);
-                noticeParseObject.saveInBackground(new SaveCallback() {
-                    @Override
-                    public void done(ParseException e) {
-                        if (e == null) {
                             Log.d("AnnuncioParse", "Salvataggio dell'annuncio sul cloud avvenuto con successo!");
                             Toast toast = Toast.makeText(getApplicationContext(),
                                     "Annuncio salvato", Toast.LENGTH_SHORT);
                             toast.show();
+
+                            finish();
                         } else {
                             Log.d("AnnuncioParse", "Problemi durante il salvataggio dell'annuncio sul cloud.");
                             e.getStackTrace();
                             Toast toast = Toast.makeText(getApplicationContext(),
                                     "Errore durante il salvataggio dell'annuncio", Toast.LENGTH_SHORT);
                             toast.show();
+
+                            finish();
                         }
 
                     }
                 });
-
-                finish();
             } else {
                 Context context = getApplicationContext();
                 CharSequence text = getString(R.string.profile_title_logged_out);

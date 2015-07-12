@@ -7,6 +7,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -95,7 +96,7 @@ public class ListaAnnunci {
     public void addAnnunci(List<ParseObject> scoreList, boolean onTop) {
         String id = "";
         String titolo = "";
-        JSONArray autori = new JSONArray();
+        JSONArray autoriJson = new JSONArray();
         ArrayList<String> lista_autori = null;
         int i, size = 0;
         String url = "";
@@ -108,17 +109,20 @@ public class ListaAnnunci {
             titolo = libroParse.getString("titolo");
 
             lista_autori = new ArrayList<>();
-            autori = libroParse.getJSONArray("autori");
-            if(autori != null) {
+            autoriJson = libroParse.getJSONArray("autori");
+            if(autoriJson != null) {
                 try {
-                    size = autori.length();
+                    size = autoriJson.length();
                     for (i = 0; i < size; i++)
-                        lista_autori.add(autori.get(i).toString());
+                        lista_autori.add(autoriJson.get(i).toString());
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
             }
-            lista_autori.add(libroParse.getString("autori").toString());
+            //TODO da utilizzare un array di string con parse
+            final String autori = libroParse.getString("autori");
+            if(autori != null)
+                lista_autori.add(autori.toString());
             url = libroParse.getString("url_immagine_copertina");
             String descrizione = libroParse.getString("descrizione");
             data = libroParse.getString("data");
@@ -141,5 +145,19 @@ public class ListaAnnunci {
 
     public void clear() {
         lista_annunci.clear();
+    }
+
+    public int deleteNoticesById(Collection<String> deleteNotices) {
+        ArrayList<Annuncio> toRemove = new ArrayList<>();
+        synchronized(lista_annunci) {
+            for(Annuncio annuncio : lista_annunci) {
+                if(deleteNotices.contains(annuncio.getLibro().getIDLibro())) {
+                    toRemove.add(annuncio);
+                }
+            }
+            lista_annunci.removeAll(toRemove);
+        }
+
+        return toRemove.size();
     }
 }

@@ -1,20 +1,32 @@
 package com.unisa.unistore.adapter;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
+import android.os.Vibrator;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.util.Pair;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
+import com.parse.DeleteCallback;
+import com.parse.FindCallback;
+import com.parse.ParseException;
+import com.parse.ParseObject;
+import com.parse.ParseQuery;
+import com.parse.ParseUser;
+import com.unisa.unistore.MainActivity;
 import com.unisa.unistore.NoticeDetailActivity;
 import com.unisa.unistore.R;
 import com.unisa.unistore.model.ListaAnnunci;
@@ -22,6 +34,7 @@ import com.unisa.unistore.utilities.ImageUtilities;
 import com.unisa.unistore.utilities.Utilities;
 
 import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -39,18 +52,19 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.AnnuncioViewHolder
     public static final String BOOK_ISBN_MESSAGE = "ISBN";
     public static final String BOOK_ID_MESSAGE = "id";
 
-    private Activity activity;
+    private MainActivity activity;
     private ListaAnnunci annunci = new ListaAnnunci();
 
     private com.nostra13.universalimageloader.core.ImageLoader imageLoader;
     private DisplayImageOptions options;
+    private boolean isCancellaAnnuncioButtonVisible = false;
 
     public void setListaAnnunci(ListaAnnunci annunci){
         this.annunci = annunci;
     }
 
     public RVAdapter(Activity activity) {
-        this.activity = activity;
+        this.activity = (MainActivity) activity;
     }
 
     @Override
@@ -97,8 +111,15 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.AnnuncioViewHolder
         return annunci.size();
     }
 
-    public static class AnnuncioViewHolder extends RecyclerView.ViewHolder {
-        private Activity activity;
+    public void setCancellaAnnuncioButtonVisible(boolean isVisible) {
+        this.isCancellaAnnuncioButtonVisible = isVisible;
+    }
+
+    public class AnnuncioViewHolder extends RecyclerView.ViewHolder {
+        private static final String TAG = "AnnuncioViewHolder";
+        private Activity mainActivity;
+
+        private ImageButton buttonCancellaLibro;
 
         private TextView idLibro;
         private TextView titoloLibro;
@@ -109,9 +130,9 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.AnnuncioViewHolder
         private CardView cardView;
         private String URLImmagineCopertina;
 
-        AnnuncioViewHolder(View itemView, Activity activity) {
+        AnnuncioViewHolder(final View itemView, Activity activity) {
             super(itemView);
-            this.activity = activity;
+            this.mainActivity = activity;
 
             this.idLibro = (TextView) itemView.findViewById(R.id.book_id);
             this.titoloLibro = (TextView) itemView.findViewById(R.id.book_title);
@@ -119,6 +140,29 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.AnnuncioViewHolder
             this.prezzoLibro = (TextView) itemView.findViewById(R.id.book_price);
             this.fotoLibro = (ImageView) itemView.findViewById(R.id.take_book_photo);
             //this.descrizioneLibro = (TextView) itemView.findViewById(R.id.book_description);
+
+            if(isCancellaAnnuncioButtonVisible) {
+                this.buttonCancellaLibro = (ImageButton) itemView.findViewById(R.id.delete_button);
+
+                buttonCancellaLibro.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        cancellaAnnuncio();
+                    }
+                });
+                buttonCancellaLibro.setOnLongClickListener(new View.OnLongClickListener() {
+
+                    @Override
+                    public boolean onLongClick(View view) {
+                        Vibrator vibe = (Vibrator) mainActivity.getSystemService(Context.VIBRATOR_SERVICE);
+                        vibe.vibrate(100);
+                        Toast.makeText(mainActivity, view.getContentDescription(), Toast.LENGTH_SHORT).show();
+                        return true;
+                    }
+                });
+
+                buttonCancellaLibro.setVisibility(View.VISIBLE);
+            }
 
             cardView = (CardView)itemView.findViewById(R.id.expandable_card_view);
             setCardClickListener();
@@ -133,7 +177,7 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.AnnuncioViewHolder
                         return;
 
                     Utilities.setClicked(true);
-                    Intent i = new Intent(activity, NoticeDetailActivity.class);
+                    Intent i = new Intent(mainActivity, NoticeDetailActivity.class);
 
                     String id = idLibro.getText().toString();
                     i.putExtra(BOOK_ID_MESSAGE, id);
@@ -153,15 +197,15 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.AnnuncioViewHolder
                             putExtra(PACKAGE + ".width", v.getWidth()).
                             putExtra(PACKAGE + ".height", v.getHeight());
 
-                    Pair<TextView, String> titoloLibroPair = Pair.create(titoloLibro, activity.getString(R.string.title_detail_transition_name));
-                    Pair<TextView, String> autoriLibroPair = Pair.create(autoriLibro, activity.getString(R.string.authors_detail_transition_name));
-                    Pair<TextView, String> prezzoLibroPair = Pair.create(prezzoLibro, activity.getString(R.string.price_detail_transition_name));
-                    Pair<ImageView, String> fotoLibroPair = Pair.create(fotoLibro, activity.getString(R.string.image_detail_transition_name));
+                    Pair<TextView, String> titoloLibroPair = Pair.create(titoloLibro, mainActivity.getString(R.string.title_detail_transition_name));
+                    Pair<TextView, String> autoriLibroPair = Pair.create(autoriLibro, mainActivity.getString(R.string.authors_detail_transition_name));
+                    Pair<TextView, String> prezzoLibroPair = Pair.create(prezzoLibro, mainActivity.getString(R.string.price_detail_transition_name));
+                    Pair<ImageView, String> fotoLibroPair = Pair.create(fotoLibro, mainActivity.getString(R.string.image_detail_transition_name));
                     Pair<View, String>[] pairs = new Pair[]{titoloLibroPair, autoriLibroPair, prezzoLibroPair, fotoLibroPair};
 
                     ActivityOptionsCompat transitionActivityOptions =
-                            ActivityOptionsCompat.makeSceneTransitionAnimation(activity, pairs);
-                    ActivityCompat.startActivity(activity, i, transitionActivityOptions.toBundle());
+                            ActivityOptionsCompat.makeSceneTransitionAnimation(mainActivity, pairs);
+                    ActivityCompat.startActivity(mainActivity, i, transitionActivityOptions.toBundle());
                 }
             });
         }
@@ -169,6 +213,51 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.AnnuncioViewHolder
         public void setURLImmagineCopertina(String URLImmagineCopertina) {
             this.URLImmagineCopertina = URLImmagineCopertina;
         }
+
+        private void cancellaAnnuncio() {
+            ParseQuery<ParseObject> query = ParseQuery.getQuery("Libri");
+            query.whereEqualTo("objectId", idLibro.getText().toString());
+
+            query.findInBackground(new FindCallback<ParseObject>() {
+                @Override
+                public void done(List<ParseObject> list, ParseException e) {
+                    if (e == null) {
+                        int size = list.size();
+                        for (int i = 0; i < size; i++) {
+                            list.get(i).deleteEventually(new DeleteCallback() {
+                                @Override
+                                public void done(ParseException e) {
+                                    if (e == null) {
+                                        List<ParseObject> users_online = null;
+                                        try {
+                                            users_online = ParseQuery.getQuery("Users_Online").whereEqualTo("online", true).find();
+                                            for(ParseObject user_online : users_online) {
+                                                user_online.add("annunci_eliminati", idLibro.getText().toString());
+                                                if(user_online.getObjectId().equals(ParseUser.getCurrentUser().getObjectId()))
+                                                    user_online.save();
+                                                else
+                                                    user_online.saveEventually();
+                                            }
+                                        } catch (ParseException e1) {
+                                            Log.d(TAG, "list.get(i).deleteEventually()/Si è verificato un'errore: " + e.getMessage());
+                                            e1.printStackTrace();
+                                        }
+                                        Log.d(TAG, "Annuncio " + idLibro.getText().toString() + " eliminato");
+                                        activity.refresh();
+                                        Toast.makeText(mainActivity, "Annuncio cancellato", Toast.LENGTH_LONG).show();
+                                    } else {
+                                        Toast.makeText(mainActivity, R.string.contact_administrator, Toast.LENGTH_LONG).show();
+                                    }
+                                }
+                            });
+                        }
+                    } else {
+                        Toast.makeText(mainActivity, R.string.contact_administrator, Toast.LENGTH_LONG).show();
+                    }
+                }
+            });
+        }
+
     }
 
 }
