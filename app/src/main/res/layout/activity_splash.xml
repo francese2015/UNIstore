@@ -2,11 +2,11 @@
 <LinearLayout  xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#55c1e7" >
+    android:background="#cc4CAF50" >
 
     <ImageView
         android:id="@+id/splash_img"
-        android:src="@drawable/splash_screen_copia"
-        android:layout_width="wrap_content"
+        android:src="@drawable/splash_screen"
+        android:layout_width="match_parent"
         android:layout_height="match_parent" />
 </LinearLayout >
