@@ -5,6 +5,7 @@ import android.app.FragmentManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -33,17 +34,19 @@ import com.mikepenz.materialdrawer.model.SecondaryDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.IProfile;
 import com.parse.ParseException;
-import com.parse.ParseObject;
-import com.parse.ParseQuery;
+import com.parse.ParseInstallation;
+import com.parse.ParsePush;
 import com.parse.ParseUser;
-import com.parse.ui.ParseOnLoginSuccessListener;
+import com.parse.SaveCallback;
 import com.unisa.unistore.model.ListaAnnunci;
+import com.unisa.unistore.utilities.NetworkUtilities;
 import com.unisa.unistore.utilities.ParseUtilities;
 import com.unisa.unistore.utilities.Utilities;
 
-import java.util.List;
+import java.util.ArrayList;
 import java.util.Stack;
 
+import ui.ParseOnLoginSuccessListener;
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener,
@@ -106,7 +109,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -115,7 +118,25 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if(Utilities.isUserAuthenticated())
             currentUser = ParseUser.getCurrentUser();
 
-        ParseUtilities.connectUser(currentUser);
+        if(ParseUtilities.connectUser(this, currentUser) == 0) {
+            if(NetworkUtilities.checkConnection(this)) {
+                ParseInstallation installation = ParseInstallation.getCurrentInstallation();
+
+                if (installation.get("channels") == null ||
+                        !((ArrayList) installation.get("channels")).contains("")) {
+                    ParsePush.subscribeInBackground("", new SaveCallback() {
+                        @Override
+                        public void done(ParseException e) {
+                            if (e == null) {
+                                Log.d("com.parse.push", "successfully subscribed to the broadcast channel.");
+                            } else {
+                                Log.e("com.parse.push", "failed to subscribe for push", e);
+                            }
+                        }
+                    });
+                }
+            }
+        }
 
         mRootView = (ViewGroup) findViewById(R.id.layout_root_view);
 
@@ -134,7 +155,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     "Activity must implemement ParseOnLoginSuccessListener");
         }
 
-        creteDrawer(false, savedInstanceState);
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                creteDrawer(false, savedInstanceState);
+            }
+        });
 
         if (savedInstanceState == null) {
             // on first time display view for first nav item
@@ -142,8 +168,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
-    private void creteDrawer(boolean compact, Bundle savedInstanceState) {
-        // Create a few sample profile
+    private void creteDrawer(final boolean compact, final Bundle savedInstanceState) {
+// Create a few sample profile
         if(Utilities.isUserAuthenticated())
             profile = new ProfileDrawerItem().withName(currentUser.get("name").toString()).withEmail(currentUser.getEmail()).withTag(currentUser).withIcon(getResources().getDrawable(R.drawable.profile)).withIdentifier(PROFILE_SETTING);
 
@@ -163,7 +189,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         settings.setIdentifier(SETTINGS_ID);
 
         DrawerBuilder drawerBuilder = new DrawerBuilder()
-                .withActivity(this)
+                .withActivity(MainActivity.this)
                 .withToolbar(toolbar)
                 .withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
                     @Override
@@ -188,10 +214,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                 finish();
                                 break;
                             case SETTINGS_ID:
-                                //displayView(SETTINGS_ID);
-                                intent = new Intent(MainActivity.this, AddNoticeViewPagerActivity.class);
-                                startActivity(intent);
-                                finish();
+//                                displayView(SETTINGS_ID);
+//                                intent = new Intent(MainActivity.this, AddNoticeViewPagerActivity.class);
+//                                startActivity(intent);
+//                                finish();
                                 break;
                             default:
                                 //Toast.makeText(MainActivity.this, R.string.message_error, Toast.LENGTH_SHORT).show();
@@ -245,12 +271,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
      * @param compact
      * @param savedInstanceState
      */
-    private void buildHeader(boolean compact, Bundle savedInstanceState) {
+    private void buildHeader(final boolean compact, final Bundle savedInstanceState) {
         IProfile login_outProfile = new ProfileDrawerItem();
 
         // Create the AccountHeader
         headerResult = new AccountHeaderBuilder()
-                .withActivity(this)
+                .withActivity(MainActivity.this)
                 .withHeaderBackground(R.drawable.drawer_background)
                 .withCompactStyle(compact)
                 .addProfiles(
@@ -394,7 +420,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     //TODO Costringere ad usare solo le costanti opportune
     public void setDrawerSelection(int selection_id) {
-        result.setSelection(selection_id);
+        result.setSelection(selection_id, false);
     }
 
     @Override
@@ -404,17 +430,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         registerReceiver(receiver, filter);
 
         if(Utilities.isUserAuthenticated()) {
-            ParseQuery<ParseObject> query = ParseQuery.getQuery("Users_Online");
-            try {
-                List<ParseObject> users_online = query.whereEqualTo("userId", currentUser.getObjectId().toString()).find();
-                if (!users_online.isEmpty()) {
-                    users_online.get(0).put("online", true);
-                    users_online.get(0).saveEventually();
-                }
-            } catch (ParseException e) {
-                Log.d(TAG, "onPause()/Si è verificato un'errore: " + e.getMessage());
-                e.printStackTrace();
-            }
+            ParseUtilities.connectUser(this, currentUser);
         }
 
         if(fragmentStack.empty()) {
@@ -437,6 +453,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onDestroy() {
         super.onDestroy();
 
+        SharedPreferences settings = getSharedPreferences(SplashScreenActivity.PREFS_NAME, 0);
+        //SplashScreen.markSplashScreenAsAlreadyLaunched(false, settings);
     }
 
     @Override
@@ -483,9 +501,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
      * Diplaying fragment view for selected nav drawer list item
      * */
     private void displayView(int position) {
-        Intent intent = null;
+        Intent intent;
 
-        //TODO da eliminare quasi sicuramente
         String selection = null;
         if(!fragmentStack.empty())
             selection = fragmentStack.lastElement();
@@ -541,15 +558,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         }
 
-        if(position != ENTER_WITH_AN_ACCOUNT_ID)
+        if(position != ENTER_WITH_AN_ACCOUNT_ID) {
             result.closeDrawer();
+        }
 
         if (fragment != null) {
-            FragmentManager fragmentManager = getFragmentManager();
-            fragmentManager.beginTransaction().replace(R.id.layout_root_view, fragment)
-                    // Add this t.the front of the card.
-                    .addToBackStack(null)
-                    .commit();
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    FragmentManager fragmentManager = getFragmentManager();
+                    fragmentManager.beginTransaction().replace(R.id.layout_root_view, fragment)
+                            // Add this t.the front of the card.
+                            .addToBackStack(null)
+                            .commit();
+                }
+            });
         } else {
             // error in creating fragment
             Log.e("MainActivity", "Error in creating fragment");
