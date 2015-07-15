@@ -2,8 +2,5 @@ include ':app'
 
 include ':calligraphy-2.1.0'
 
-// Parse Login UI Library
-include ':ParseLoginUI'
-
 // Facebook SDK
 include 'facebook-sdk:facebook'
