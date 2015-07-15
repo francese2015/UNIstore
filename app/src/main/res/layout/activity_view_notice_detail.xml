@@ -30,7 +30,7 @@
                 android:background="@color/book_detail_background"
                 android:visibility="visible" />
 
-            <ImageView
+            <com.parse.ParseImageView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_centerInParent="true"
