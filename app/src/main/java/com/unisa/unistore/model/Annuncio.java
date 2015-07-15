@@ -30,6 +30,10 @@ public class Annuncio {
     private Libro libro;
     private Number prezzo;
 
+    public Annuncio() {
+        libro = new Libro();
+    }
+
     public Annuncio(ParseUser autore_annuncio, Date data_pubblicazione_annuncio, Libro libro, Number prezzo) {
         this.autore = autore_annuncio;
         this.data_pubblicazione = data_pubblicazione_annuncio;
