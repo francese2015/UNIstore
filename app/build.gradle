@@ -106,7 +106,7 @@ dependencies {
     compile 'com.android.support:recyclerview-v7:21.+'
     compile 'com.android.support:design:22.2.0'
 
-    compile 'com.google.android.gms:play-services:7.5.0'
+    compile 'com.google.android.gms:play-services-maps:7.5.0'
 
     compile 'com.squareup.picasso:picasso:2.5.0'
     compile('com.crashlytics.sdk.android:crashlytics:2.4.0@aar') {
