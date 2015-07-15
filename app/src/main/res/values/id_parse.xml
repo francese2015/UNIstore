@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="parse_app_id">D0sMMsYRwdpZFDdzaiaaxEjjH1lWatoIvowSssl5</string>
+    <string name="parse_client_key">YVBXHp0Yr2r9quCmtjMS2JfhokwqeK2OHIzubJet</string>
+    <string name="facebook_app_id">0b2e571664f81788a4dd8fde00868bfa</string>
+    <string name="google_isbn_search_api_key">AIzaSyAfEoQrjMoSaurzBJpkht783jvAB6trYkM</string>
+    <string templateMergeStrategy="preserve" translatable="false" name="google_maps_key"> AIzaSyBvbqIMgk1fhOoy6QPt4hTgscumnzMLmqo </string>
+</resources>

@@ -16,11 +16,12 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.parse.ParseObject;
 
 @SuppressLint("NewApi")
 public class MapsActivity extends Activity implements LocationListener {
     GoogleMap map;
-
+    private ParseObject bookParseObject;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -50,6 +51,8 @@ public class MapsActivity extends Activity implements LocationListener {
 
         map.animateCamera(CameraUpdateFactory.newLatLngZoom(
                 new LatLng(location.getLatitude(), location.getLongitude()), 16));
+
+
 
     }
 
