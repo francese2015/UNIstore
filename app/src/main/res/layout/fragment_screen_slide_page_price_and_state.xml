@@ -1,0 +1,98 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/content"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:layout_margin="@dimen/activity_horizontal_margin">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Inserisci il prezzo di vendita del libro"
+            android:textColorHint="#9E9E9E"
+            android:paddingLeft="16dp"
+            android:textColor="@color/md_blue_500"
+            android:textSize="18sp"
+            android:nextFocusForward="@+id/book_title"/>
+
+        <EditText
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/book_price"
+            android:hint="@string/price"
+            android:inputType="number"
+            android:ems="10"
+            android:maxLength="10"
+            android:paddingLeft="16dp"
+            android:textColorHint="#9E9E9E"
+            android:textColor="@color/primary_text"
+            android:textSize="@dimen/font_size" />
+
+        <View
+            android:layout_height="1dp"
+            android:layout_width="match_parent"
+            android:background="#90909090"
+            android:layout_marginBottom="15dp"
+            android:layout_marginTop="15dp"
+            android:layout_marginRight="18dp"
+            />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="In che stato si trova il libro?"
+            android:textColorHint="#9E9E9E"
+            android:paddingLeft="16dp"
+            android:textColor="@color/md_blue_500"
+            android:textSize="18sp"
+            android:nextFocusForward="@+id/book_title"/>
+
+        <RadioGroup xmlns:android="http://schemas.android.com/apk/res/android"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/book_state"
+            android:layout_marginLeft="@dimen/activity_horizontal_margin"
+            android:layout_marginRight="@dimen/activity_horizontal_margin"
+            android:orientation="vertical">
+
+            <com.rey.material.widget.RadioButton
+                style="@style/RadioButtonDrawable"
+                android:id="@+id/used_state"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/used_state"
+                android:checked="true"
+                android:textSize="14sp"
+                android:textColor="@color/primary_text"
+                android:gravity="center_vertical"/>
+
+            <com.rey.material.widget.RadioButton
+                style="@style/RadioButtonDrawable"
+                android:id="@+id/like_new_state"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/like_new_state"
+                android:textSize="14sp"
+                android:textColor="@color/primary_text"
+                android:gravity="center_vertical"/>
+
+            <com.rey.material.widget.RadioButton
+                style="@style/RadioButtonDrawable"
+                android:id="@+id/new_state"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/new_state"
+                android:textSize="14sp"
+                android:textColor="@color/primary_text"
+                android:gravity="center_vertical"
+                />
+
+        </RadioGroup>
+
+    </LinearLayout>
+
+</ScrollView>

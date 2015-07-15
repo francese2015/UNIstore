@@ -1,0 +1,68 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/content"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:layout_margin="@dimen/activity_horizontal_margin"
+        android:layout_marginRight="18dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Edizione del libro"
+            android:textColorHint="#9E9E9E"
+            android:textColor="@color/md_blue_500"
+            android:paddingLeft="16dp"
+            android:textSize="18sp"
+            android:nextFocusForward="@+id/book_title"/>
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/book_edition"
+            android:hint="@string/edition"
+            android:textColorHint="#9E9E9E"
+            android:textColor="@color/primary_text"
+            android:paddingLeft="16dp"
+            android:textSize="@dimen/font_size"
+            android:layout_marginRight="18dp"
+            android:nextFocusForward="@+id/book_publishing_house"/>
+
+        <View
+            android:layout_height="1dp"
+            android:layout_width="match_parent"
+            android:background="#90909090"
+            android:layout_marginRight="18dp"
+            android:layout_marginBottom="15dp"
+            android:layout_marginTop="15dp"
+            />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Casa Editrice"
+            android:textColorHint="#9E9E9E"
+            android:textColor="@color/md_blue_500"
+            android:paddingLeft="16dp"
+            android:textSize="18sp"
+            android:nextFocusForward="@+id/book_title"/>
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/book_publishing_house"
+            android:hint="@string/publishing_house"
+            android:textColorHint="#9E9E9E"
+            android:textColor="@color/primary_text"
+            android:paddingLeft="16dp"
+            android:textSize="@dimen/font_size"
+            android:layout_marginRight="18dp"
+            android:nextFocusForward="@+id/book_authors"/>
+
+    </LinearLayout>
+
+</ScrollView>

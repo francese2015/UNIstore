@@ -1,9 +1,11 @@
 package com.unisa.unistore.adapter;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Vibrator;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
@@ -22,13 +24,17 @@ import android.widget.Toast;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.parse.DeleteCallback;
 import com.parse.FindCallback;
+import com.parse.GetDataCallback;
 import com.parse.ParseException;
+import com.parse.ParseFile;
+import com.parse.ParseImageView;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
 import com.unisa.unistore.MainActivity;
 import com.unisa.unistore.NoticeDetailActivity;
 import com.unisa.unistore.R;
+import com.unisa.unistore.model.Annuncio;
 import com.unisa.unistore.model.ListaAnnunci;
 import com.unisa.unistore.utilities.ImageUtilities;
 import com.unisa.unistore.utilities.Utilities;
@@ -74,15 +80,17 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.AnnuncioViewHolder
         return pvh;
     }
 
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     @Override
     public void onBindViewHolder(AnnuncioViewHolder annuncioHolder, int position) {
         String id = annunci.getAnnuncio(position).getLibro().getIDLibro();
         annuncioHolder.idLibro.setText(id);
+        Annuncio annuncio = annunci.getAnnuncio(position);
 
-        String titolo = annunci.getAnnuncio(position).getLibro().getTitoloLibro();
+        String titolo = annuncio.getLibro().getTitoloLibro();
         annuncioHolder.titoloLibro.setText(titolo);
 
-        ArrayList<String> autori = (ArrayList<String>) annunci.getAnnuncio(position).getLibro().getAutoriLibro();
+        ArrayList<String> autori = (ArrayList<String>) annuncio.getLibro().getAutoriLibro();
         String strAutori = "";
         if (autori.size() > 0) {
             strAutori = autori.get(0);
@@ -93,16 +101,40 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.AnnuncioViewHolder
             annuncioHolder.autoriLibro.setText(strAutori);
         }
 
-        String URLImmagineCopertina = annunci.getAnnuncio(position).getLibro().getURLImmagineCopertina();
-        annuncioHolder.setURLImmagineCopertina(URLImmagineCopertina);
-        new ImageUtilities(activity, annuncioHolder.fotoLibro).displayImage(URLImmagineCopertina);
-        //new GetBookThumb(annuncioHolder.fotoLibro).execute(URLImmagineCopertina);
+        String URLImmagineCopertina = annuncio.getLibro().getURLImmagineCopertina();
+        if(URLImmagineCopertina != null && !URLImmagineCopertina.isEmpty()) {
+            annuncioHolder.setURLImmagineCopertina(URLImmagineCopertina);
+            new ImageUtilities(activity, annuncioHolder.fotoLibro).displayImage(URLImmagineCopertina);
+            //new GetBookThumb(annuncioHolder.fotoLibro).execute(URLImmagineCopertina);
+        } else {
+            ParseFile photoFile;
+            try {
+                ParseQuery query = ParseQuery.getQuery("Libri");
+                query.whereEqualTo("objectId", annuncioHolder.idLibro.getText().toString());
+                final List<ParseObject> list = query.find();
+                if(!list.isEmpty()) {
+                    photoFile = list.get(0).getParseFile("file_foto");
+                    if (photoFile != null) {
+                        ((ParseImageView) annuncioHolder.fotoLibro).setParseFile(photoFile);
+                        ((ParseImageView) annuncioHolder.fotoLibro).loadInBackground(new GetDataCallback() {
+                            @Override
+                            public void done(byte[] data, ParseException e) {
+                                // nothing to do
+                            }
+                        });
+                    } else {
+                        annuncioHolder.fotoLibro.setImageDrawable(activity.getDrawable(R.drawable.image_not_found));
+                    }
+                }
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+        }
 
-
-        String prezzo = String.valueOf(annunci.getAnnuncio(position).getPrezzo());
+        String prezzo = String.valueOf(annuncio.getPrezzo());
         annuncioHolder.prezzoLibro.setText(prezzo + activity.getString(R.string.euro_symbol));
 
-        String descrizione = annunci.getAnnuncio(position).getLibro().getDescrizione();
+        String descrizione = annuncio.getLibro().getDescrizione();
         //annuncioHolder.customizeCard(titolo, strAutori, prezzo, URLImmagineCopertina, descrizione);
     }
 
@@ -141,31 +173,36 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.AnnuncioViewHolder
             this.fotoLibro = (ImageView) itemView.findViewById(R.id.take_book_photo);
             //this.descrizioneLibro = (TextView) itemView.findViewById(R.id.book_description);
 
-            if(isCancellaAnnuncioButtonVisible) {
-                this.buttonCancellaLibro = (ImageButton) itemView.findViewById(R.id.delete_button);
+            activity.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    if (isCancellaAnnuncioButtonVisible) {
+                        buttonCancellaLibro = (ImageButton) itemView.findViewById(R.id.delete_button);
 
-                buttonCancellaLibro.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        cancellaAnnuncio();
+                        buttonCancellaLibro.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                cancellaAnnuncio();
+                            }
+                        });
+                        buttonCancellaLibro.setOnLongClickListener(new View.OnLongClickListener() {
+
+                            @Override
+                            public boolean onLongClick(View view) {
+                                Vibrator vibe = (Vibrator) mainActivity.getSystemService(Context.VIBRATOR_SERVICE);
+                                vibe.vibrate(100);
+                                Toast.makeText(mainActivity, view.getContentDescription(), Toast.LENGTH_SHORT).show();
+                                return true;
+                            }
+                        });
+
+                        buttonCancellaLibro.setVisibility(View.VISIBLE);
                     }
-                });
-                buttonCancellaLibro.setOnLongClickListener(new View.OnLongClickListener() {
 
-                    @Override
-                    public boolean onLongClick(View view) {
-                        Vibrator vibe = (Vibrator) mainActivity.getSystemService(Context.VIBRATOR_SERVICE);
-                        vibe.vibrate(100);
-                        Toast.makeText(mainActivity, view.getContentDescription(), Toast.LENGTH_SHORT).show();
-                        return true;
-                    }
-                });
-
-                buttonCancellaLibro.setVisibility(View.VISIBLE);
-            }
-
-            cardView = (CardView)itemView.findViewById(R.id.expandable_card_view);
-            setCardClickListener();
+                    cardView = (CardView) itemView.findViewById(R.id.expandable_card_view);
+                    setCardClickListener();
+                }
+            });
         }
 
         private void setCardClickListener() {
@@ -173,7 +210,7 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.AnnuncioViewHolder
 
                 @Override
                 public void onClick(View v) {
-                    if(Utilities.isClicked())
+                    if (Utilities.isClicked())
                         return;
 
                     Utilities.setClicked(true);
@@ -231,9 +268,9 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.AnnuncioViewHolder
                                         List<ParseObject> users_online = null;
                                         try {
                                             users_online = ParseQuery.getQuery("Users_Online").whereEqualTo("online", true).find();
-                                            for(ParseObject user_online : users_online) {
+                                            for (ParseObject user_online : users_online) {
                                                 user_online.add("annunci_eliminati", idLibro.getText().toString());
-                                                if(user_online.getObjectId().equals(ParseUser.getCurrentUser().getObjectId()))
+                                                if (user_online.getObjectId().equals(ParseUser.getCurrentUser().getObjectId()))
                                                     user_online.save();
                                                 else
                                                     user_online.saveEventually();

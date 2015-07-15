@@ -1,0 +1,99 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/content"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:layout_margin="@dimen/activity_horizontal_margin">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textSize="18sp"
+            android:textColor="@color/md_blue_500"
+            android:text="Inserire titolo ed autore/i del libro"/>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="3"
+            android:orientation="vertical"
+            android:layout_margin="@dimen/activity_horizontal_margin">
+
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/book_title"
+                android:inputType="textPersonName"
+                android:hint="@string/title"
+                android:textColorHint="#9E9E9E"
+                android:textColor="@color/primary_text"
+                android:paddingLeft="16dp"
+                android:textSize="@dimen/font_size"
+                android:nextFocusForward="@+id/book_authors"/>
+
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textPersonName"
+                android:layout_below="@+id/book_title"
+                android:layout_marginTop="16dp"
+                android:ems="10"
+                android:id="@+id/book_authors"
+                android:hint="@string/authors"
+                android:paddingLeft="16dp"
+                android:textColorHint="#9E9E9E"
+                android:textColor="@color/primary_text"
+                android:textSize="@dimen/font_size"
+                android:nextFocusForward="@+id/book_edition"/>
+            <!--
+
+                        <EditText
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:id="@+id/book_edition"
+                            android:layout_below="@+id/book_authors"
+                            android:layout_marginTop="18dp"
+                            android:ems="10"
+                            android:hint="@string/edition"
+                            android:paddingLeft="16dp"
+                            android:textColorHint="#9E9E9E"
+                            android:textColor="@color/primary_text"
+                            android:textSize="@dimen/font_size"
+                            android:nextFocusForward="@+id/book_language_spinner"/>
+
+                        <com.rey.material.widget.Spinner
+                            style="@style/Material.Widget.Spinner.Light"
+                            android:id="@+id/book_language_spinner"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="16dp"
+                            android:layout_below="@+id/book_authors"
+                            android:minWidth="128dp"
+                            app:rd_style="@style/Material.Drawable.Ripple.Wave.Light"
+                            app:rd_enable="true"
+                            app:rd_delayClick="none"
+                            app:spn_labelEnable="true"
+                            app:spn_label="@string/choose_language_hint"
+                            app:spn_arrowSwitchMode="true"
+                            app:spn_arrowAnimDuration="@android:integer/config_shortAnimTime"
+                            app:spn_arrowInterpolator="@android:anim/decelerate_interpolator"/>
+            -->
+        </RelativeLayout>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/hint"
+            android:textColor="@color/md_blue_500"
+            android:visibility="gone"
+            android:layout_weight="1"
+            android:textSize="16sp" />
+
+    </LinearLayout>
+
+</ScrollView>

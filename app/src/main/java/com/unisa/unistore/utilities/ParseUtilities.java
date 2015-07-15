@@ -10,7 +10,6 @@ import com.parse.ParseObject;
 import com.parse.ParsePush;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
-import com.parse.SaveCallback;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -82,61 +81,61 @@ public class ParseUtilities {
         return listaDati;
     }
 
-    public static void connectUser(ParseUser currentUser) {
-        if(Utilities.isUserAuthenticated()) {
-            ParseQuery<ParseObject> query = ParseQuery.getQuery("Users_Online");
-            try {
-                List<ParseObject> users_online = query.whereEqualTo("userId", currentUser.getObjectId().toString()).find();
-                ParseObject usersOnlineObject = null;
-                if(!users_online.isEmpty()) {
-                    usersOnlineObject = users_online.get(0);
-                    usersOnlineObject.put("online", true);
-                    usersOnlineObject.put("contatore_nuovi_annunci", 0);
-                    usersOnlineObject.remove("annunci_eliminati");
-                } else {
-                    usersOnlineObject = new ParseObject("Users_Online");
-                    usersOnlineObject.put("userId", currentUser.getObjectId().toString());
-                    usersOnlineObject.put("online", true);
-                    usersOnlineObject.put("contatore_nuovi_annunci", 0);
-                    usersOnlineObject.remove("annunci_eliminati");
-                }
-                usersOnlineObject.saveEventually(new SaveCallback() {
-                    @Override
-                    public void done(ParseException e) {
-                        if(e == null) {
-                            Log.d(TAG, "connectUser/Salvattaggio effettuato con successo");
-
-                        } else {
-                            Log.d(TAG, "connectUser/Si è verificato un'errore: " + e.getMessage());
-                        }
+    public static int connectUser(Context context, ParseUser currentUser) {
+        if(NetworkUtilities.checkConnection(context)) {
+            if(Utilities.isUserAuthenticated()) {
+                ParseQuery<ParseObject> query = ParseQuery.getQuery("Users_Online");
+                try {
+                    List<ParseObject> users_online = query.whereEqualTo("userId", currentUser.getObjectId().toString()).find();
+                    ParseObject usersOnlineObject;
+                    if(!users_online.isEmpty()) {
+                        usersOnlineObject = users_online.get(0);
+                        usersOnlineObject.put("online", true);
+                        usersOnlineObject.put("contatore_nuovi_annunci", 0);
+                        usersOnlineObject.remove("annunci_eliminati");
+                    } else {
+                        usersOnlineObject = new ParseObject("Users_Online");
+                        usersOnlineObject.put("userId", currentUser.getObjectId().toString());
+                        usersOnlineObject.put("online", true);
+                        usersOnlineObject.put("contatore_nuovi_annunci", 0);
+                        usersOnlineObject.remove("annunci_eliminati");
                     }
-                });
-            } catch (ParseException e) {
-                Log.d(TAG, "onCreate/Si è verificato un'errore: " + e.getMessage());
-                e.printStackTrace();
+                    usersOnlineObject.save();
+                    return 0;
+                } catch (ParseException e) {
+                    Log.d(TAG, "onCreate/Si è verificato un'errore: " + e.getMessage());
+                    e.printStackTrace();
+                }
             }
         }
+
+        return -1;
     }
 
-    public static void disconnectUser(Context context) {
-        if(Utilities.isUserAuthenticated()) {
-            ParseQuery<ParseObject> query = ParseQuery.getQuery("Users_Online");
-            try {
-                List<ParseObject> users_online = query.whereEqualTo("userId", ParseUser.getCurrentUser().getObjectId().toString()).find();
-                ParseObject usersOnlineObject = users_online.get(0);
-                usersOnlineObject.put("online", false);
-                usersOnlineObject.put("contatore_nuovi_annunci", 0);
+    public static int disconnectUser(Context context) {
+        if (NetworkUtilities.checkConnection(context)) {
+            if (Utilities.isUserAuthenticated()) {
+                ParseQuery<ParseObject> query = ParseQuery.getQuery("Users_Online");
+                try {
+                    List<ParseObject> users_online = query.whereEqualTo("userId", ParseUser.getCurrentUser().getObjectId().toString()).find();
+                    ParseObject usersOnlineObject = users_online.get(0);
+                    usersOnlineObject.put("online", false);
+                    usersOnlineObject.put("contatore_nuovi_annunci", 0);
 
-                usersOnlineObject.save();
-            } catch (ParseException e) {
-                Log.d(TAG, "disconnectUser/Si è verificato un'errore: " + e.getMessage());
-                if(NetworkUtilities.checkConnection(context)) {
-                    Log.d(TAG, "La connessione funziona");
-                } else {
-                    Log.d(TAG, "La connessione NON funziona");
+                    usersOnlineObject.save();
+                    return 0;
+                } catch (ParseException e) {
+                    Log.d(TAG, "disconnectUser/Si è verificato un'errore: " + e.getMessage());
+                    if (NetworkUtilities.checkConnection(context)) {
+                        Log.d(TAG, "La connessione funziona");
+                    } else {
+                        Log.d(TAG, "La connessione NON funziona");
+                    }
+                    e.printStackTrace();
                 }
-                e.printStackTrace();
             }
         }
+
+        return -1;
     }
 }
