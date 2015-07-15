@@ -6,7 +6,6 @@
     android:layout_height="match_parent">
 
     <com.rey.material.widget.Button
-        style="@style/MenuButtonsStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/logout_btn"
@@ -15,7 +14,6 @@
         app:rd_enable="true"/>
 
     <com.rey.material.widget.Button
-        style="@style/MenuButtonsStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/delete_account_btn"

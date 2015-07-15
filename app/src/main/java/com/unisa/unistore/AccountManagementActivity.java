@@ -14,10 +14,12 @@ import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
-import com.parse.ui.ParseOnLoginSuccessListener;
 import com.unisa.unistore.utilities.Utilities;
 
 import java.util.List;
+
+import ui.ParseOnLoginSuccessListener;
+
 
 /**
  * Created by Daniele on 23/06/2015.
