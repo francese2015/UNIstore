@@ -5,6 +5,7 @@ import android.app.FragmentManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -33,17 +34,19 @@ import com.mikepenz.materialdrawer.model.SecondaryDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.IProfile;
 import com.parse.ParseException;
-import com.parse.ParseObject;
-import com.parse.ParseQuery;
+import com.parse.ParseInstallation;
+import com.parse.ParsePush;
 import com.parse.ParseUser;
-import com.parse.ui.ParseOnLoginSuccessListener;
+import com.parse.SaveCallback;
 import com.unisa.unistore.model.ListaAnnunci;
+import com.unisa.unistore.utilities.NetworkUtilities;
 import com.unisa.unistore.utilities.ParseUtilities;
 import com.unisa.unistore.utilities.Utilities;
 
-import java.util.List;
+import java.util.ArrayList;
 import java.util.Stack;
 
+import ui.ParseOnLoginSuccessListener;
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener,
@@ -72,6 +75,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     public static final String QUERY_TAG = "annunci";
     private static final String TAG = "MainActivity";
+
     private Fragment fragment;
 
     private Toolbar toolbar;
@@ -106,16 +110,34 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
         LA = new ListaAnnunci();
 
-        if (Utilities.isUserAuthenticated())
+        if(Utilities.isUserAuthenticated())
             currentUser = ParseUser.getCurrentUser();
 
-        ParseUtilities.connectUser(currentUser);
+        if(ParseUtilities.connectUser(this, currentUser) == 0) {
+            if(NetworkUtilities.checkConnection(this)) {
+                ParseInstallation installation = ParseInstallation.getCurrentInstallation();
+
+                if (installation.get("channels") == null ||
+                        !((ArrayList) installation.get("channels")).contains("")) {
+                    ParsePush.subscribeInBackground("", new SaveCallback() {
+                        @Override
+                        public void done(ParseException e) {
+                            if (e == null) {
+                                Log.d("com.parse.push", "successfully subscribed to the broadcast channel.");
+                            } else {
+                                Log.e("com.parse.push", "failed to subscribe for push", e);
+                            }
+                        }
+                    });
+                }
+            }
+        }
 
         mRootView = (ViewGroup) findViewById(R.id.layout_root_view);
 
@@ -134,19 +156,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     "Activity must implemement ParseOnLoginSuccessListener");
         }
 
-        creteDrawer(false, savedInstanceState);
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                creteDrawer(false, savedInstanceState);
+            }
+        });
 
         if (savedInstanceState == null) {
             // on first time display view for first nav item
             displayView(HOME_ID);
         }
-
-
     }
 
-    private void creteDrawer(boolean compact, Bundle savedInstanceState) {
-        // Create a few sample profile
-        if (Utilities.isUserAuthenticated())
+    private void creteDrawer(final boolean compact, final Bundle savedInstanceState) {
+// Create a few sample profile
+        if(Utilities.isUserAuthenticated())
             profile = new ProfileDrawerItem().withName(currentUser.get("name").toString()).withEmail(currentUser.getEmail()).withTag(currentUser).withIcon(getResources().getDrawable(R.drawable.profile)).withIdentifier(PROFILE_SETTING);
 
         logoutProfile = new ProfileSettingDrawerItem().withName(getString(R.string.logout)).withDescription("Scollegati dall'app").withIcon(FontAwesome.Icon.faw_sign_out).withIdentifier(LOGOUT_ID);
@@ -157,8 +182,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 .withName(R.string.home).withIcon(FontAwesome.Icon.faw_home).withIdentifier(HOME_ID);
         PrimaryDrawerItem personalNotice = new PrimaryDrawerItem()
                 .withName(R.string.personal_notice).withIcon(FontAwesome.Icon.faw_archive).withIdentifier(PERSONAL_NOTICE_ID);
-        final PrimaryDrawerItem Geo = new PrimaryDrawerItem()
-                .withName(R.string.geo).withIcon(FontAwesome.Icon.faw_map_marker).withIdentifier(GEO_ID);
+        final PrimaryDrawerItem Geo = new PrimaryDrawerItem().withName(R.string.geo).withIcon(FontAwesome.Icon.faw_map_marker).withIdentifier(GEO_ID);
 
         DividerDrawerItem divider = new DividerDrawerItem();
 
@@ -166,66 +190,65 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 .withName(R.string.drawer_item_settings).withIcon(FontAwesome.Icon.faw_cog);
         settings.setIdentifier(SETTINGS_ID);
 
-        DrawerBuilder drawerBuilder = new DrawerBuilder();
-        drawerBuilder.withActivity(this);
-        drawerBuilder.withToolbar(toolbar);
-        drawerBuilder.withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
-            @Override
-            public boolean onItemClick(AdapterView<?> parent, View view, int position, long id, IDrawerItem drawerItem) {
-                // do something with the clicked item :D
-                int identifier = drawerItem.getIdentifier();
-                switch (identifier) {
-                    case HOME_ID:
-                        displayView(HOME_ID);
-                        break;
-                    case PERSONAL_NOTICE_ID:
-                        displayView(PERSONAL_NOTICE_ID);
-                    case GEO_ID:
-                       Intent intent = new Intent(MainActivity.this, MapsActivity.class);
-                        startActivity(intent);
-                        break;
-                    case PURCHASE_AGREEMENT_ID:
-                        displayView(PURCHASE_AGREEMENT_ID);
-                        //result.getActionBarDrawerToggle().setDrawerIndicatorEnabled(true);
-                        break;
-                 //   case ENTER_WITH_AN_ACCOUNT_ID:
-                  //      Intent intent = new Intent(MainActivity.this, LoginActivity.class);
-                        //TODO probabilmente da aggiustare
-                  //      startActivity(intent);
-                  //      finish();
-                  //      break;
-                    case SETTINGS_ID:
-                        //displayView(SETTINGS_ID);
-                                /*
-                                intent = new Intent(MainActivity.this, AddNoticeViewPagerActivity.class);
+        DrawerBuilder drawerBuilder = new DrawerBuilder()
+                .withActivity(MainActivity.this)
+                .withToolbar(toolbar)
+                .withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
+                    @Override
+                    public boolean onItemClick(AdapterView<?> parent, View view, int position, long id, IDrawerItem drawerItem) {
+                        // do something with the clicked item :D
+                        int identifier = drawerItem.getIdentifier();
+                        switch(identifier) {
+                            case HOME_ID:
+                                displayView(HOME_ID);
+                                break;
+                            case PERSONAL_NOTICE_ID:
+                                displayView(PERSONAL_NOTICE_ID);
+                                break;
+                            case PURCHASE_AGREEMENT_ID:
+                                displayView(PURCHASE_AGREEMENT_ID);
+                                //result.getActionBarDrawerToggle().setDrawerIndicatorEnabled(true);
+                                break;
+                            case GEO_ID:
+                                Intent intent = new Intent(MainActivity.this, MapsActivity.class);
+                                startActivity(intent);
+                                break;
+                            case ENTER_WITH_AN_ACCOUNT_ID:
+                                intent = new Intent(MainActivity.this, LoginActivity.class);
+                                //TODO probabilmente da aggiustare
                                 startActivity(intent);
                                 finish();
-                                */
-                        break;
-                    default:
-                        //Toast.makeText(MainActivity.this, R.string.message_error, Toast.LENGTH_SHORT).show();
-                        return false;
-                }
-                return true;
-            }
-        });
-        drawerBuilder.withOnDrawerNavigationListener(new Drawer.OnDrawerNavigationListener() {
-            @Override
-            public boolean onNavigationClickListener(View clickedView) {
-                //this method is only called if the Arrow icon is shown. The hamburger is automatically managed by the MaterialDrawer
-                //if the back arrow is shown. close the activity
-                MainActivity.this.finish();
-                //return true if we have consumed the event
-                return true;
-            }
-        });
-        drawerBuilder.addStickyDrawerItems(
-                settings
-        );
-        drawerBuilder.withAnimateDrawerItems(true);
-        drawerBuilder.withSavedInstance(savedInstanceState);
+                                break;
+                            case SETTINGS_ID:
+//                                displayView(SETTINGS_ID);
+//                                intent = new Intent(MainActivity.this, AddNoticeViewPagerActivity.class);
+//                                startActivity(intent);
+//                                finish();
+                                break;
+                            default:
+                                //Toast.makeText(MainActivity.this, R.string.message_error, Toast.LENGTH_SHORT).show();
+                                return false;
+                        }
+                        return true;
+                    }
+                })
+                .withOnDrawerNavigationListener(new Drawer.OnDrawerNavigationListener() {
+                    @Override
+                    public boolean onNavigationClickListener(View clickedView) {
+                        //this method is only called if the Arrow icon is shown. The hamburger is automatically managed by the MaterialDrawer
+                        //if the back arrow is shown. close the activity
+                        MainActivity.this.finish();
+                        //return true if we have consumed the event
+                        return true;
+                    }
+                })
+                .addStickyDrawerItems(
+                        settings
+                )
+                .withAnimateDrawerItems(true)
+                .withSavedInstance(savedInstanceState);
 
-        if (!Utilities.isUserAuthenticated()) {
+        if(!Utilities.isUserAuthenticated()) {
             drawerBuilder.addDrawerItems(
                     home,
                     divider,
@@ -255,12 +278,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
      * @param compact
      * @param savedInstanceState
      */
-    private void buildHeader(boolean compact, Bundle savedInstanceState) {
+    private void buildHeader(final boolean compact, final Bundle savedInstanceState) {
         IProfile login_outProfile = new ProfileDrawerItem();
 
         // Create the AccountHeader
         headerResult = new AccountHeaderBuilder()
-                .withActivity(this)
+                .withActivity(MainActivity.this)
                 .withHeaderBackground(R.drawable.drawer_background)
                 .withCompactStyle(compact)
                 .addProfiles(
@@ -389,7 +412,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onStart() {
         super.onStart();
 
-        if (firstVisit && Utilities.isUserAuthenticated()) {
+        if(firstVisit && Utilities.isUserAuthenticated()) {
             Context context = getApplicationContext();
             CharSequence text = getString(R.string.welcome) + " " +
                     currentUser.getString("name");
@@ -404,30 +427,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     //TODO Costringere ad usare solo le costanti opportune
     public void setDrawerSelection(int selection_id) {
-        result.setSelection(selection_id);
+        result.setSelection(selection_id, false);
     }
 
     @Override
-    public void onResume() {
+    public void onResume(){
         super.onResume();
 
         registerReceiver(receiver, filter);
 
-        if (Utilities.isUserAuthenticated()) {
-            ParseQuery<ParseObject> query = ParseQuery.getQuery("Users_Online");
-            try {
-                List<ParseObject> users_online = query.whereEqualTo("userId", currentUser.getObjectId().toString()).find();
-                if (!users_online.isEmpty()) {
-                    users_online.get(0).put("online", true);
-                    users_online.get(0).saveEventually();
-                }
-            } catch (ParseException e) {
-                Log.d(TAG, "onPause()/Si è verificato un'errore: " + e.getMessage());
-                e.printStackTrace();
-            }
+        if(Utilities.isUserAuthenticated()) {
+            ParseUtilities.connectUser(this, currentUser);
         }
 
-        if (fragmentStack.empty()) {
+        if(fragmentStack.empty()) {
             return;
         }
 
@@ -447,6 +460,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onDestroy() {
         super.onDestroy();
 
+        SharedPreferences settings = getSharedPreferences(SplashScreenActivity.PREFS_NAME, 0);
+        //SplashScreen.markSplashScreenAsAlreadyLaunched(false, settings);
     }
 
     @Override
@@ -465,10 +480,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
      */
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        final SearchView searchView = (SearchView) menu.findItem(R.id.search).getActionView();
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+        final SearchView searchView = (SearchView)menu.findItem(R.id.search).getActionView();
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener()
+        {
             @Override
-            public boolean onQueryTextSubmit(String query) {
+            public boolean onQueryTextSubmit(String query)
+            {
                 //Toast.makeText(MainActivity.this, query, Toast.LENGTH_SHORT).show();
                 searchView.clearFocus();
                 Intent intent = new Intent(MainActivity.this, SearchResultActivity.class);
@@ -478,7 +495,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
 
             @Override
-            public boolean onQueryTextChange(String newText) {
+            public boolean onQueryTextChange(String newText)
+            {
                 return false;
             }
         });
@@ -488,45 +506,44 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     /**
      * Diplaying fragment view for selected nav drawer list item
-     */
+     * */
     private void displayView(int position) {
-        Intent intent = null;
+        Intent intent;
 
-        //TODO da eliminare quasi sicuramente
         String selection = null;
-        if (!fragmentStack.empty())
+        if(!fragmentStack.empty())
             selection = fragmentStack.lastElement();
 
         switch (position) {
             case HOME_ID:
-                if (selection != null && selection.equals(HOME_FRAGMENT_TAG))
+                if(selection != null && selection.equals(HOME_FRAGMENT_TAG))
                     return;
                 // update the main content by replacing fragments
                 fragment = new HomeFragment();
                 pushFragment(fragment, HOME_FRAGMENT_TAG);
                 //((HomeFragment)fragment).setToolbar(toolbar);
-                ((HomeFragment) fragment).setToolbar(supportActionBar);
+                ((HomeFragment)fragment).setToolbar(supportActionBar);
                 break;
             case PERSONAL_NOTICE_ID:
-                if (selection != null && selection.equals(PERSONAL_NOTICE_TAG))
+                if(selection != null && selection.equals(PERSONAL_NOTICE_TAG))
                     return;
 
                 fragment = new PersonalNoticeFragment();
                 pushFragment(fragment, PERSONAL_NOTICE_TAG);
 
-                ((PersonalNoticeFragment) fragment).setToolbar(supportActionBar);
+                ((PersonalNoticeFragment)fragment).setToolbar(supportActionBar);
                 break;
             case PURCHASE_AGREEMENT_ID:
-                if (selection != null && selection.equals(PURCHASE_AGREEMENT_TAG))
+                if(selection != null && selection.equals(PURCHASE_AGREEMENT_TAG))
                     return;
 
                 fragment = new PurchaseAgreementFragment();
                 pushFragment(fragment, PURCHASE_AGREEMENT_TAG);
 
-                ((PurchaseAgreementFragment) fragment).setToolbar(supportActionBar);
+                ((PurchaseAgreementFragment)fragment).setToolbar(supportActionBar);
                 break;
             case ENTER_WITH_AN_ACCOUNT_ID:
-                if (Utilities.isUserAuthenticated()) {
+                if(Utilities.isUserAuthenticated()) {
                     ParseUser.logOut();
                     currentUser = null;
 
@@ -548,15 +565,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         }
 
-        if (position != ENTER_WITH_AN_ACCOUNT_ID)
+        if(position != ENTER_WITH_AN_ACCOUNT_ID) {
             result.closeDrawer();
+        }
 
         if (fragment != null) {
-            FragmentManager fragmentManager = getFragmentManager();
-            fragmentManager.beginTransaction().replace(R.id.layout_root_view, fragment)
-                    // Add this t.the front of the card.
-                    .addToBackStack(null)
-                    .commit();
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    FragmentManager fragmentManager = getFragmentManager();
+                    fragmentManager.beginTransaction().replace(R.id.layout_root_view, fragment)
+                            // Add this t.the front of the card.
+                            .addToBackStack(null)
+                            .commit();
+                }
+            });
         } else {
             // error in creating fragment
             Log.e("MainActivity", "Error in creating fragment");
@@ -566,8 +589,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private int pushFragment(Fragment fragment, String tag) {
         int fragmentTopPosition = fragmentStack.size() - 1;
 
-        if (fragmentTopPosition >= 0) {
-            if (fragmentStack.get(fragmentTopPosition).equals(tag))
+        if(fragmentTopPosition >= 0) {
+            if(fragmentStack.get(fragmentTopPosition).equals(tag))
                 return -1;
         }
         fragmentStack.push(tag);
@@ -577,20 +600,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onBackPressed() {
-        if (fragment instanceof NoticeFragment) {
+        if(fragment instanceof NoticeFragment) {
             final NoticeFragment noticeFragment = (NoticeFragment) fragment;
             //Controlla se il menu del fabButton sia aperto: in tal caso questo viene chiuso.
-            if (noticeFragment.isFABMenuOpened()) {
+            if(noticeFragment.isFABMenuOpened()) {
                 noticeFragment.closeFABMenu();
                 return;
             }
         }
 
-        if (result != null && result.isDrawerOpen()) {
+        if(result != null && result.isDrawerOpen()) {
             result.closeDrawer();
-        } else if (getFragmentManager().getBackStackEntryCount() > 1) {
+        } else if(getFragmentManager().getBackStackEntryCount() > 1) {
             getFragmentManager().popBackStack();
-            if (fragmentStack.empty()) {
+            if(fragmentStack.empty()) {
                 return;
             } else {
                 //Tolgo l'ultimo fragment dallo stack per ottenere il fragment precedente
@@ -646,7 +669,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         //add the values which need to be saved from the drawer to the bundle
         outState = result.saveInstanceState(outState);
         //add the values which need to be saved from the accountHeader to the bundle
-        if (headerResult != null)
+        if(headerResult != null)
             outState = headerResult.saveInstanceState(outState);
         super.onSaveInstanceState(outState);
     }
@@ -664,9 +687,4 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void refresh() {
         ((NoticeFragment) fragment).refresh();
     }
-
-
-
 }
-
-
