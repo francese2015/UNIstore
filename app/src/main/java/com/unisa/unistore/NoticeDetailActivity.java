@@ -35,7 +35,10 @@ import android.widget.Toast;
 
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.parse.FindCallback;
+import com.parse.GetDataCallback;
 import com.parse.ParseException;
+import com.parse.ParseFile;
+import com.parse.ParseImageView;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
@@ -174,6 +177,7 @@ public class NoticeDetailActivity extends AppCompatActivity implements View.OnCl
 
     }
 
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     private void setupLayout() {
         Intent intent = getIntent();
 
@@ -194,7 +198,32 @@ public class NoticeDetailActivity extends AppCompatActivity implements View.OnCl
         this.backgroundFotoLibro = findViewById(R.id.background_book_image_detail);
         this.autoreAnnuncio = (TextView) findViewById(R.id.notice_author_detail);
         this.fotoLibro = (ImageView) findViewById(R.id.book_image_detail);
-        new ImageUtilities(this, fotoLibro).displayImage(intent.getStringExtra(RVAdapter.BOOK_IMAGE_URL_MESSAGE));
+        String URLFotoLibro = intent.getStringExtra(RVAdapter.BOOK_IMAGE_URL_MESSAGE);
+        if(URLFotoLibro != null && !URLFotoLibro.isEmpty())
+            new ImageUtilities(this, fotoLibro).displayImage(URLFotoLibro);
+        else {
+
+            ParseFile photoFile;
+            try {
+                ParseQuery query = ParseQuery.getQuery("Libri");
+                query.whereEqualTo("objectId", idLibro);
+                final List<ParseObject> list = query.find();
+                photoFile = list.get(0).getParseFile("file_foto");
+                if (photoFile != null) {
+                    ((ParseImageView) fotoLibro).setParseFile(photoFile);
+                    ((ParseImageView) fotoLibro).loadInBackground(new GetDataCallback() {
+                        @Override
+                        public void done(byte[] data, ParseException e) {
+                            // nothing to do
+                        }
+                    });
+                } else {
+                    fotoLibro.setImageDrawable(getDrawable(R.drawable.image_not_found));
+                }
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+        }
 
         resizeImage();
     }
@@ -275,7 +304,8 @@ public class NoticeDetailActivity extends AppCompatActivity implements View.OnCl
                         } else
                             autoreAnnuncio.setText(R.string.not_found);
 
-                        if (parseObject != null && parseObject.getString("descrizione").length() > 18) {
+                        if (parseObject != null && parseObject.getString("descrizione") != null &&
+                                parseObject.getString("descrizione").length() > 18) {
                             descrizioneLibro.setText(parseObject.getString("descrizione"));
                             descrizioneLibro.setVisibility(View.VISIBLE);
                             findViewById(R.id.book_description_detail_description).setVisibility(View.VISIBLE);
