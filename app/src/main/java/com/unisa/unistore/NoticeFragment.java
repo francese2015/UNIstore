@@ -142,29 +142,36 @@ public abstract class NoticeFragment extends Fragment {
 
 
     void setFAB() {
-        fab_menu = (FloatingActionsMenu) getActivity().findViewById(R.id.fab_menu);
-        fab_menu.setOnTouchListener(new View.OnTouchListener() {
+
+        activity.runOnUiThread(new Runnable() {
             @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                /*
-                 * Se fab_menu � aperto, quando si clicca su qualsiasi parte dello schermo
-                 * (che non sia un elemento apartenente a fab_menu), lo stesso viene chiuso.
-                 */
-                if (fab_menu.isExpanded()) {
-                    fab_menu.collapse();
-                    return true;
-                }
+            public void run() {
+                fab_menu = (FloatingActionsMenu) getActivity().findViewById(R.id.fab_menu);
+                fab_menu.setOnTouchListener(new View.OnTouchListener() {
+                    @Override
+                    public boolean onTouch(View v, MotionEvent event) {
+                        /*
+                         * Se fab_menu e' aperto, quando si clicca su qualsiasi parte dello schermo
+                         * (che non sia un elemento appartenente a fab_menu), lo stesso viene chiuso.
+                         */
+                        if (fab_menu.isExpanded()) {
+                            fab_menu.collapse();
+                            return true;
+                        }
 
-                return false;
+                        return false;
+                    }
+
+                });
+
+                fab_camera = (FloatingActionButton) getActivity().findViewById(R.id.fab_camera);
+                fab_camera.setTag("camera");
+                fab_form = (FloatingActionButton) getActivity().findViewById(R.id.fab_form);
+                fab_form.setTag("form");
+                setFABListener(fab_form, fab_camera);
             }
-
         });
 
-        fab_camera = (FloatingActionButton) getActivity().findViewById(R.id.fab_camera);
-        fab_camera.setTag("camera");
-        fab_form = (FloatingActionButton) getActivity().findViewById(R.id.fab_form);
-        fab_form.setTag("form");
-        setFABListener(fab_form, fab_camera);
 
         /*
         fab_line = (FloatingActionButton) activity.findViewById(R.id.fab_line);
@@ -191,54 +198,62 @@ public abstract class NoticeFragment extends Fragment {
     }
 
     private void setFABListener(final FloatingActionButton... fab_form) {
-        int len = fab_form.length;
-        FloatingActionButton tmp = null;
-
-        fab_menu.setOnFloatingActionsMenuUpdateListener(new FloatingActionsMenu.OnFloatingActionsMenuUpdateListener() {
+        activity.runOnUiThread(new Runnable() {
             @Override
-            public void onMenuExpanded() {
-                fab_menu.setBackgroundColor(getResources().getColor(R.color.fab_background));
-            }
+            public void run() {
+                int len = fab_form.length;
+                FloatingActionButton tmp = null;
 
-            @Override
-            public void onMenuCollapsed() {
-                fab_menu.setBackgroundColor(getResources().getColor(R.color.transparent_fab_background));
+                fab_menu.setOnFloatingActionsMenuUpdateListener(new FloatingActionsMenu.OnFloatingActionsMenuUpdateListener() {
+                    @Override
+                    public void onMenuExpanded() {
+                        fab_menu.setBackgroundColor(getResources().getColor(R.color.fab_background));
+                    }
+
+                    @Override
+                    public void onMenuCollapsed() {
+                        fab_menu.setBackgroundColor(getResources().getColor(R.color.transparent_fab_background));
+                    }
+                });
+
+                for (int i = 0; i < len; i++) {
+                    tmp = fab_form[i];
+
+                    tmp.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            fab_menu.collapse();
+
+                            if (Utilities.isUserAuthenticated()) {
+                                Intent intent;
+                                if (v.getTag().toString().equals("form")) {
+                                    intent = new Intent(getActivity(), AddNoticeScreenSlideActivity.class);
+                                    intent.putExtra(INPUT_TYPE_MESSAGE, true);
+                                } else {
+                                    intent = new Intent(getActivity(), PubblicaAnnuncioActivity.class);
+                                }
+                                getActivity().startActivityForResult(intent, MainActivity.PUBBLICA_ANNUNCIO_CALL);
+                            } else {
+                                Context context = getActivity().getApplicationContext();
+                                CharSequence text = getString(R.string.profile_title_logged_out);
+                                int duration = Toast.LENGTH_LONG;
+
+                                Toast toast = Toast.makeText(context, text, duration);
+                                toast.show();
+                            }
+                        }
+                    });
+
+                    final FloatingActionButton finalTmp = tmp;
+                    tmp.setOnLongClickListener(new View.OnLongClickListener() {
+                        @Override
+                        public boolean onLongClick(View v) {
+                            return false;
+                        }
+                    });
+                }
             }
         });
-
-        for(int i = 0; i < len; i++) {
-            tmp = fab_form[i];
-
-            tmp.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    fab_menu.collapse();
-
-                    if (Utilities.isUserAuthenticated()) {
-                        Intent intent = new Intent(getActivity(), PubblicaAnnuncioActivity.class);
-                        if(v.getTag().toString().equals("form")) {
-                            intent.putExtra(INPUT_TYPE_MESSAGE, true);
-                        }
-                        getActivity().startActivityForResult(intent, MainActivity.PUBBLICA_ANNUNCIO_CALL);
-                    } else {
-                        Context context = getActivity().getApplicationContext();
-                        CharSequence text = getString(R.string.profile_title_logged_out);
-                        int duration = Toast.LENGTH_LONG;
-
-                        Toast toast = Toast.makeText(context, text, duration);
-                        toast.show();
-                    }
-                }
-            });
-
-            final FloatingActionButton finalTmp = tmp;
-            tmp.setOnLongClickListener(new View.OnLongClickListener() {
-                @Override
-                public boolean onLongClick(View v) {
-                    return false;
-                }
-            });
-        }
     }
 
     public boolean isFABMenuOpened() {
@@ -250,71 +265,76 @@ public abstract class NoticeFragment extends Fragment {
             fab_menu.collapse();
     }
 
-    public void setNoticeListLayout(ListaAnnunci LA, boolean cancellaAnnuncioButtonVisible) {
-        mSwipeRefreshLayout = (SwipeRefreshLayout) getActivity().findViewById(R.id.annuncio_swipe_refresh_layout);
-        recyclerView = (RecyclerView) getActivity().findViewById(R.id.recycler_view);
-        // use a linear layout manager
-        mLayoutManager = new LinearLayoutManager(getActivity());
-        recyclerView.setLayoutManager(mLayoutManager);
-
-        adapter = new RVAdapter(getActivity());
-        adapter.setListaAnnunci(this.LA);
-        adapter.setCancellaAnnuncioButtonVisible(cancellaAnnuncioButtonVisible);
-        recyclerView.setAdapter(adapter);
-
-        wheel = (FrameLayout) getActivity().findViewById(R.id.progress_wheel_layout);
-
-        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+    public void setNoticeListLayout(ListaAnnunci LA, final boolean cancellaAnnuncioButtonVisible) {
+        activity.runOnUiThread(new Runnable() {
             @Override
-            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-                super.onScrolled(recyclerView, dx, dy);
+            public void run() {
+                mSwipeRefreshLayout = (SwipeRefreshLayout) getActivity().findViewById(R.id.annuncio_swipe_refresh_layout);
+                recyclerView = (RecyclerView) getActivity().findViewById(R.id.recycler_view);
+                // use a linear layout manager
+                mLayoutManager = new LinearLayoutManager(getActivity());
+                recyclerView.setLayoutManager(mLayoutManager);
 
-                if(dy < -FAB_THRESHOLD && fab_menu.getVisibility() != View.VISIBLE) {
-                    fab_menu.setVisibility(View.VISIBLE);
-                    fab_menu.startAnimation(AnimationUtils.loadAnimation(activity,
-                            R.anim.jump_from_down));
-                } else if(dy > FAB_THRESHOLD && fab_menu.getVisibility() != View.GONE) {
-                    fab_menu.setVisibility(View.GONE);
-                    fab_menu.startAnimation(AnimationUtils.loadAnimation(activity,
-                            R.anim.jump_to_down));
-                }
+                adapter = new RVAdapter(getActivity());
+                adapter.setListaAnnunci(NoticeFragment.this.LA);
+                adapter.setCancellaAnnuncioButtonVisible(cancellaAnnuncioButtonVisible);
+                recyclerView.setAdapter(adapter);
 
-                visibleItemCount = mLayoutManager.getChildCount();
-                totalItemCount = mLayoutManager.getItemCount();
-                pastVisiblesItems = mLayoutManager.findFirstVisibleItemPosition();
-                Log.d(TAG, "visibleItemCount (" + visibleItemCount +
-                        ") + pastVisiblesItems (" + pastVisiblesItems + ") = " +
-                        (visibleItemCount + pastVisiblesItems) +
-                        "\ntotalItemCount = " + totalItemCount);
+                wheel = (FrameLayout) getActivity().findViewById(R.id.progress_wheel_layout);
 
-                if (dy != 0 && loading && !lastNoticeReached) {
-                    if ((visibleItemCount + pastVisiblesItems) >= totalItemCount) {
-                        loading = false;
-                        Log.d(TAG, "Ultimo annuncio caricato!");
-                        downloadAnnunci(false);
+                recyclerView.setOnScrollListener(new RecyclerView.OnScrollListener() {
+                    @Override
+                    public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                        super.onScrolled(recyclerView, dx, dy);
+
+                        if (dy < -FAB_THRESHOLD && fab_menu.getVisibility() != View.VISIBLE) {
+                            fab_menu.setVisibility(View.VISIBLE);
+                            fab_menu.startAnimation(AnimationUtils.loadAnimation(activity,
+                                    R.anim.jump_from_down));
+                        } else if (dy > FAB_THRESHOLD && fab_menu.getVisibility() != View.GONE) {
+                            fab_menu.setVisibility(View.GONE);
+                            fab_menu.startAnimation(AnimationUtils.loadAnimation(activity,
+                                    R.anim.jump_to_down));
+                        }
+
+                        visibleItemCount = mLayoutManager.getChildCount();
+                        totalItemCount = mLayoutManager.getItemCount();
+                        pastVisiblesItems = mLayoutManager.findFirstVisibleItemPosition();
+                        Log.d(TAG, "visibleItemCount (" + visibleItemCount +
+                                ") + pastVisiblesItems (" + pastVisiblesItems + ") = " +
+                                (visibleItemCount + pastVisiblesItems) +
+                                "\ntotalItemCount = " + totalItemCount);
+
+                        if (dy != 0 && loading && !lastNoticeReached) {
+                            if ((visibleItemCount + pastVisiblesItems) >= totalItemCount) {
+                                loading = false;
+                                Log.d(TAG, "Ultimo annuncio caricato!");
+                                downloadAnnunci(false);
+                            }
+                        } else {
+                            if ((visibleItemCount + pastVisiblesItems) == totalItemCount - 1) {
+                                if (!loading)
+                                    loading = true;
+                            }
+                        }
                     }
-                } else {
-                    if ((visibleItemCount + pastVisiblesItems) == totalItemCount - 1) {
-                        if (!loading)
-                            loading = true;
+                });
+
+                mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+                    @Override
+                    public void onRefresh() {
+                        refresh();
                     }
-                }
+                });
+
+                mSwipeRefreshLayout.setColorSchemeResources(R.color.primary_dark,
+                        R.color.primary,
+                        R.color.accent
+                );
+
+                recyclerView.setHasFixedSize(true);
             }
         });
-
-        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                refresh();
-            }
-        });
-
-        mSwipeRefreshLayout.setColorSchemeResources(R.color.primary_dark,
-                R.color.primary,
-                R.color.accent
-        );
-
-        recyclerView.setHasFixedSize(true);
     }
 
     public void refresh() {
@@ -335,7 +355,7 @@ public abstract class NoticeFragment extends Fragment {
                 }else{
                     // stop the animation after the data is fully loaded
                     mSwipeRefreshLayout.setRefreshing(false);
-                    adapter.notifyDataSetChanged();
+                    notifyDataSetChanged();
                     Log.d(TAG, "Refresh degli annunci terminato");
                 }
             }
@@ -344,6 +364,15 @@ public abstract class NoticeFragment extends Fragment {
             }
         }
     };
+
+    private void notifyDataSetChanged() {
+        activity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                adapter.notifyDataSetChanged();
+            }
+        });
+    }
 
     public void setRefreshing(boolean isRefreshing) {
         this.isRefreshing = isRefreshing;
@@ -452,20 +481,30 @@ public abstract class NoticeFragment extends Fragment {
 
             lastNoticesCnt = cntNewNotices;
 
-            Utilities.slideUP(activity, wheel);
+            activity.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Utilities.slideUP(activity, wheel);
+                }
+            });
 
             query.findInBackground(new FindCallback<ParseObject>() {
                 public void done(List<ParseObject> scoreList, ParseException e) {
                     if (e == null) {
-                        if(scoreList.size() == 0) {
+                        if (scoreList.size() == 0) {
                             lastNoticeReached = true;
-                            Utilities.slideDown(activity, wheel);
+                            activity.runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Utilities.slideDown(activity, wheel);
+                                }
+                            });
                             return;
                         }
 
                         if (scoreList.size() > 0) {
                             LA.addAnnunci(scoreList, false);
-                            adapter.notifyDataSetChanged();
+                            notifyDataSetChanged();
                             queryCnt += scoreList.size();
                         }
 
@@ -486,7 +525,7 @@ public abstract class NoticeFragment extends Fragment {
         if(deletedNotices != null && deletedNotices.size() > 0) {//sono stati eliminati degli annunci
             Log.d(TAG, "Comincio l'eliminazione di " + deletedNotices.size() + " annunci");
             int cntDeletedNotices = LA.deleteNoticesById(deletedNotices);
-            adapter.notifyDataSetChanged();
+            notifyDataSetChanged();
             Log.d(TAG, "Eliminazione degli annunci terminata");
             //TODO da verificare che funzioni correttamente
             user_online.remove("annunci_eliminati");
