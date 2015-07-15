@@ -92,7 +92,7 @@
 
         <!-- Splash screen -->
         <activity
-            android:name=".SplashScreen"
+            android:name=".SplashScreenActivity"
             android:label="@string/app_name"
             android:screenOrientation="portrait" >
         </activity>
@@ -191,7 +191,7 @@
                 android:value="com.unisa.unistore.MainActivity" />
         </activity>
         <activity
-            android:name=".AddNoticeViewPagerActivity"
+            android:name=".AddNoticeScreenSlideActivity"
             android:label="@string/app_name"
             android:parentActivityName=".MainActivity"
             android:screenOrientation="portrait" >
@@ -248,15 +248,8 @@
             android:value="92f20d3b97e2bdcb51f68ca1c309ed5bbbfa270f" />
 
         <meta-data
-            android:name="com.google.android.gms.version"
-            android:value="@integer/google_play_services_version" />
-        <meta-data
             android:name="com.google.android.maps.v2.API_KEY"
             android:value="@string/google_maps_key" />
 
-        <activity
-            android:name=".MapsActivity"
-             >
-        </activity>
     </application>
 </manifest>
